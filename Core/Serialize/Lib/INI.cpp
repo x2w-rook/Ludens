@@ -1,6 +1,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <cassert>
+#include <cctype>
 #include <cstdio>
 #include "Core/Serialize/Include/INI.h"
 
@@ -42,27 +43,73 @@ namespace LD {
 
 		int lineLen = lineEnd - lineBegin;
 		mLineNo++;
+		mIsInSectionName = false;
+		mIsInPropertyName = false;
+		mIsInPropertyValue = false;
 
 		for (int i = 0; i < lineLen; i++)
 		{
 			char c = lineBegin[i];
+			if (isspace(c) && !mIsInSectionName)
+				continue;
+
 			if (c == '[')
 			{
 				mSectionNameLen = 0;
 				mIsInSectionName = true;
+				continue;
 			}
-			else if (c == ']')
+			else if (c == ']' && mIsInSectionName)
 			{
-				mSectionNameBuf[mSectionNameLen] = '\0';
 				mIsInSectionName = false;
+
+				mSectionNameBuf[mSectionNameLen] = '\0';
 				if (mUserCallback && mUserCallback->OnSection)
 					mUserCallback->OnSection(mConfig.UserData, mLineNo, mSectionNameBuf);
+				continue;
 			}
-			else if (mIsInSectionName)
+			else if (c == '=' && mIsInPropertyName)
+			{
+				mIsInPropertyName = false;
+
+				for (int* idx = &mPropertyNameLen; *idx > 0 && isspace(mPropertyNameBuf[*idx - 1]); (*idx)--) ;
+				mPropertyNameBuf[mPropertyNameLen] = '\0';
+
+				mPropertyValueLen = 0;
+				mIsInPropertyValue = true;
+				continue;
+			}
+			else if (!mIsInPropertyValue && !mIsInPropertyName)
+			{
+				mPropertyNameLen = 0;
+				mIsInPropertyName = true;
+			}
+
+
+			if (mIsInSectionName)
 			{
 				assert(mSectionNameLen < MAX_SECTION_NAME_LEN);
 				mSectionNameBuf[mSectionNameLen++] = c;
 			}
+			else if (mIsInPropertyName)
+			{
+				assert(mPropertyNameLen < MAX_PROPERTY_NAME_LEN);
+				mPropertyNameBuf[mPropertyNameLen++] = c;
+			}
+			else if (mIsInPropertyValue)
+			{
+				assert(mPropertyValueLen < MAX_PROPERTY_VALUE_LEN);
+				mPropertyValueBuf[mPropertyValueLen++] = c;
+			}
+		}
+
+		if (mIsInPropertyValue)
+		{
+			for (int* idx = &mPropertyValueLen; *idx > 0 && isspace(mPropertyValueBuf[*idx - 1]); (*idx)--) ;
+			mPropertyValueBuf[mPropertyValueLen] = '\0';
+
+			if (mUserCallback && mUserCallback->OnProperty)
+				mUserCallback->OnProperty(mConfig.UserData, mLineNo, mPropertyNameBuf, mPropertyValueBuf);
 		}
 	}
 

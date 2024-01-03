@@ -1,6 +1,8 @@
 #pragma once
 
-#define MAX_SECTION_NAME_LEN  256
+#define MAX_SECTION_NAME_LEN       256
+#define MAX_PROPERTY_NAME_LEN      128
+#define MAX_PROPERTY_VALUE_LEN     128
 
 namespace LD {
 
@@ -30,9 +32,15 @@ namespace LD {
 		INIParserConfig mConfig;
 		const INIParserCallback* mUserCallback = nullptr;
 		int mLineNo;
-		char mSectionNameBuf[MAX_SECTION_NAME_LEN];
 		int mSectionNameLen;
+		int mPropertyNameLen;
+		int mPropertyValueLen;
 		bool mIsInSectionName;
+		bool mIsInPropertyName;
+		bool mIsInPropertyValue;
+		char mSectionNameBuf[MAX_SECTION_NAME_LEN];
+		char mPropertyNameBuf[MAX_PROPERTY_NAME_LEN];
+		char mPropertyValueBuf[MAX_PROPERTY_VALUE_LEN];
 	};
 
 } // namespace LD
