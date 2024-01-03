@@ -20,7 +20,8 @@ namespace LD {
 	class INIParser
 	{
 	public:
-		INIParser() {}
+		INIParser() = delete;
+		INIParser(const INIParserConfig& config) : mConfig(config) {}
 		~INIParser() {}
 
 		void Config(const INIParserConfig& config);

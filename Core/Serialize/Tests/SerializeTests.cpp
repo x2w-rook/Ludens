@@ -33,11 +33,10 @@ static void OnProperty(void* user, int lineno, const char* name, const char* val
 TEST_CASE("ini sections")
 {
 	TestContext test;
-	INIParser parser;
 
 	INIParserConfig testConfig;
 	testConfig.UserData = &test;
-	parser.Config(testConfig);
+	INIParser parser(testConfig);
 
 	INIParserCallback testCallbacks;
 	testCallbacks.OnSection = OnSection;
@@ -62,11 +61,11 @@ TEST_CASE("ini sections")
 TEST_CASE("ini properties")
 {
 	TestContext test;
-	INIParser parser;
 
 	INIParserConfig testConfig;
 	testConfig.UserData = &test;
-	parser.Config(testConfig);
+	INIParser parser(testConfig);
+
 
 	INIParserCallback testCallbacks;
 	testCallbacks.OnProperty = OnProperty;
