@@ -9,6 +9,9 @@ set(MODULE_INCLUDE_DIR
 add_library(LDSerialize STATIC "${MODULE_SRC}")
 target_include_directories(LDSerialize PRIVATE "${MODULE_INCLUDE_DIR}")
 
-set(TEST_SRC "Tests/SerializeTests.cpp")
+set(TEST_SRC
+	"Tests/SerializeTests.cpp"
+	"Tests/SerializeINI.h"
+)
 add_executable(LDSerializeTests "${MODULE_SRC}" "${TEST_SRC}")
 target_include_directories(LDSerializeTests PRIVATE "${MODULE_INCLUDE_DIR}")

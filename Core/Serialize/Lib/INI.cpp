@@ -113,4 +113,41 @@ namespace LD {
 		}
 	}
 
+	const char* INIWriter::ViewOutput()
+	{
+		return mOutput.c_str();
+	}
+
+	size_t INIWriter::ViewSize()
+	{
+		return mOutput.size();
+	}
+
+	INIWriter& INIWriter::Write(const char* text)
+	{
+		mOutput.append(text);
+		return *this;
+	}
+
+	INIWriter& INIWriter::WriteSection(const char* section)
+	{
+		mOutput.append("[");
+		mOutput.append(section);
+		mOutput.append("]");
+		mOutput.append(mConfig.WriteSingleLine ? " " : "\n");
+
+		return *this;
+	}
+
+	INIWriter& INIWriter::WriteProperty(const char* name, const char* value)
+	{
+		mOutput.append(name);
+		mOutput.append("=");
+		mOutput.append(value);
+		mOutput.append(mConfig.WriteSingleLine ? " " : "\n");
+
+		return *this;
+	}
+
+
 } // namespace LD
