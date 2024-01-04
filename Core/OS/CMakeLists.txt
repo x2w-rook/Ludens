@@ -1,0 +1,5 @@
+set(MODULE_SRC "Include/Error.h")
+set(MODULE_INCLUDE_DIR "${CMAKE_SOURCE_DIR}")
+add_library(LDOS STATIC "${MODULE_SRC}")
+target_include_directories(LDOS PRIVATE "${MODULE_INCLUDE_DIR}")
+set_target_properties(LDOS PROPERTIES LINKER_LANGUAGE CXX)
