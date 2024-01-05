@@ -3,7 +3,7 @@ set(MODULE_SRC
 	"Lib/INI.cpp"
 )
 set(MODULE_INCLUDE_DIR
-	"${CMAKE_SOURCE_DIR}"
+	"${CMAKE_SOURCE_DIR}/Ludens"
 	"${CMAKE_SOURCE_DIR}/Extra/doctest"
 )
 add_library(LDSerialize STATIC "${MODULE_SRC}")
