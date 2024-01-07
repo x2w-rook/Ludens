@@ -1,9 +1,11 @@
 set(MODULE_SRC
 	"Include/Application.h"
 	"Include/ApplicationLayer.h"
+	"Include/Event.h"
 	"Lib/Application.cpp"
 	"Lib/ApplicationWindow.h"
 	"Lib/ApplicationWindow.cpp"
+	"Lib/Event.cpp"
 )
 set(MODULE_INCLUDE_DIR
 	"${CMAKE_SOURCE_DIR}/Ludens"

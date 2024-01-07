@@ -1,4 +1,3 @@
-#include <iostream>
 #include <GLFW/glfw3.h>
 #include "Core/Application/Lib/ApplicationWindow.h"
 #include "Core/Application/Include/Application.h"
@@ -25,11 +24,7 @@ namespace LD {
 		glfwMakeContextCurrent(mHandle);
 		glfwSwapInterval(mConfig.EnableVsync ? 1 : 0);
 
-		// TODO: event propagation
-		glfwSetKeyCallback(mHandle, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
-			if (action == GLFW_PRESS)
-				std::cout << "glfw key " << key << std::endl;
-		});
+		SetupCallbacks();
 
 		mHasSetup = true;
 	}
@@ -70,6 +65,53 @@ namespace LD {
 		LD_DEBUG_ASSERT(mHasSetup);
 
 		return !glfwWindowShouldClose(mHandle);
+	}
+
+	void ApplicationWindow::SetupCallbacks()
+	{
+		glfwSetKeyCallback(mHandle, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
+			if (action == GLFW_PRESS || action == GLFW_REPEAT)
+			{
+				KeyPressedEvent event;
+				event.Key = key;
+				EventDispatch(event, &Application::EventHandler);
+			}
+			else if (action == GLFW_RELEASE)
+			{
+				KeyReleasedEvent event;
+				event.Key = key;
+				EventDispatch(event, &Application::EventHandler);
+			}
+		});
+
+		glfwSetMouseButtonCallback(mHandle, [](GLFWwindow* window, int button, int action, int mods) {
+			if (action == GLFW_PRESS)
+			{
+				MouseButtonPressedEvent event;
+				event.Button = button;
+				EventDispatch(event, &Application::EventHandler);
+			}
+			else if (action == GLFW_RELEASE)
+			{
+				MouseButtonReleasedEvent event;
+				event.Button = button;
+				EventDispatch(event, &Application::EventHandler);
+			}
+		});
+
+		glfwSetCursorPosCallback(mHandle, [](GLFWwindow* window, double xpos, double ypos) {
+			MouseMotionEvent event;
+			event.XPos = (float)xpos;
+			event.YPos = (float)ypos;
+			EventDispatch(event, &Application::EventHandler);
+		});
+
+		glfwSetScrollCallback(mHandle, [](GLFWwindow* window, double xoffset, double yoffset) {
+			MouseScrolledEvent event;
+			event.XOffset = (float)xoffset;
+			event.YOffset = (float)yoffset;
+			EventDispatch(event, &Application::EventHandler);
+		});
 	}
 
 } // namespace LD

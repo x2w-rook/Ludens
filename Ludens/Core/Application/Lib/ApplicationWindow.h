@@ -31,6 +31,8 @@ namespace LD {
 		bool IsAlive();
 
 	private:
+		void SetupCallbacks();
+
 		ApplicationWindowConfig mConfig;
 		GLFWwindow* mHandle = nullptr;
 		bool mHasSetup = false;

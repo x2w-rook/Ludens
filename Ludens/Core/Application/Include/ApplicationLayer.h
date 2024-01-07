@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Core/Application/Include/Event.h"
 #include "Core/OS/Include/Time.h"
 
 namespace LD {
@@ -10,6 +11,7 @@ namespace LD {
 		ApplicationLayer() {}
 		virtual ~ApplicationLayer() {}
 
+		virtual bool OnEvent(const Event& event) { return false; }
 
 		// NOTE: temporary solution before multi-threading and job systems
 		//       - Fixed Update is called on a fixed interval defined by driver Application,

@@ -2,6 +2,7 @@
 
 #include <string>
 #include <cstdint>
+#include "Core/Application/Include/Event.h"
 #include "Core/OS/Include/Memory.h"
 
 
@@ -33,6 +34,8 @@ namespace LD {
 
 		void Setup(const ApplicationConfig& config);
 		void Cleanup();
+
+		static bool EventHandler(const Event& event);
 
 		static Application& Get();
 		inline std::string GetName() const { return mConfig.Name; }

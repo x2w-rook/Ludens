@@ -51,6 +51,28 @@ namespace LD {
 		sInstance = nullptr;
 	}
 
+	bool Application::EventHandler(const Event& event)
+	{
+		Application& app = Application::Get();
+
+		if ((event.Flags & EVENT_FLAGS_APPLICATION_BIT) == EVENT_FLAGS_APPLICATION_BIT)
+		{
+			switch (event.Type)
+			{
+			case EventType::ApplicationQuit:
+				app.mIsRunning = false;
+				return true;
+			default:
+				break;
+			}
+		}
+
+		if (!app.mLayer)
+			return false;
+
+		return app.mLayer->OnEvent(event);
+	}
+
 	Application& Application::Get()
 	{
 		LD_DEBUG_ASSERT(sInstance != nullptr);
@@ -69,7 +91,7 @@ namespace LD {
 		double fixedUpdateTimer = 0.0f;
 
 		mIsRunning = true;
-		while (mIsRunning)
+		while (mIsRunning && mWindow->IsAlive())
 		{
 			timeLastFrame = timeThisFrame;
 			timeThisFrame = mWindow->GetTime();
@@ -87,7 +109,6 @@ namespace LD {
 			mLayer->OnDeltaUpdate(dt);
 
 			mWindow->SwapBuffers();
-			mIsRunning = mWindow->IsAlive();
 		}
 	}
 
