@@ -5,12 +5,16 @@
 
 namespace LD {
 
+	class Application;
+
 	class ApplicationLayer
 	{
 	public:
 		ApplicationLayer() {}
 		virtual ~ApplicationLayer() {}
 
+		virtual void OnAttach(const Application& app) {}
+		virtual void OnDetach(const Application& app) {}
 		virtual bool OnEvent(const Event& event) { return false; }
 
 		// NOTE: temporary solution before multi-threading and job systems

@@ -3,6 +3,7 @@
 #include <string>
 #include <cstdint>
 #include "Core/Application/Include/Event.h"
+#include "Core/Application/Include/ApplicationLayer.h"
 #include "Core/OS/Include/Memory.h"
 
 
@@ -42,7 +43,19 @@ namespace LD {
 
 		// TODO: multiple application layers and event propagation,
 		//       currently we have only one layer
-		inline void SetLayer(Ref<ApplicationLayer> layer) { mLayer = layer; }
+		inline void PushLayer(Ref<ApplicationLayer> layer)
+		{
+			mLayer = layer;
+			mLayer->OnAttach(*this);
+		}
+
+		inline void PopLayer(Ref<ApplicationLayer> layer)
+		{
+			if (layer != mLayer)
+				return;
+			mLayer->OnDetach(*this);
+			mLayer = nullptr;
+		}
 
 		// Application entry point
 		void Run();
