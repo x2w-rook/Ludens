@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Core/Application/Include/Input.h"
+
 namespace LD {
 
 	struct Event;
@@ -36,6 +38,9 @@ namespace LD {
 			: Type(type), Flags(flags), IsHandled(false) {}
 		virtual ~Event() {}
 
+		inline bool IsApplicationEvent() const { return (Flags & EVENT_FLAGS_APPLICATION_BIT) == EVENT_FLAGS_APPLICATION_BIT; }
+		inline bool IsInputEvent() const { return (Flags & EVENT_FLAGS_INPUT_BIT) == EVENT_FLAGS_INPUT_BIT; }
+
 		EventType Type = EventType::None;
 		EventFlags Flags = EVENT_FLAGS_NONE;
 		bool IsHandled;
@@ -54,8 +59,8 @@ namespace LD {
 			: Event(EventType::KeyPressed, EVENT_FLAGS_INPUT_BIT | EVENT_FLAGS_INPUT_KEY_BIT) {};
 		~KeyPressedEvent() {}
 
-		// TODO: KeyCode.h
-		int Key;
+		KeyCode Key;
+		bool Repeat;
 	};
 
 	struct KeyReleasedEvent : Event
@@ -64,8 +69,7 @@ namespace LD {
 			: Event(EventType::KeyReleased, EVENT_FLAGS_INPUT_BIT | EVENT_FLAGS_INPUT_KEY_BIT) {};
 		~KeyReleasedEvent() {}
 
-		// TODO: KeyCode.h
-		int Key;
+		KeyCode Key;
 	};
 
 	struct MouseMotionEvent : Event
@@ -94,7 +98,7 @@ namespace LD {
 			: Event(EventType::MouseButtonPressed, EVENT_FLAGS_INPUT_BIT | EVENT_FLAGS_INPUT_MOUSE_BIT) {};
 		~MouseButtonPressedEvent() {}
 
-		int Button;
+		MouseButton Button;
 	};
 
 	struct MouseButtonReleasedEvent : Event
@@ -103,7 +107,7 @@ namespace LD {
 			: Event(EventType::MouseButtonReleased, EVENT_FLAGS_INPUT_BIT | EVENT_FLAGS_INPUT_MOUSE_BIT) {};
 		~MouseButtonReleasedEvent() {}
 
-		int Button;
+		MouseButton Button;
 	};
 
 } // namespace LD

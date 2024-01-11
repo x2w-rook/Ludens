@@ -16,6 +16,7 @@ namespace LD {
 
 	class ApplicationWindow;
 	class ApplicationLayer;
+	class Event;
 
 
 	struct ApplicationConfig
@@ -61,6 +62,9 @@ namespace LD {
 		void Run();
 
 	private:
+		void OnInputEvent(const Event& event);
+		void OnInputNewFrame();
+
 		static Application* sInstance;
 		bool mHasSetup = false;
 		bool mIsRunning = false;

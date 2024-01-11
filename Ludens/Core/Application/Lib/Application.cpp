@@ -55,7 +55,7 @@ namespace LD {
 	{
 		Application& app = Application::Get();
 
-		if ((event.Flags & EVENT_FLAGS_APPLICATION_BIT) == EVENT_FLAGS_APPLICATION_BIT)
+		if (event.IsApplicationEvent())
 		{
 			switch (event.Type)
 			{
@@ -65,6 +65,17 @@ namespace LD {
 			default:
 				break;
 			}
+			
+			// Application events are consumed and not forwarded to layers
+			return true;
+		}
+		
+		if (event.IsInputEvent())
+		{
+			app.OnInputEvent(event);
+
+			// Input events will be forwarded to layers, and they can choose
+			// to act on events or directly or poll the input state via Input.h
 		}
 
 		if (!app.mLayer)
@@ -96,6 +107,8 @@ namespace LD {
 			timeLastFrame = timeThisFrame;
 			timeThisFrame = mWindow->GetTime();
 			DeltaTime dt(timeThisFrame - timeLastFrame);
+
+			OnInputNewFrame();
 
 			mWindow->PollEvents();
 

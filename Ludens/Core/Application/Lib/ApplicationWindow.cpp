@@ -73,13 +73,14 @@ namespace LD {
 			if (action == GLFW_PRESS || action == GLFW_REPEAT)
 			{
 				KeyPressedEvent event;
-				event.Key = key;
+				event.Key = static_cast<KeyCode>(key);
+				event.Repeat = action == GLFW_REPEAT;
 				EventDispatch(event, &Application::EventHandler);
 			}
 			else if (action == GLFW_RELEASE)
 			{
 				KeyReleasedEvent event;
-				event.Key = key;
+				event.Key = static_cast<KeyCode>(key);
 				EventDispatch(event, &Application::EventHandler);
 			}
 		});
@@ -88,13 +89,13 @@ namespace LD {
 			if (action == GLFW_PRESS)
 			{
 				MouseButtonPressedEvent event;
-				event.Button = button;
+				event.Button = static_cast<MouseButton>(button);
 				EventDispatch(event, &Application::EventHandler);
 			}
 			else if (action == GLFW_RELEASE)
 			{
 				MouseButtonReleasedEvent event;
-				event.Button = button;
+				event.Button = static_cast<MouseButton>(button);
 				EventDispatch(event, &Application::EventHandler);
 			}
 		});
