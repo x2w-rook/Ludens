@@ -18,7 +18,10 @@ namespace LD {
 	{
 	public:
 		ApplicationWindow() {}
+		ApplicationWindow(const ApplicationWindow&) = delete;
 		~ApplicationWindow() {}
+
+		ApplicationWindow& operator=(const ApplicationWindow&) = delete;
 
 		void Setup(const ApplicationWindowConfig& config);
 		void Cleanup();

@@ -11,7 +11,10 @@ namespace LD {
 	{
 	public:
 		ApplicationLayer() {}
+		ApplicationLayer(const ApplicationLayer&) = delete;
 		virtual ~ApplicationLayer() {}
+
+		ApplicationLayer& operator=(const ApplicationLayer&) = delete;
 
 		virtual void OnAttach(const Application& app) {}
 		virtual void OnDetach(const Application& app) {}

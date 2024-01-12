@@ -33,16 +33,18 @@ namespace LD {
 
 	struct Event
 	{
-		Event() = delete;
+		Event(const Event&) = default;
 		Event(EventType type, EventFlags flags)
 			: Type(type), Flags(flags), IsHandled(false) {}
 		virtual ~Event() {}
 
+		Event& operator=(const Event&) = default;
+
 		inline bool IsApplicationEvent() const { return (Flags & EVENT_FLAGS_APPLICATION_BIT) == EVENT_FLAGS_APPLICATION_BIT; }
 		inline bool IsInputEvent() const { return (Flags & EVENT_FLAGS_INPUT_BIT) == EVENT_FLAGS_INPUT_BIT; }
 
-		EventType Type = EventType::None;
-		EventFlags Flags = EVENT_FLAGS_NONE;
+		const EventType Type = EventType::None;
+		const EventFlags Flags = EVENT_FLAGS_NONE;
 		bool IsHandled;
 	};
 
@@ -50,14 +52,12 @@ namespace LD {
 	{
 		ApplicationQuitEvent()
 			: Event(EventType::ApplicationQuit, EVENT_FLAGS_APPLICATION_BIT) {};
-		~ApplicationQuitEvent() {}
 	};
 
 	struct KeyPressedEvent : Event
 	{
 		KeyPressedEvent()
 			: Event(EventType::KeyPressed, EVENT_FLAGS_INPUT_BIT | EVENT_FLAGS_INPUT_KEY_BIT) {};
-		~KeyPressedEvent() {}
 
 		KeyCode Key;
 		bool Repeat;
@@ -67,7 +67,6 @@ namespace LD {
 	{
 		KeyReleasedEvent()
 			: Event(EventType::KeyReleased, EVENT_FLAGS_INPUT_BIT | EVENT_FLAGS_INPUT_KEY_BIT) {};
-		~KeyReleasedEvent() {}
 
 		KeyCode Key;
 	};
@@ -76,7 +75,6 @@ namespace LD {
 	{
 		MouseMotionEvent()
 			: Event(EventType::MouseMotion, EVENT_FLAGS_INPUT_BIT | EVENT_FLAGS_INPUT_MOUSE_BIT) {}
-		~MouseMotionEvent() {}
 
 		float XPos;
 		float YPos;
@@ -86,7 +84,6 @@ namespace LD {
 	{
 		MouseScrolledEvent()
 			: Event(EventType::MouseScrolled, EVENT_FLAGS_INPUT_BIT | EVENT_FLAGS_INPUT_MOUSE_BIT) {}
-		~MouseScrolledEvent() {}
 
 		float XOffset;
 		float YOffset;
@@ -96,7 +93,6 @@ namespace LD {
 	{
 		MouseButtonPressedEvent()
 			: Event(EventType::MouseButtonPressed, EVENT_FLAGS_INPUT_BIT | EVENT_FLAGS_INPUT_MOUSE_BIT) {};
-		~MouseButtonPressedEvent() {}
 
 		MouseButton Button;
 	};
@@ -105,7 +101,6 @@ namespace LD {
 	{
 		MouseButtonReleasedEvent()
 			: Event(EventType::MouseButtonReleased, EVENT_FLAGS_INPUT_BIT | EVENT_FLAGS_INPUT_MOUSE_BIT) {};
-		~MouseButtonReleasedEvent() {}
 
 		MouseButton Button;
 	};

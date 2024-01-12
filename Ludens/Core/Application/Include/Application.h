@@ -32,7 +32,10 @@ namespace LD {
 	{
 	public:
 		Application();
+		Application(const Application&) = delete;
 		virtual ~Application();
+
+		Application& operator=(const Application&) = delete;
 
 		void Setup(const ApplicationConfig& config);
 		void Cleanup();
