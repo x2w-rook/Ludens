@@ -25,6 +25,9 @@ namespace LD {
 
 		// elapsed time in seconds since window Setup
 		double GetTime();
+
+		// mouse cursor position in screen space
+		void GetCursorPosition(float& screenX, float& screenY);
 		
 		void PollEvents();
 		void SwapBuffers();

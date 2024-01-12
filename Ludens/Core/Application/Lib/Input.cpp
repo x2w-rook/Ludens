@@ -3,7 +3,9 @@
 #include "Core/Application/Include/Input.h"
 #include "Core/Application/Include/Application.h"
 #include "Core/Application/Include/Event.h"
+#include "Core/Application/Lib/ApplicationWindow.h"
 #include "Core/OS/Include/Error.h"
+#include "Core/Math/Include/Vec2.h"
 
 
 namespace LD {
@@ -15,6 +17,8 @@ namespace Input {
 	bool sMouseButton[MOUSE_BUTTON_ENUM_LAST];
 	bool sMouseButtonPressed[MOUSE_BUTTON_ENUM_LAST];
 	bool sMouseButtonReleased[MOUSE_BUTTON_ENUM_LAST];
+	Vec2 sMousePosition, sMouseMotionPosition;
+	Vec2 sMouseMotion;
 
 	bool GetKey(KeyCode key)
 	{
@@ -44,6 +48,19 @@ namespace Input {
 	bool GetMouseButtonReleased(MouseButton button)
 	{
 		return sMouseButtonReleased[button];
+	}
+
+	bool GetMouseMotion(float& deltaX, float& deltaY)
+	{
+		deltaX = sMouseMotion.x;
+		deltaY = sMouseMotion.y;
+		return deltaX != 0.0f && deltaY != 0.0f;
+	}
+
+	void GetMousePosition(float& screenX, float& screenY)
+	{
+		screenX = sMousePosition.x;
+		screenY = sMousePosition.y;
 	}
 
 } // namespace Input
@@ -83,6 +100,14 @@ namespace Input {
 			Input::sMouseButtonReleased[event.Button] = true;
 			break;
 		}
+		case EventType::MouseMotion:
+		{
+			const MouseMotionEvent& event = static_cast<const MouseMotionEvent&>(inputEvent);
+			Vec2 newMouseMotionPosition(event.XPos, event.YPos);
+			Input::sMouseMotion = newMouseMotionPosition - Input::sMouseMotionPosition;
+			Input::sMouseMotionPosition = newMouseMotionPosition;
+			break;
+		}
 		default:
 			break;
 		}
@@ -90,6 +115,16 @@ namespace Input {
 
 	void Application::OnInputNewFrame()
 	{
+		static bool sFirstInputFrame = true;
+
+		mWindow->GetCursorPosition(Input::sMousePosition.x, Input::sMousePosition.y);
+		
+		if (sFirstInputFrame)
+		{
+			sFirstInputFrame = false;
+			Input::sMouseMotionPosition = Input::sMousePosition;
+		}
+
 		for (size_t i = 0; i < KEY_CODE_ENUM_LAST; i++)
 		{
 			Input::sKeyPressed[i] = false;
@@ -101,6 +136,9 @@ namespace Input {
 			Input::sMouseButtonPressed[i] = false;
 			Input::sMouseButtonReleased[i] = false;
 		}
+
+		Input::sMouseMotion.x = 0.0f;
+		Input::sMouseMotion.y = 0.0f;
 	}
 
 } // namespace LD

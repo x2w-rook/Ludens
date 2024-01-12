@@ -44,6 +44,16 @@ namespace LD {
 		return glfwGetTime();
 	}
 
+	void ApplicationWindow::GetCursorPosition(float& screenX, float& screenY)
+	{
+		LD_DEBUG_ASSERT(mHasSetup);
+
+		double x, y;
+		glfwGetCursorPos(mHandle, &x, &y);
+		screenX = (float)x;
+		screenY = (float)y;
+	}
+
 	void ApplicationWindow::PollEvents()
 	{
 		LD_DEBUG_ASSERT(mHasSetup);
