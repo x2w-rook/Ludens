@@ -1,5 +1,4 @@
 set(MODULE_SRC
-	"Include/Error.h"
 	"Include/Memory.h"
 	"Include/Time.h"
 )

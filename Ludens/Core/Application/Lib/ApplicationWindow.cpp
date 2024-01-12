@@ -1,7 +1,7 @@
 #include <GLFW/glfw3.h>
 #include "Core/Application/Lib/ApplicationWindow.h"
 #include "Core/Application/Include/Application.h"
-#include "Core/OS/Include/Error.h"
+#include "Core/Header/Include/Error.h"
 
 namespace LD {
 

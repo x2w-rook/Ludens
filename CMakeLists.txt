@@ -8,6 +8,7 @@ add_subdirectory("Extra/glad")
 
 
 # build core modules
+add_subdirectory("Ludens/Core/Header")
 add_subdirectory("Ludens/Core/OS")
 add_subdirectory("Ludens/Core/Application")
 add_subdirectory("Ludens/Core/Serialize")
