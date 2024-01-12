@@ -19,6 +19,7 @@ namespace Input {
 	bool sMouseButtonReleased[MOUSE_BUTTON_ENUM_LAST];
 	Vec2 sMousePosition, sMouseMotionPosition;
 	Vec2 sMouseMotion;
+	Vec2 sMouseScroll;
 
 	bool GetKey(KeyCode key)
 	{
@@ -54,7 +55,14 @@ namespace Input {
 	{
 		deltaX = sMouseMotion.x;
 		deltaY = sMouseMotion.y;
-		return deltaX != 0.0f && deltaY != 0.0f;
+		return deltaX != 0.0f || deltaY != 0.0f;
+	}
+
+	bool GetMouseScroll(float& deltaX, float& deltaY)
+	{
+		deltaX = sMouseScroll.x;
+		deltaY = sMouseScroll.y;
+		return deltaX != 0.0f || deltaY != 0.0f;
 	}
 
 	void GetMousePosition(float& screenX, float& screenY)
@@ -108,6 +116,13 @@ namespace Input {
 			Input::sMouseMotionPosition = newMouseMotionPosition;
 			break;
 		}
+		case EventType::MouseScrolled:
+		{
+			const MouseScrolledEvent& event = static_cast<const MouseScrolledEvent&>(inputEvent);
+			Input::sMouseScroll.x = event.XOffset;
+			Input::sMouseScroll.y = event.YOffset;
+			break;
+		}
 		default:
 			break;
 		}
@@ -139,6 +154,8 @@ namespace Input {
 
 		Input::sMouseMotion.x = 0.0f;
 		Input::sMouseMotion.y = 0.0f;
+		Input::sMouseScroll.x = 0.0f;
+		Input::sMouseScroll.y = 0.0f;
 	}
 
 } // namespace LD

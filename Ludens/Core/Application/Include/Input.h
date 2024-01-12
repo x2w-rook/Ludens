@@ -160,6 +160,7 @@ namespace Input {
 	bool GetMouseButtonPressed(MouseButton button);
 	bool GetMouseButtonReleased(MouseButton button);
 	bool GetMouseMotion(float& deltaX, float& deltaY);
+	bool GetMouseScroll(float& deltaX, float& deltaY);
 	void GetMousePosition(float& screenX, float& screenY);
 
 } // namespace Input
