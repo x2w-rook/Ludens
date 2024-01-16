@@ -2,3 +2,4 @@
 #include <doctest.h>
 
 #include "Core/DSA/Tests/TestArray.h"
+#include "Core/DSA/Tests/TestVector.h"
