@@ -12,6 +12,54 @@ namespace LD {
 	void* MemoryRealloc(void* mem, size_t size);
 	void MemoryFree(void* mem);
 
+	struct MemoryPlacementData
+	{
+		size_t Count;
+	};
+
+	template <typename T>
+	T* MemoryPlacementAlloc(size_t count)
+	{
+		MemoryPlacementData* header = (MemoryPlacementData*)MemoryAlloc(sizeof(MemoryPlacementData) + sizeof(T) * count);
+		header->Count = count;
+		T* mem = (T*)(header + 1);
+
+		for (size_t i = 0; i < count; i++)
+			new (mem + i) T{};
+		return mem;
+	}
+	
+	template <typename T>
+	T* MemoryPlacementRealloc(T* oldMem, size_t count)
+	{
+		if (oldMem == nullptr)
+			return MemoryPlacementAlloc<T>(count);
+
+		MemoryPlacementData* oldHeader = ((MemoryPlacementData*)oldMem) - 1;
+		size_t oldCount = oldHeader->Count;
+		size_t minCount = oldCount < count ? oldCount : count;
+
+		T* newMem = MemoryPlacementAlloc<T>(count);
+
+		for (size_t i = 0; i < minCount; i++)
+			newMem[i] = oldMem[i];
+
+		MemoryPlacementFree<T>(oldMem);
+
+		return newMem;
+	}
+
+	template <typename T>
+	void MemoryPlacementFree(T* mem)
+	{
+		MemoryPlacementData* header = ((MemoryPlacementData*)mem) - 1;
+
+		for (size_t i = 0; i < header->Count; i++)
+			(mem + i)->~T();
+
+		MemoryFree((void*)header);
+	}
+
 	///
 	/// SMART POINTERS
 	///
