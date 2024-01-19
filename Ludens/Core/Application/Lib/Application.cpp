@@ -51,6 +51,21 @@ namespace LD {
 		sInstance = nullptr;
 	}
 
+	void* Application::GetWindowHandle()
+	{
+		return static_cast<void*>(mWindow->GetHandle());
+	}
+
+	void Application::SetWindowCursorNormal()
+	{
+		mWindow->SetCursorNormal();
+	}
+
+	void Application::SetWindowCursorGrabbed()
+	{
+		mWindow->SetCursorGrabbed();
+	}
+
 	bool Application::EventHandler(const Event& event)
 	{
 		Application& app = Application::Get();

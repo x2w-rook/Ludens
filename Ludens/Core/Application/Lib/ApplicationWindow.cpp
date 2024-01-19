@@ -54,6 +54,13 @@ namespace LD {
 		screenY = (float)y;
 	}
 
+	void* ApplicationWindow::GetHandle()
+	{
+		LD_DEBUG_ASSERT(mHasSetup && mHandle != nullptr);
+
+		return (void*)mHandle;
+	}
+
 	void ApplicationWindow::PollEvents()
 	{
 		LD_DEBUG_ASSERT(mHasSetup);
@@ -75,6 +82,21 @@ namespace LD {
 		LD_DEBUG_ASSERT(mHasSetup);
 
 		return !glfwWindowShouldClose(mHandle);
+	}
+
+	void ApplicationWindow::SetCursorHidden()
+	{
+		glfwSetInputMode(mHandle, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+	}
+
+	void ApplicationWindow::SetCursorNormal()
+	{
+		glfwSetInputMode(mHandle, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	}
+
+	void ApplicationWindow::SetCursorGrabbed()
+	{
+		glfwSetInputMode(mHandle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	}
 
 	void ApplicationWindow::SetupCallbacks()

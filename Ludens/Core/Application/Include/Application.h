@@ -37,13 +37,17 @@ namespace LD {
 
 		Application& operator=(const Application&) = delete;
 
+		static bool EventHandler(const Event& event);
+		static Application& Get();
+
 		void Setup(const ApplicationConfig& config);
 		void Cleanup();
 
-		static bool EventHandler(const Event& event);
-
-		static Application& Get();
 		inline std::string GetName() const { return mConfig.Name; }
+		void* GetWindowHandle();
+		void SetWindowCursorNormal();
+		void SetWindowCursorGrabbed();
+
 
 		// TODO: multiple application layers and event propagation,
 		//       currently we have only one layer
@@ -73,7 +77,7 @@ namespace LD {
 		bool mIsRunning = false;
 		ApplicationConfig mConfig;
 		Own<ApplicationWindow> mWindow = nullptr;
-		Ref<ApplicationLayer> mLayer;
+		Ref<ApplicationLayer> mLayer = nullptr;
 	};
 
 } // namespace LD

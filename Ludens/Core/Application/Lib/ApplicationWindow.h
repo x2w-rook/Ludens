@@ -31,10 +31,15 @@ namespace LD {
 
 		// mouse cursor position in screen space
 		void GetCursorPosition(float& screenX, float& screenY);
+		void* GetHandle();
 		
 		void PollEvents();
 		void SwapBuffers();
 		bool IsAlive();
+
+		void SetCursorHidden();
+		void SetCursorNormal();
+		void SetCursorGrabbed();
 
 	private:
 		void SetupCallbacks();
