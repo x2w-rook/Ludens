@@ -3,3 +3,4 @@
 
 #include "Core/Math/Tests/TestVec2.h"
 #include "Core/Math/Tests/TestVec3.h"
+#include "Core/Math/Tests/TestVec4.h"
