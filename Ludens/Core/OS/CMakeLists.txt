@@ -1,10 +1,12 @@
 set(MODULE_SRC
 	"Include/Memory.h"
 	"Include/Time.h"
+	"Include/UID.h"
 	"Lib/Memory.cpp")
 
 set(TEST_SRC
 	"Tests/TestMemory.h"
+	"Tests/TestUID.h"
 	"Tests/OSTests.cpp")
 
 set(MODULE_INCLUDE_DIR

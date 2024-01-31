@@ -2,3 +2,4 @@
 #include <doctest.h>
 
 #include "Core/OS/Tests/TestMemory.h"
+#include "Core/OS/Tests/TestUID.h"
