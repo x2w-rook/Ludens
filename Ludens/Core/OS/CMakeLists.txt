@@ -1,5 +1,6 @@
 set(MODULE_SRC
 	"Include/Memory.h"
+	"Include/Allocator.h"
 	"Include/Time.h"
 	"Include/UID.h"
 	"Lib/Memory.cpp")
