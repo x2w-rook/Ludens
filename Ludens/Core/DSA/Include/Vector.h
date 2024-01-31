@@ -2,21 +2,51 @@
 
 #include <initializer_list>
 #include "Core/Header/Include/Error.h"
+#include "Core/Math/Include/Bits.h"
 #include "Core/OS/Include/Memory.h"
+#include "Core/OS/Include/Allocator.h"
 
 namespace LD {
 
-	template <typename T>
+	template <typename T, typename TAllocator = MemoryAllocator>
 	class Vector
 	{
 	public:
-		Vector() = default;
-		Vector(size_t size);
-		Vector(const Vector<T>& other);
-		Vector(const std::initializer_list<T>& list);
-		~Vector();
+		Vector()
+			: mSize(0)
+			, mData(nullptr)
+			, mAllocSize(0)
+		{
+		}
 
-		Vector<T>& operator=(const Vector<T>& other);
+		Vector(size_t size)
+		{
+			Resize(size);
+		}
+
+		Vector(const Vector<T>& other)
+		{
+			Resize(other.mSize);
+			std::copy(other.Begin(), other.End(), Begin());
+		}
+
+		Vector(const std::initializer_list<T>& list)
+		{
+			Resize(list.size());
+			std::copy(list.begin(), list.end(), Begin());
+		}
+
+		~Vector()
+		{
+			Resize(0);
+		}
+
+		Vector<T>& operator=(const Vector<T>& other)
+		{
+			Resize(other.mSize);
+			std::copy(other.Begin(), other.End(), Begin());
+			return *this;
+		}
 
 		inline T* Data() { return mData; }
 		inline const T* Data() const { return mData; }
@@ -24,8 +54,65 @@ namespace LD {
 		inline size_t Size() const { return mSize; }
 		inline size_t ByteSize() const { return sizeof(T) * mSize; }
 
-		inline void Resize(size_t size);
-		inline void PushBack(const T&);
+		inline void Resize(size_t size)
+		{
+			// deallocate
+			if (size == 0)
+			{
+				if (mData != nullptr)
+				{
+					for (size_t i = 0; i < mAllocSize; i++)
+						mData[i].~T();
+					mAllocator.Free(mData);
+					mData = nullptr;
+				}
+				mSize = 0;
+				return;
+			}
+
+			size_t newAllocSize = NextPowerOf2((u32)size);
+
+			// shrinking, or growing but does not trigger realloc
+			if (size <= mSize || newAllocSize <= mAllocSize)
+			{
+				mSize = size;
+				return;
+			}
+
+			// reallocate, migrate data
+			T* newData = (T*)mAllocator.Alloc(sizeof(T) * newAllocSize);
+			for (size_t i = 0; i < newAllocSize; i++)
+				new (newData + i) T{};
+
+			if (mData != nullptr)
+			{
+				for (size_t i = 0; i < mAllocSize; i++)
+				{
+					if (i < mSize)
+						newData[i] = std::move(mData[i]);
+					mData[i].~T();
+				}
+				mAllocator.Free(mData);
+			}
+
+			mAllocSize = newAllocSize;
+			mData = newData;
+			mSize = size;
+		}
+
+		inline void PushBack(const T& item)
+		{
+			Resize(mSize + 1);
+			mData[mSize - 1] = item;
+		}
+
+		inline void PushBack(T&& item)
+		{
+			Resize(mSize + 1);
+			mData[mSize - 1] = std::move(item);
+		}
+
+		inline void Clear() { mSize = 0; }
 
 		inline const T* Begin() const { return mData; }
 		inline const T* End() const { return mData + mSize; }
@@ -53,62 +140,9 @@ namespace LD {
 	private:
 		T* mData = nullptr;
 		size_t mSize = 0;
+		size_t mAllocSize = 0;
+		TAllocator mAllocator{};
 	};
 
-	template <typename T>
-	Vector<T>::Vector(size_t size)
-	{
-		mSize = size;
-		mData = (T*)MemoryAlloc(sizeof(T) * size);
-	}
-
-	template <typename T>
-	Vector<T>::Vector(const Vector<T>& other)
-	{
-		Resize(other.mSize);
-		std::copy(other.Begin(), other.End(), Begin());
-	}
-
-	template <typename T>
-	Vector<T>::Vector(const std::initializer_list<T>& list)
-	{
-		Resize(list.size());
-		std::copy(list.begin(), list.end(), Begin());
-	}
-
-	template <typename T>
-	Vector<T>::~Vector()
-	{
-		if (mData != nullptr)
-			MemoryFree(mData);
-	}
-
-	template <typename T>
-	Vector<T>& Vector<T>::operator=(const Vector<T>& other)
-	{
-		Resize(other.mSize);
-		std::copy(other.Begin(), other.End(), Begin());
-		return *this;
-	}
-
-	template <typename T>
-	void Vector<T>::Resize(size_t size)
-	{
-		if (size <= mSize)
-		{
-			mSize = size;
-			return;
-		}
-
-		mData = (T*)MemoryRealloc(mData, sizeof(T) * size);
-		mSize = size;
-	}
-
-	template <typename T>
-	void Vector<T>::PushBack(const T& item)
-	{
-		Resize(mSize + 1);
-		mData[mSize - 1] = item;
-	}
 
 } // namespace LD
