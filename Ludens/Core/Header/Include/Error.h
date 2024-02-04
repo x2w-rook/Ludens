@@ -18,9 +18,16 @@
 #endif
 
 
+// Debug Unreachable
+// - prohibit code paths in debug builds
+#ifndef LD_DEBUG_UNREACHABLE
+# define LD_DEBUG_UNREACHABLE              LD_DEBUG_ASSERT(false && "unreachable")
+#endif
+
+
 // Static Assertions
 // - the asserted expression is checked by the compiler at compile time
 // - does not need to be in function body
 #ifndef LD_STATIC_ASSERT
-# define LD_STATIC_ASSERT(EXPR)            static_assert(EXPR, "")
+# define LD_STATIC_ASSERT(EXPR)            static_assert(EXPR, #EXPR)
 #endif
