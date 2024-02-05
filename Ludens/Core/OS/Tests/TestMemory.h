@@ -1,3 +1,5 @@
+#pragma once
+
 #include <doctest.h>
 #include "Core/OS/Include/Memory.h"
 

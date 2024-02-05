@@ -1,3 +1,5 @@
+#pragma once
+
 #include <doctest.h>
 #include "Core/OS/Include/UID.h"
 #include "Core/DSA/Include/Vector.h"

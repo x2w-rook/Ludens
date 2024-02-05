@@ -6,6 +6,7 @@ set(MODULE_SRC
 	"Lib/Memory.cpp")
 
 set(TEST_SRC
+	"Tests/TestPoolAllocator.h"
 	"Tests/TestMemory.h"
 	"Tests/TestUID.h"
 	"Tests/OSTests.cpp")
