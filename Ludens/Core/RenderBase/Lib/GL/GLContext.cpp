@@ -111,18 +111,6 @@ namespace LD {
 		mBoundTexture2D = (UID)texture;
 	}
 
-	void GLContext::BindProgram(GLProgram& shader)
-	{
-		if (mBoundProgram == (UID)shader)
-		{
-			LD_DEBUG_ASSERT([&]() { GLint actual; glGetIntegerv(GL_CURRENT_PROGRAM, &actual); return actual == (GLuint)shader; }());
-			return;
-		}
-
-		glUseProgram((GLuint)shader);
-		mBoundProgram = (UID)shader;
-	}
-
 	void GLContext::BindTextureUnit(int unit)
 	{
 		if (mBoundTextureUnit == unit)
@@ -135,6 +123,18 @@ namespace LD {
 		mBoundTextureUnit = unit;
 	}
 	*/
+
+	void GLContext::BindProgram(GLProgram& shader)
+	{
+		if (mBoundProgram == (UID)shader)
+		{
+			LD_DEBUG_ASSERT([&]() { GLint actual; glGetIntegerv(GL_CURRENT_PROGRAM, &actual); return actual == (GLuint)shader; }());
+			return;
+		}
+
+		glUseProgram((GLuint)shader);
+		mBoundProgram = (UID)shader;
+	}
 
 	void GLContext::QueryLimits()
 	{

@@ -46,7 +46,7 @@ namespace LD {
 		void BindUBO(GLUniformBuffer& ubo);
 		//void BindTextureUnit(int unit);
 		//void BindTexture2D(GLTexture2D& texture);
-		//void BindProgram(GLProgram& program);
+		void BindProgram(GLProgram& program);
 
 		inline GLuint GetVersion() const { return mVersion; }
 		inline const GLContextLimits& GetLimits() const { return sLimits; }
