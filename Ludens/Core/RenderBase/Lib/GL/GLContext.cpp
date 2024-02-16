@@ -102,7 +102,6 @@ namespace LD {
 		mBoundUBO = (UID)ubo;
 	}
 
-	/*
 	void GLContext::BindTexture2D(GLTexture2D& texture)
 	{
 		// NOTE: OpenGL texture units supports bindings to all targets, here we don't cache which texture unit we bind to,
@@ -122,7 +121,6 @@ namespace LD {
 		glActiveTexture(GL_TEXTURE0 + unit);
 		mBoundTextureUnit = unit;
 	}
-	*/
 
 	void GLContext::BindProgram(GLProgram& shader)
 	{
