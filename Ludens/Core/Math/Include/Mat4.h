@@ -39,9 +39,7 @@ namespace LD {
 		static TMat4<T> Rotate(const TVec3<T>& axis, T degrees);
 		static TMat4<T> LookAt(const TVec3<T>& position, const TVec3<T>& direction, const TVec3<T>& worldUp);
 		static TMat4<T> Perspective(T fovRadians, T aspect, T zNear, T zFar);
-
-		// TODO: orthographic projection, AABB
-		// static TMat4<T> Orthographic();
+		static TMat4<T> Orthographic(T left, T right, T bottom, T top, T near, T far);
 	};
 
 	template <typename T>
@@ -105,6 +103,20 @@ namespace LD {
 
 		return projection;
 	}
+
+	template <typename T>
+	TMat4<T> TMat4<T>::Orthographic(T left, T right, T bottom, T top, T near, T far)
+	{
+		TMat4<T> ortho = TMat4<T>::Identity;
+		ortho[0][0] = static_cast<T>(2.0f) / (right - left);
+		ortho[1][1] = static_cast<T>(2.0f) / (top - bottom);
+		ortho[2][2] = static_cast<T>(2.0f) / (near - far);
+		ortho[3][0] = (right + left) / (left - right);
+		ortho[3][1] = (top + bottom) / (bottom - top);
+		ortho[3][2] = (near + far) / (near - far);
+		return ortho;
+	}
+
 
 	template <typename T>
 	const TMat4<T> TMat4<T>::Identity{
