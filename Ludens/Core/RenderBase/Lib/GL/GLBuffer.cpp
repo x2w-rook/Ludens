@@ -18,6 +18,7 @@ namespace LD {
 	{
 		mHandle = CUID<GLVertexBuffer>::Get();
 		mContext = &context;
+		mSize = info.Size;
 
 		glCreateBuffers(1, &mVBO);
 		if (info.Size > 0)
@@ -50,6 +51,14 @@ namespace LD {
 		LD_DEBUG_ASSERT(mContext != nullptr);
 
 		mContext->BindVBO(*this);
+	}
+
+	void GLVertexBuffer::SetData(u32 offset, u32 size, const void* data)
+	{
+		LD_DEBUG_ASSERT(offset + size <= mSize);
+
+		Bind();
+		glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
 	}
 
 	void GLIndexBuffer::Setup(GLContext& context, const GLIndexBufferInfo& info)

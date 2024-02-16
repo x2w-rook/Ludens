@@ -28,7 +28,8 @@ namespace LD {
 		void Setup(GLContext& context, const GLVertexBufferInfo& info);
 		void Cleanup();
 		void Bind();
-		
+		void SetData(u32 offset, u32 size, const void* data);
+
 		inline UID GetHandle() const { return (UID)mHandle; }
 		inline explicit operator UID() const { return (UID)mHandle; }
 		inline explicit operator GLuint() const { return mVBO; }
@@ -37,6 +38,7 @@ namespace LD {
 		CUID<GLVertexBuffer> mHandle;
 		GLContext* mContext = nullptr;
 		GLuint mVBO;
+		u32 mSize = 0;
 	};
 
 	struct GLIndexBufferInfo

@@ -1,4 +1,4 @@
-set(MODULE_SRC
+set(MODULE_INCLUDE
 	"Include/GL/GL.h"
 	"Include/GL/GLSL.h"
 	"Include/GL/GLContext.h"
@@ -7,7 +7,9 @@ set(MODULE_SRC
 	"Include/GL/GLVertex.h"
 	"Include/GL/GLTexture.h"
 	"Include/GL/GLBuffer.h"
-	"Include/GL/GLProgram.h"
+	"Include/GL/GLProgram.h")
+
+set(MODULE_LIB
 	"Lib/GL/GLSL.cpp"
 	"Lib/GL/GLContext.cpp"
 	"Lib/GL/GLCommand.cpp"
@@ -22,6 +24,6 @@ set(MODULE_INCLUDE_DIR
 	"${CMAKE_SOURCE_DIR}/Extra/glad/include"
 	"${CMAKE_SOURCE_DIR}/Extra/glfw/include")
 
-add_library(LDRenderBase STATIC "${MODULE_SRC}")
+add_library(LDRenderBase STATIC "${MODULE_INCLUDE}" "${MODULE_LIB}")
 target_include_directories(LDRenderBase PRIVATE "${MODULE_INCLUDE_DIR}")
 target_link_libraries(LDRenderBase PRIVATE glad)
