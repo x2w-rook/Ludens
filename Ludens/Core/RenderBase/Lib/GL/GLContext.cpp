@@ -53,7 +53,6 @@ namespace LD {
 	{
 	}
 
-	/*
 	void GLContext::BindVAO(GLVertexArray* vao)
 	{
 		if (vao == nullptr)
@@ -71,7 +70,6 @@ namespace LD {
 		glBindVertexArray((GLuint)*vao);
 		mBoundVAO = vao;
 	}
-	*/
 
 	void GLContext::BindVBO(GLVertexBuffer& vbo)
 	{

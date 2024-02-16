@@ -40,7 +40,7 @@ namespace LD {
 		void Setup();
 		void Cleanup();
 
-		//void BindVAO(GLVertexArray* vao);
+		void BindVAO(GLVertexArray* vao);
 		void BindVBO(GLVertexBuffer& vbo);
 		void BindIBO(GLIndexBuffer& ibo);
 		void BindUBO(GLUniformBuffer& ubo);
