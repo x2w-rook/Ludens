@@ -80,7 +80,7 @@ namespace LD {
 			return Get();
 		}
 
-		const T& ValueOr(const T& fallback)
+		const T& ValueOr(const T& fallback) const
 		{
 			return mHasValue ? Get() : fallback;
 		}
