@@ -56,6 +56,14 @@ namespace LD {
 		return static_cast<void*>(mWindow->GetHandle());
 	}
 
+	void Application::GetWindowSize(u32* width, u32* height) const
+	{
+		if (width)
+			*width = mWindow->GetWidth();
+		if (height)
+			*height = mWindow->GetHeight();
+	}
+
 	void Application::SetWindowCursorNormal()
 	{
 		mWindow->SetCursorNormal();
@@ -75,14 +83,19 @@ namespace LD {
 			switch (event.Type)
 			{
 			case EventType::ApplicationQuit:
+			{
 				app.mIsRunning = false;
-				return true;
+				return true; // consume event
+			}
+			case EventType::ApplicationWindowResize:
+			{
+				auto e = static_cast<const ApplicationWindowResizeEvent&>(event);
+				app.mIsMinimized = (e.Width == 0 || e.Height == 0);
+				break;
+			}
 			default:
 				break;
 			}
-			
-			// Application events are consumed and not forwarded to layers
-			return true;
 		}
 		
 		if (event.IsInputEvent())

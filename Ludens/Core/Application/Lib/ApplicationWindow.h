@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include "Core/Header/Include/Types.h"
 
 class GLFWwindow;
 
@@ -9,8 +10,8 @@ namespace LD {
 	struct ApplicationWindowConfig
 	{
 		std::string Name;
-		uint32_t Width;
-		uint32_t Height;
+		u32 Width;
+		u32 Height;
 		bool EnableVsync = true;
 	};
 
@@ -32,6 +33,10 @@ namespace LD {
 		// mouse cursor position in screen space
 		void GetCursorPosition(float& screenX, float& screenY);
 		void* GetHandle();
+		inline std::string GetName() const { return mName; }
+		inline u32 GetWidth() const { return mWidth; }
+		inline u32 GetHeight() const { return mHeight; }
+		inline float GetAspectRatio() const { return (float)mWidth / (float)mHeight; }
 		
 		void PollEvents();
 		void SwapBuffers();
@@ -44,7 +49,9 @@ namespace LD {
 	private:
 		void SetupCallbacks();
 
-		ApplicationWindowConfig mConfig;
+		std::string mName;
+		u32 mWidth = 0;
+		u32 mHeight = 0;
 		GLFWwindow* mHandle = nullptr;
 		bool mHasSetup = false;
 	};

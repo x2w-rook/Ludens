@@ -2,6 +2,7 @@
 
 #include <string>
 #include <cstdint>
+#include "Core/Header/Include/Types.h"
 #include "Core/Application/Include/Event.h"
 #include "Core/Application/Include/ApplicationLayer.h"
 #include "Core/OS/Include/Memory.h"
@@ -22,8 +23,8 @@ namespace LD {
 	struct ApplicationConfig
 	{
 		std::string Name;
-		uint32_t WindowWidth  = LD_APPLICATION_DEFAULT_WINDOW_WIDTH;
-		uint32_t WindowHeight = LD_APPLICATION_DEFAULT_WINDOW_HEIGHT;
+		u32 WindowWidth  = LD_APPLICATION_DEFAULT_WINDOW_WIDTH;
+		u32 WindowHeight = LD_APPLICATION_DEFAULT_WINDOW_HEIGHT;
 		double FixedUpdateInterval = LD_APPLICATION_DEFAULT_FIXED_UPDATE_INTERVAL;
 	};
 
@@ -45,6 +46,7 @@ namespace LD {
 
 		inline std::string GetName() const { return mConfig.Name; }
 		void* GetWindowHandle();
+		void GetWindowSize(u32* width, u32* height) const;
 		void SetWindowCursorNormal();
 		void SetWindowCursorGrabbed();
 
@@ -75,6 +77,7 @@ namespace LD {
 		static Application* sInstance;
 		bool mHasSetup = false;
 		bool mIsRunning = false;
+		bool mIsMinimized = false;
 		ApplicationConfig mConfig;
 		Own<ApplicationWindow> mWindow = nullptr;
 		Ref<ApplicationLayer> mLayer = nullptr;

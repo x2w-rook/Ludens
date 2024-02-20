@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Core/Header/Include/Types.h"
 #include "Core/Application/Include/Input.h"
 
 namespace LD {
@@ -13,6 +14,8 @@ namespace LD {
 	{
 		None = 0,
 		ApplicationQuit,
+		ApplicationWindowResize,
+		ApplicationFrameBufferResize,
 		KeyPressed,
 		KeyReleased,
 		MouseMotion,
@@ -52,6 +55,24 @@ namespace LD {
 	{
 		ApplicationQuitEvent()
 			: Event(EventType::ApplicationQuit, EVENT_FLAGS_APPLICATION_BIT) {};
+	};
+
+	struct ApplicationWindowResizeEvent : Event
+	{
+		ApplicationWindowResizeEvent()
+			: Event(EventType::ApplicationWindowResize, EVENT_FLAGS_APPLICATION_BIT) {};
+
+		u32 Width;    // window width in screen coordinates
+		u32 Height;   // window height in screen coordinates
+	};
+
+	struct ApplicationFrameBufferResizeEvent : Event
+	{
+		ApplicationFrameBufferResizeEvent()
+			: Event(EventType::ApplicationFrameBufferResize, EVENT_FLAGS_APPLICATION_BIT) {};
+
+		u32 Width;    // window framebuffer width in pixels
+		u32 Height;   // window framebuffer height in pixels
 	};
 
 	struct KeyPressedEvent : Event

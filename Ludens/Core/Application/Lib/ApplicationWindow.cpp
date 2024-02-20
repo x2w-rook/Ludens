@@ -7,7 +7,9 @@ namespace LD {
 
 	void ApplicationWindow::Setup(const ApplicationWindowConfig& config)
 	{
-		mConfig = config;
+		mName = config.Name;
+		mWidth = config.Width;
+		mHeight = config.Height;
 
 		int result = glfwInit();
 		LD_DEBUG_ASSERT(result == GLFW_TRUE);
@@ -17,12 +19,13 @@ namespace LD {
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-		glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-		mHandle = glfwCreateWindow((int)mConfig.Width, (int)mConfig.Height, mConfig.Name.c_str(), nullptr, nullptr);
+		mHandle = glfwCreateWindow((int)mWidth, (int)mHeight, mName.c_str(), nullptr, nullptr);
 		LD_DEBUG_ASSERT(mHandle != nullptr);
 
+		glfwSetWindowUserPointer(mHandle, this);
+
 		glfwMakeContextCurrent(mHandle);
-		glfwSwapInterval(mConfig.EnableVsync ? 1 : 0);
+		glfwSwapInterval(config.EnableVsync ? 1 : 0);
 
 		SetupCallbacks();
 
@@ -101,6 +104,25 @@ namespace LD {
 
 	void ApplicationWindow::SetupCallbacks()
 	{
+		glfwSetWindowSizeCallback(mHandle, [](GLFWwindow* window, int width, int height) {
+			ApplicationWindow* appWindow = (ApplicationWindow*)glfwGetWindowUserPointer(window);
+			appWindow->mWidth = (u32)width;
+			appWindow->mHeight = (u32)height;
+
+			ApplicationWindowResizeEvent event;
+			event.Width = (u32)width;
+			event.Height = (u32)height;
+			EventDispatch(event, &Application::EventHandler);
+		});
+
+		// The frame buffer size is measured in pixels, which may or may not equal the window size in screen coordinates.
+		glfwSetFramebufferSizeCallback(mHandle, [](GLFWwindow* window, int width, int height) {
+			ApplicationFrameBufferResizeEvent event;
+			event.Width = (u32)width;
+			event.Height = (u32)height;
+			EventDispatch(event, &Application::EventHandler);
+		});
+
 		glfwSetKeyCallback(mHandle, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
 			if (action == GLFW_PRESS || action == GLFW_REPEAT)
 			{
