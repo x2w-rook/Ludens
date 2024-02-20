@@ -26,6 +26,7 @@ namespace LD {
 		u32 WindowWidth  = LD_APPLICATION_DEFAULT_WINDOW_WIDTH;
 		u32 WindowHeight = LD_APPLICATION_DEFAULT_WINDOW_HEIGHT;
 		double FixedUpdateInterval = LD_APPLICATION_DEFAULT_FIXED_UPDATE_INTERVAL;
+		Ref<ApplicationLayer> Layer;
 	};
 
 
@@ -49,23 +50,6 @@ namespace LD {
 		void GetWindowSize(u32* width, u32* height) const;
 		void SetWindowCursorNormal();
 		void SetWindowCursorGrabbed();
-
-
-		// TODO: multiple application layers and event propagation,
-		//       currently we have only one layer
-		inline void PushLayer(Ref<ApplicationLayer> layer)
-		{
-			mLayer = layer;
-			mLayer->OnAttach(*this);
-		}
-
-		inline void PopLayer(Ref<ApplicationLayer> layer)
-		{
-			if (layer != mLayer)
-				return;
-			mLayer->OnDetach(*this);
-			mLayer = nullptr;
-		}
 
 		// Application entry point
 		void Run();

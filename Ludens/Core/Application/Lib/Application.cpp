@@ -26,6 +26,7 @@ namespace LD {
 	void Application::Setup(const ApplicationConfig& config)
 	{
 		LD_DEBUG_ASSERT(sInstance == this);
+		LD_DEBUG_ASSERT(config.Layer != nullptr);
 
 		mConfig = config;
 
@@ -37,6 +38,8 @@ namespace LD {
 
 		mWindow = MakeOwn<ApplicationWindow>();
 		mWindow->Setup(windowConfig);
+		mLayer = config.Layer;
+		mLayer->OnAttach(*this);
 
 		mHasSetup = true;
 	}
@@ -45,6 +48,7 @@ namespace LD {
 	{
 		mHasSetup = false;
 
+		mLayer->OnDetach(*this);
 		mWindow->Cleanup();
 		mWindow = nullptr;
 
