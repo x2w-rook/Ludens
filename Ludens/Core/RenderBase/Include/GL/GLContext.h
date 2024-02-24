@@ -11,6 +11,7 @@ namespace LD {
 	class GLIndexBuffer;
 	class GLUniformBuffer;
 	class GLTexture2D;
+	class GLFrameBuffer;
 	class GLProgram;
 
 
@@ -22,6 +23,7 @@ namespace LD {
 		int MaxCombinedTextureImageUnits;
 		int MaxElementIndex;
 		int MaxDrawBuffers;
+		int MaxColorAttachments;
 		int MaxUniformBufferBindings;
 		int MaxUniformBlockSize;
 	};
@@ -47,6 +49,8 @@ namespace LD {
 		void BindTextureUnit(int unit);
 		void BindTexture2D(GLTexture2D& texture);
 		void BindProgram(GLProgram& program);
+		void BindFrameBuffer(GLFrameBuffer& frameBuffer);
+		void UnbindFrameBuffer();
 
 		inline GLuint GetVersion() const { return mVersion; }
 		inline const GLContextLimits& GetLimits() const { return sLimits; }
@@ -63,6 +67,7 @@ namespace LD {
 		UID mBoundUBO = 0;
 		UID mBoundProgram = 0;
 		UID mBoundTexture2D = 0;
+		UID mBoundFrameBuffer = 0;
 		int mBoundTextureUnit = 0;
 	};
 

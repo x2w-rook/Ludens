@@ -7,7 +7,8 @@ set(MODULE_INCLUDE
 	"Include/GL/GLVertex.h"
 	"Include/GL/GLTexture.h"
 	"Include/GL/GLBuffer.h"
-	"Include/GL/GLProgram.h")
+	"Include/GL/GLProgram.h"
+	"Include/GL/GLFrameBuffer.h")
 
 set(MODULE_LIB
 	"Lib/GL/GLSL.cpp"
@@ -17,7 +18,8 @@ set(MODULE_LIB
 	"Lib/GL/GLVertex.cpp"
 	"Lib/GL/GLTexture.cpp"
 	"Lib/GL/GLBuffer.cpp"
-	"Lib/GL/GLProgram.cpp")
+	"Lib/GL/GLProgram.cpp"
+	"Lib/GL/GLFrameBuffer.cpp")
 
 set(MODULE_INCLUDE_DIR
 	"${CMAKE_SOURCE_DIR}/Ludens"

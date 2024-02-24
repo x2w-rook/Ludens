@@ -7,6 +7,7 @@
 #include "Core/RenderBase/Include/GL/GLBuffer.h"
 #include "Core/RenderBase/Include/GL/GLTexture.h"
 #include "Core/RenderBase/Include/GL/GLProgram.h"
+#include "Core/RenderBase/Include/GL/GLFrameBuffer.h"
 #include "Core/Header/Include/Error.h"
 
 
@@ -102,14 +103,6 @@ namespace LD {
 		mBoundUBO = (UID)ubo;
 	}
 
-	void GLContext::BindTexture2D(GLTexture2D& texture)
-	{
-		// NOTE: OpenGL texture units supports bindings to all targets, here we don't cache which texture unit we bind to,
-		//       only the last texture bound for each texture target.
-		glBindTexture(GL_TEXTURE_2D, (GLuint)texture);
-		mBoundTexture2D = (UID)texture;
-	}
-
 	void GLContext::BindTextureUnit(int unit)
 	{
 		if (mBoundTextureUnit == unit)
@@ -117,9 +110,17 @@ namespace LD {
 			LD_DEBUG_ASSERT([&]() { GLint actual; glGetIntegerv(GL_ACTIVE_TEXTURE, &actual); return actual == (GL_TEXTURE0 + unit); }());
 			return;
 		}
-		
+
 		glActiveTexture(GL_TEXTURE0 + unit);
 		mBoundTextureUnit = unit;
+	}
+
+	void GLContext::BindTexture2D(GLTexture2D& texture)
+	{
+		// NOTE: OpenGL texture units supports bindings to all targets, here we don't cache which texture unit we bind to,
+		//       only the last texture bound for each texture target.
+		glBindTexture(GL_TEXTURE_2D, (GLuint)texture);
+		mBoundTexture2D = (UID)texture;
 	}
 
 	void GLContext::BindProgram(GLProgram& shader)
@@ -134,16 +135,36 @@ namespace LD {
 		mBoundProgram = (UID)shader;
 	}
 
+	void GLContext::BindFrameBuffer(GLFrameBuffer& frameBuffer)
+	{
+		if (mBoundFrameBuffer == (UID)frameBuffer)
+		{
+			LD_DEBUG_ASSERT([&]() { GLint actual; glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &actual); return actual == (GLuint)frameBuffer; }());
+			LD_DEBUG_ASSERT([&]() { GLint actual; glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &actual); return actual == (GLuint)frameBuffer; }());
+			return;
+		}
+
+		// NOTE: currently only binds to GL_FRAMEBUFFER target, so GL_DRAW_FRAMEBUFFER and GL_READ_FRAMEBUFFER should always be the same.
+		glBindFramebuffer(GL_FRAMEBUFFER, (GLuint)frameBuffer);
+		mBoundFrameBuffer = (UID)frameBuffer;
+	}
+
+	void GLContext::UnbindFrameBuffer()
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		mBoundFrameBuffer = 0;
+	}
+
 	void GLContext::QueryLimits()
 	{
 		glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &sLimits.MaxTextureImageUnits);
 		glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &sLimits.MaxCombinedTextureImageUnits);
 		glGetIntegerv(GL_MAX_ELEMENT_INDEX, &sLimits.MaxElementIndex);
 		glGetIntegerv(GL_MAX_DRAW_BUFFERS, &sLimits.MaxDrawBuffers);
+		glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, &sLimits.MaxColorAttachments);
 		glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &sLimits.MaxUniformBlockSize);
 		glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &sLimits.MaxUniformBufferBindings);
 	}
-
 
 	std::string GLContextLimits::ToString() const
 	{
@@ -153,6 +174,7 @@ namespace LD {
 		ss << "GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS:\t" << MaxCombinedTextureImageUnits << '\n';
 		ss << "GL_MAX_ELEMENT_INDEX:\t" << MaxTextureImageUnits << '\n';
 		ss << "GL_MAX_DRAW_BUFFERS:\t" << MaxDrawBuffers << '\n';
+		ss << "GL_MAX_COLOR_ATTACHMENTS:\t" << MaxColorAttachments << '\n';
 		ss << "GL_MAX_UNIFORM_BLOCK_SIZE:\t" << MaxUniformBlockSize << '\n';
 		ss << "GL_MAX_UNIFORM_BUFFER_BINDINGS:\t" << MaxUniformBufferBindings << '\n';
 
