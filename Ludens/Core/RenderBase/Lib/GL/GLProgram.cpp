@@ -27,17 +27,21 @@ namespace LD {
 		mFSSize = info.FragmentShaderSize;
 		mProgram = glCreateProgram();
 
+		bool result;
+
 		if (mVSData)
 		{
 			mVS = glCreateShader(GL_VERTEX_SHADER);
-			Compile(&mVS, GL_VERTEX_SHADER, mVSData, mVSSize);
+			result = Compile(&mVS, GL_VERTEX_SHADER, mVSData, mVSSize);
+			LD_DEBUG_ASSERT(result && "GLProgram vertex shader compile error");
 			glAttachShader(mProgram, mVS);
 		}
 
 		if (mFSData)
 		{
 			mFS = glCreateShader(GL_FRAGMENT_SHADER);
-			Compile(&mFS, GL_FRAGMENT_SHADER, mFSData, mFSSize);
+			result = Compile(&mFS, GL_FRAGMENT_SHADER, mFSData, mFSSize);
+			LD_DEBUG_ASSERT(result && "GLProgram fragment shader compile error");
 			glAttachShader(mProgram, mFS);
 		}
 
