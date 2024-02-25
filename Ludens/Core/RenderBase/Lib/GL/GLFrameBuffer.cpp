@@ -21,7 +21,9 @@ namespace LD {
 		glCreateFramebuffers(1, &mFrameBuffer);
 		mContext->BindFrameBuffer(*this);
 
-		for (size_t i = 0; i < info.ColorAttachmentCount; i++)
+		size_t colorAttachmentCount = info.ColorAttachmentCount;
+
+		for (size_t i = 0; i < colorAttachmentCount; i++)
 		{
 			GLTexture2D& attachment = *info.ColorAttachments[i];
 
@@ -37,9 +39,12 @@ namespace LD {
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, (GLuint)attachment, 0);
 		}
 
-		// TODO: MRT
-		// GLenum drawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
-		// glDrawBuffers(1, drawBuffers);
+		Vector<GLenum> drawBuffers(colorAttachmentCount);
+		for (size_t i = 0; i < colorAttachmentCount; i++)
+		{
+			drawBuffers[i] = GL_COLOR_ATTACHMENT0 + i;
+		}
+		glDrawBuffers(colorAttachmentCount, drawBuffers.Data());
 
 		LD_DEBUG_ASSERT(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
 
