@@ -38,7 +38,7 @@ namespace LD {
 
 		~Vector()
 		{
-			Resize(0);
+			Deallocate();
 		}
 
 		Vector<T>& operator=(const Vector<T>& other)
@@ -56,20 +56,6 @@ namespace LD {
 
 		inline void Resize(size_t size)
 		{
-			// deallocate
-			if (size == 0)
-			{
-				if (mData != nullptr)
-				{
-					for (size_t i = 0; i < mAllocSize; i++)
-						mData[i].~T();
-					mAllocator.Free(mData);
-					mData = nullptr;
-				}
-				mSize = 0;
-				return;
-			}
-
 			size_t newAllocSize = NextPowerOf2((u32)size);
 
 			// shrinking, or growing but does not trigger realloc
@@ -112,6 +98,14 @@ namespace LD {
 			mData[mSize - 1] = std::move(item);
 		}
 
+		inline void PopBack()
+		{
+			if (mSize == 0)
+				return;
+
+			Resize(mSize - 1);
+		}
+
 		inline void Clear() { mSize = 0; }
 
 		inline const T* Begin() const { return mData; }
@@ -138,6 +132,20 @@ namespace LD {
 		}
 
 	private:
+		void Deallocate()
+		{
+			if (mData == nullptr)
+				return;
+
+			for (size_t i = 0; i < mAllocSize; i++)
+				mData[i].~T();
+
+			mAllocator.Free(mData);
+			mData = nullptr;
+			mSize = 0;
+			return;
+		}
+
 		T* mData = nullptr;
 		size_t mSize = 0;
 		size_t mAllocSize = 0;
