@@ -11,6 +11,7 @@ namespace LD {
 	class GLIndexBuffer;
 	class GLUniformBuffer;
 	class GLTexture2D;
+	class GLTexture2DArray;
 	class GLFrameBuffer;
 	class GLProgram;
 
@@ -48,6 +49,7 @@ namespace LD {
 		void BindUBO(GLUniformBuffer& ubo);
 		void BindTextureUnit(int unit);
 		void BindTexture2D(GLTexture2D& texture);
+		void BindTexture2DArray(GLTexture2DArray& textureArray);
 		void BindProgram(GLProgram& program);
 		void BindFrameBuffer(GLFrameBuffer& frameBuffer);
 		void UnbindFrameBuffer();
@@ -67,6 +69,7 @@ namespace LD {
 		UID mBoundUBO = 0;
 		UID mBoundProgram = 0;
 		UID mBoundTexture2D = 0;
+		UID mBoundTexture2DArray = 0;
 		UID mBoundFrameBuffer = 0;
 		int mBoundTextureUnit = 0;
 	};

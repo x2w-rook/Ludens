@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glad/glad.h>
+#include "Core/Header/Include/Types.h"
 #include "Core/OS/Include/UID.h"
 
 namespace LD {
@@ -38,6 +39,43 @@ namespace LD {
 		CUID<GLTexture2D> mHandle;
 		GLContext* mContext = nullptr;
 		GLuint mTexture;
+	};
+
+	struct GLTexture2DArrayInfo
+	{
+		const void* Data = nullptr;
+		GLenum DataFormat;
+		GLenum DataType;
+		GLenum InternalFormat;
+		u32 Width;
+		u32 Height;
+		u32 Layers;
+	};
+
+	class GLTexture2DArray
+	{
+	public:
+		GLTexture2DArray();
+		GLTexture2DArray(const GLTexture2DArray&) = delete;
+		~GLTexture2DArray();
+
+		GLTexture2DArray& operator=(const GLTexture2DArray&) = delete;
+
+		void Setup(GLContext& context, const GLTexture2DArrayInfo& info);
+		void Cleanup();
+		void Bind(int unit);
+
+		inline UID GetHandle() const { return (UID)mHandle; }
+		inline explicit operator UID() const { return (UID)mHandle; }
+		inline explicit operator GLuint() const { return mTexture; }
+
+	private:
+		CUID<GLTexture2DArray> mHandle;
+		GLContext* mContext = nullptr;
+		GLuint mTexture;
+		u32 mWidth;
+		u32 mHeight;
+		u32 mLayers;
 	};
 
 } // namespace LD

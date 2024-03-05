@@ -123,6 +123,12 @@ namespace LD {
 		mBoundTexture2D = (UID)texture;
 	}
 
+	void GLContext::BindTexture2DArray(GLTexture2DArray& texture)
+	{
+		glBindTexture(GL_TEXTURE_2D_ARRAY, (GLuint)texture);
+		mBoundTexture2DArray = (UID)texture;
+	}
+
 	void GLContext::BindProgram(GLProgram& shader)
 	{
 		if (mBoundProgram == (UID)shader)
