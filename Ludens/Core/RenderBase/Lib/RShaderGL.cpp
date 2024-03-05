@@ -1,0 +1,28 @@
+#include "Core/Header/Include/Error.h"
+#include "Core/RenderBase/Include/RShader.h"
+#include "Core/RenderBase/Lib/RShaderGL.h"
+
+namespace LD {
+
+	RShaderGL::RShaderGL()
+	{
+	}
+
+	RShaderGL::~RShaderGL()
+	{
+		LD_DEBUG_ASSERT(ID == 0);
+	}
+
+	void RShaderGL::Setup(RShader& shaderH, const RShaderInfo& info, RDeviceGL& device)
+	{
+		RShaderBase::Setup(shaderH, info, (RDeviceBase*)&device);
+
+		Source = { (const char*)info.Data, (size_t)info.Size };
+	}
+
+	void RShaderGL::Cleanup(RShader& shaderH)
+	{
+		RShaderBase::Cleanup(shaderH);
+	}
+
+} // namespace LD

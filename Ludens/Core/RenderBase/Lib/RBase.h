@@ -124,7 +124,7 @@ namespace LD {
 
 		CUID<RShaderBase> ID;
 		RDeviceBase* Device = nullptr;
-		RShaderStageBit ShaderStage;
+		RShaderType Type;
 	};
 
 	struct RFrameBufferBase

@@ -104,7 +104,7 @@ namespace LD {
 	{
 		ID = CUID<RShaderBase>::Get();
 		Device = device;
-		ShaderStage = info.ShaderStage;
+		Type = info.Type;
 
 		// connect
 		shaderH.mID = ID;
