@@ -26,12 +26,10 @@ namespace LD {
 		//       For now we are using hard coded default values.
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		LD_DEBUG_ASSERT(info.Data != nullptr);
-		
-		glTexImage2D(GL_TEXTURE_2D, 0, info.InternalFormat, (GLsizei)info.Width, (GLsizei)info.Height, 0, info.DataFormat, GL_UNSIGNED_BYTE, info.Data);
+		glTexImage2D(GL_TEXTURE_2D, 0, info.InternalFormat, (GLsizei)info.Width, (GLsizei)info.Height, 0, info.DataFormat, info.DataType, info.Data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 

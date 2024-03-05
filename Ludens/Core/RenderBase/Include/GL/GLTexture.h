@@ -12,6 +12,7 @@ namespace LD {
 		const void* Data = nullptr;
 		GLenum InternalFormat;
 		GLenum DataFormat;
+		GLenum DataType = GL_UNSIGNED_BYTE;
 		u16 Width;
 		u16 Height;
 	};
