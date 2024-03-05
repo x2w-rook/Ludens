@@ -41,17 +41,7 @@ namespace LD {
 		u32 mSize = 0;
 	};
 
-	struct GLIndexBufferInfo
-	{
-		GLenum Usage;
-		u32 Size = 0;
-		const void* Data = nullptr;
-
-		// GL_UNSIGNED_BYTE:   8 bit indices
-		// GL_UNSIGNED_SHORT: 16 bit indices
-		// GL_UNSIGNED_INT:   32 bit indices
-		GLenum IndexSize = GL_UNSIGNED_SHORT;
-	};
+	using GLIndexBufferInfo = GLVertexBufferInfo;
 
 	class GLIndexBuffer
 	{
@@ -66,7 +56,6 @@ namespace LD {
 		void Cleanup();
 		void Bind();
 		
-		inline GLenum GetIndexSize() const { return mIndexSize; }
 		inline UID GetHandle() const { return (UID)mHandle; }
 		inline explicit operator UID() const { return (UID)mHandle; }
 		inline explicit operator GLuint() const { return mIBO; }
@@ -75,7 +64,6 @@ namespace LD {
 		CUID<GLIndexBuffer> mHandle;
 		GLContext* mContext = nullptr;
 		GLuint mIBO;
-		GLenum mIndexSize;
 	};
 
 	struct GLUniformBufferInfo

@@ -64,14 +64,17 @@ namespace LD {
 	void GLIndexBuffer::Setup(GLContext& context, const GLIndexBufferInfo& info)
 	{
 		mHandle = CUID<GLIndexBuffer>::Get();
-		mIndexSize = info.IndexSize;
 		mContext = &context;
 
 		glCreateBuffers(1, &mIBO);
+
 		if (info.Size > 0)
 		{
-			context.BindIBO(*this); // NOTE: this requires a VAO being bound first
+			GLint oldIBO;
+			glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &oldIBO);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIBO);
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, info.Size, info.Data, info.Usage);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, oldIBO);
 		}
 	}
 
