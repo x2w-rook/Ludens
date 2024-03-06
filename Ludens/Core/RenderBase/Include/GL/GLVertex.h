@@ -21,6 +21,8 @@ namespace LD {
 	public:
 		GLVertexLayout& AddVertexAttribute(const GLVertexAttribute& attribute);
 		inline const Vector<GLVertexAttribute>& GetAttributes() const { return mAttributes; }
+		inline const Vector<u32>& GetOffsets() const { return mOffsets; }
+		inline u32 GetVertexStride() const { return mVertexStride; }
 
 	private:
 		u32 mVertexStride = 0;

@@ -15,7 +15,6 @@ namespace LD {
 
 	struct RBufferInfo
 	{
-		RShaderStageFlags BindStages;
 		RBufferType Type;
 		const void* Data = nullptr;
 		u32 Size = 0;
