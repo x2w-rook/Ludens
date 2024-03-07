@@ -35,6 +35,8 @@ namespace LD {
 		{
 			GLTexture2D& attachment = *info.DepthStencilAttachment;
 
+			// TODO: currently assumes GL_DEPTH_STENCIL_ATTACHMENT, check if attachment is depth only or stencil only
+
 			attachment.Bind(0);
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, (GLuint)attachment, 0);
 		}
