@@ -41,16 +41,21 @@ namespace LD {
 		Vector<RVertexBufferSlot> Slots;
 	};
 
+	struct RPipelineLayout
+	{
+		size_t GroupLayoutCount = 0;
+		RBindingGroupLayout* GroupLayouts = nullptr;
+	};
+
 	// Info to create a graphics pipeline.
 	struct RPipelineInfo
 	{
 		const char* Name = nullptr;
 		RPrimitiveTopology PrimitiveTopology = RPrimitiveTopology::TriangleList;
+		RPipelineLayout PipelineLayout;
 		RVertexLayout VertexLayout;
 		RShader VertexShader;
 		RShader FragmentShader;
-		u32 GroupLayoutCount;
-		RBindingGroupLayout* GroupLayouts;
 	};
 
 	// graphics pipeline handle and interface

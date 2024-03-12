@@ -34,7 +34,8 @@ namespace LD {
 
 	bool File::Exists(const Path& path)
 	{
-		return std::filesystem::exists(path);
+		auto& std_path = static_cast<std::filesystem::path>(path);
+		return std::filesystem::exists(std_path);
 	}
 
 	bool File::Open(const Path& path, FileMode mode)
@@ -100,7 +101,8 @@ namespace LD {
 
 	bool FileSystem::CreateDirectories(const Path& path)
 	{
-		return std::filesystem::create_directories(path);
+		auto& std_path = static_cast<std::filesystem::path>(path);
+		return std::filesystem::create_directories(std_path);
 	}
 
 } // namespace LD

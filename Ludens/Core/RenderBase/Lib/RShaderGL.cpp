@@ -17,6 +17,7 @@ namespace LD {
 	{
 		RShaderBase::Setup(shaderH, info, (RDeviceBase*)&device);
 
+		// copy shader source, deferred creation until RPipelineGL
 		Source = { (const char*)info.Data, (size_t)info.Size };
 	}
 
