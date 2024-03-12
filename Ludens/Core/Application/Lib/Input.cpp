@@ -1,5 +1,3 @@
-#pragma once
-
 #include "Core/Application/Include/Input.h"
 #include "Core/Application/Include/Application.h"
 #include "Core/Application/Include/Event.h"
