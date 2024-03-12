@@ -1,5 +1,7 @@
 #pragma once
 
+#include <chrono>
+
 namespace LD {
 
 	class DeltaTime
@@ -16,5 +18,43 @@ namespace LD {
 	private:
 		double mSeconds;
 	};
+
+    class Timer
+    {
+    public:
+        void Start();
+        void Stop();
+
+        double GetMilliseconds();
+        double GetSeconds() { return GetMilliseconds() / 1000.0; }
+
+    private:
+        std::chrono::time_point<std::chrono::system_clock> mStartTime;
+        std::chrono::time_point<std::chrono::system_clock> mEndTime;
+        bool mIsRunning = false;
+    };
+
+    class ScopeTimer
+    {
+    public:
+        ScopeTimer() = delete;
+        ScopeTimer(double* milliSeconds)
+            : mMilliSeconds(milliSeconds)
+        {
+            mTimer.Start();
+        }
+
+        ~ScopeTimer()
+        {
+            mTimer.Stop();
+
+            if (mMilliSeconds)
+                *mMilliSeconds = mTimer.GetMilliseconds();
+        }
+
+    private:
+        Timer mTimer;
+        double* mMilliSeconds;
+    };
 
 } // namespace LD
