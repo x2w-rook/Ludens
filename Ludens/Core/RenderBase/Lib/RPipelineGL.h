@@ -31,6 +31,12 @@ namespace LD {
 		GLProgram Program;
 		GLenum PrimitiveTopology;
 		Vector<u32> VertexStrides; // vertex byte size at each vertex buffer slot
+		
+		// for each binding group, map RTexture binding to OpenGL Texture Unit
+		Vector<std::unordered_map<u32, u32>> TextureUnitBinding;
+
+		// for each binding group, map uniform RBuffer binding to OpenGL Buffer Base
+		Vector<std::unordered_map<u32, u32>> UniformBufferBinding;
 	};
 
 } // namespace LD

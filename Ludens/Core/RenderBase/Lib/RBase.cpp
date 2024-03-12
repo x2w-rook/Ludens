@@ -104,6 +104,7 @@ namespace LD {
 	{
 		ID = CUID<RShaderBase>::Get();
 		Device = device;
+		SourceType = info.SourceType;
 		Type = info.Type;
 
 		// connect
@@ -319,10 +320,12 @@ namespace LD {
 		VertexShaderH = info.VertexShader;
 		FragmentShaderH = info.FragmentShader;
 
-		GroupLayoutsH.Resize(info.GroupLayoutCount);
-		for (size_t i = 0; i < info.GroupLayoutCount; i++)
+		const RPipelineLayout& pipelineLayout = info.PipelineLayout;
+
+		GroupLayoutsH.Resize(pipelineLayout.GroupLayoutCount);
+		for (size_t i = 0; i < GroupLayoutsH.Size(); i++)
 		{
-			GroupLayoutsH[i] = info.GroupLayouts[i];
+			GroupLayoutsH[i] = pipelineLayout.GroupLayouts[i];
 		}
 
 		// connect

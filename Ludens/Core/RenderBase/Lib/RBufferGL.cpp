@@ -18,8 +18,6 @@ namespace LD {
 	{
 		RBufferBase::Setup(handle, info, &device);
 
-		LD_DEBUG_ASSERT(info.Size > 0 && info.Data != nullptr);
-
 		Target = DeriveGLTarget(info.Type);
 
 		switch (Target)

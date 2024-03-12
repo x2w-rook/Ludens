@@ -22,10 +22,39 @@ namespace LD {
 
 		RShaderGL& vertexShader = Derive<RShaderGL>(VertexShaderH);
 		RShaderGL& fragmentShader = Derive<RShaderGL>(FragmentShaderH);
+		size_t groupCount = GroupLayoutsH.Size();
 
-		// TODO: SPIR-V compile path
+		// This is based on how RShaderCompiler patches GLSL for OpenGL:
+		// - texture binding with lower qualifier uses lower texture unit slot
+		// - uniform buffer with lower qualifier uses lower buffer base
+		{
+			TextureUnitBinding.Resize(groupCount);
+			UniformBufferBinding.Resize(groupCount);
+
+			int textureUnit = 0;
+			int uniformBufferBase = 0;
+
+			for (size_t groupIdx = 0; groupIdx < groupCount; groupIdx++)
+			{
+				RBindingGroupLayoutGL& groupLayout = Derive<RBindingGroupLayoutGL>(GroupLayoutsH[groupIdx]);
+
+				for (size_t bindingIdx = 0; bindingIdx < groupLayout.Bindings.Size(); bindingIdx++)
+				{
+					switch (groupLayout.Bindings[bindingIdx].Type)
+					{
+					case RBindingType::Texture:
+						TextureUnitBinding[groupIdx][bindingIdx] = textureUnit++;
+						break;
+					case RBindingType::UniformBuffer:
+						UniformBufferBinding[groupIdx][bindingIdx] = uniformBufferBase++;
+						break;
+					}
+				}
+			}
+		}
 
 		GLProgramInfo programInfo{};
+		programInfo.IsSpirvData = vertexShader.SourceType == RShaderSourceType::SPIRV;
 		programInfo.VertexShaderData = vertexShader.Source.data();
 		programInfo.VertexShaderSize = vertexShader.Source.size();
 		programInfo.FragmentShaderData = fragmentShader.Source.data();

@@ -64,8 +64,8 @@ namespace LD {
 		virtual RResult DeletePipeline(RPipeline& pipeline) = 0;
 
 		virtual RResult SetPipeline(RPipeline& pipeline) = 0;
-		virtual RResult SetBindingGroup(RBindingGroup& group, u32 slot) = 0;
-		virtual RResult SetVertexBuffer(RBuffer& buffer, u32 slot) = 0;
+		virtual RResult SetBindingGroup(u32 slot, RBindingGroup& group) = 0;
+		virtual RResult SetVertexBuffer(u32 slot, RBuffer& buffer) = 0;
 		virtual RResult SetIndexBuffer(RBuffer& buffer) = 0;
 		virtual RResult SetFrameBuffer(RFrameBuffer* frameBuffer) = 0;
 
@@ -124,6 +124,7 @@ namespace LD {
 
 		CUID<RShaderBase> ID;
 		RDeviceBase* Device = nullptr;
+		RShaderSourceType SourceType;
 		RShaderType Type;
 	};
 
@@ -197,8 +198,8 @@ namespace LD {
 		void Setup(RBindingGroup& groupH, const RBindingGroupInfo& info, RDeviceBase* device);
 		void Cleanup(RBindingGroup& groupH);
 
-		virtual RResult BindTexture(RTexture& textureH, u32 slot) = 0;
-		virtual RResult BindUniformBuffer(RBuffer& bufferH, u32 slot) = 0;
+		virtual RResult BindTexture(u32 binding, RTexture& textureH) = 0;
+		virtual RResult BindUniformBuffer(u32 binding, RBuffer& bufferH) = 0;
 
 		struct Binding
 		{
