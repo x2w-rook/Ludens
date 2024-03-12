@@ -38,3 +38,69 @@
 # include <cmath>
 # define LD_MATH_ATAN(EXPR)   std::atan(EXPR)
 #endif
+
+namespace LD {
+
+	template <typename T>
+	class TRadians;
+
+	template <typename T>
+	class TDegrees
+	{
+	public:
+		TDegrees() = default;
+		TDegrees(const T& rotation)
+			: Rotation(rotation) {}
+
+		inline TDegrees& operator=(const T& rotation)
+		{
+			Rotation = rotation;
+			return *this;
+		}
+
+		inline operator T() const
+		{
+			return Rotation;
+		}
+
+		inline TRadians<T> ToRadians() const
+		{
+			return Rotation * static_cast<T>(LD_MATH_PI) / static_cast<T>(180);
+		}
+
+	private:
+		T Rotation;
+	};
+
+	template <typename T>
+	class TRadians
+	{
+	public:
+		TRadians() = default;
+		TRadians(const T& rotation)
+			: Rotation(rotation) {}
+
+		inline TRadians& operator=(const T& rotation)
+		{
+			Rotation = rotation;
+			return *this;
+		}
+
+		inline operator T() const
+		{
+			return Rotation;
+		}
+
+		inline TDegrees<T> ToDegrees() const
+		{
+			return Rotation / static_cast<T>(LD_MATH_PI) * static_cast<T>(180);
+		}
+
+	private:
+		T Rotation;
+	};
+
+	using Degrees = TDegrees<float>;
+	using Radians = TRadians<float>;
+
+} // namespace LD
