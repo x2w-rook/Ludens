@@ -15,6 +15,7 @@ namespace LD {
 
 	struct GLProgramInfo
 	{
+		bool IsSpirvData = false;
 		const char* VertexShaderData = nullptr;
 		const char* FragmentShaderData = nullptr;
 		u32 VertexShaderSize = 0;
@@ -44,7 +45,8 @@ namespace LD {
 		inline explicit operator GLuint() const { return (GLuint)mProgram; }
 
 	private:
-		bool Compile(GLuint* shader, GLenum stage, const char* data, u32 size);
+		bool CompileShaderSource(GLuint* shader, GLenum stage, const char* data, u32 byteSize);
+		bool CompileShaderBinary(GLuint* shader, GLenum stage, const char* spirv, u32 byteSize);
 
 		CUID<GLProgram> mHandle;
 		GLContext* mContext = nullptr;
@@ -55,6 +57,7 @@ namespace LD {
 		GLuint mVS;
 		GLuint mFS;
 		GLuint mProgram;
+		bool mIsSpirvData;
 	};
 
 } // namespace LD

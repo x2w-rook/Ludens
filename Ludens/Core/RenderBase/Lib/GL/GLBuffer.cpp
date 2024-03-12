@@ -104,8 +104,11 @@ namespace LD {
 		mContext = &context;
 		mSize = info.Size;
 
+		LD_DEBUG_ASSERT(mSize > 0);
+
 		glCreateBuffers(1, &mUBO);
 		Bind();
+
 		glBufferData(GL_UNIFORM_BUFFER, mSize, nullptr, info.Usage);
 	}
 

@@ -1,8 +1,9 @@
 #include <iostream>
+#include <glad/glad.h>
 #include "Core/RenderBase/Include/GL/GLProgram.h"
 #include "Core/RenderBase/Include/GL/GLContext.h"
 #include "Core/Header/Include/Error.h"
-
+#include "Core/OS/Include/Memory.h"
 
 
 namespace LD {
@@ -21,26 +22,38 @@ namespace LD {
 	{
 		mHandle = CUID<GLProgram>::Get();
 		mContext = &context;
+		mProgram = glCreateProgram();
+		mIsSpirvData = info.IsSpirvData;
+
 		mVSData = info.VertexShaderData;
 		mVSSize = info.VertexShaderSize;
 		mFSData = info.FragmentShaderData;
 		mFSSize = info.FragmentShaderSize;
-		mProgram = glCreateProgram();
+		LD_DEBUG_ASSERT(mVSData && mFSData);
 
 		bool result;
 
-		if (mVSData)
+		if (mIsSpirvData)
 		{
 			mVS = glCreateShader(GL_VERTEX_SHADER);
-			result = Compile(&mVS, GL_VERTEX_SHADER, mVSData, mVSSize);
+			result = CompileShaderBinary(&mVS, GL_VERTEX_SHADER, mVSData, mVSSize);
+			LD_DEBUG_ASSERT(result && "GLProgram vertex shader spirv compile error");
+			glAttachShader(mProgram, mVS);
+
+			mFS = glCreateShader(GL_FRAGMENT_SHADER);
+			result = CompileShaderBinary(&mFS, GL_FRAGMENT_SHADER, mFSData, mFSSize);
+			LD_DEBUG_ASSERT(result && "GLProgram fragment shader spirv compile error");
+			glAttachShader(mProgram, mFS);
+		}
+		else
+		{
+			mVS = glCreateShader(GL_VERTEX_SHADER);
+			result = CompileShaderSource(&mVS, GL_VERTEX_SHADER, mVSData, mVSSize);
 			LD_DEBUG_ASSERT(result && "GLProgram vertex shader compile error");
 			glAttachShader(mProgram, mVS);
-		}
 
-		if (mFSData)
-		{
 			mFS = glCreateShader(GL_FRAGMENT_SHADER);
-			result = Compile(&mFS, GL_FRAGMENT_SHADER, mFSData, mFSSize);
+			result = CompileShaderSource(&mFS, GL_FRAGMENT_SHADER, mFSData, mFSSize);
 			LD_DEBUG_ASSERT(result && "GLProgram fragment shader compile error");
 			glAttachShader(mProgram, mFS);
 		}
@@ -101,11 +114,11 @@ namespace LD {
 		return true;
 	}
 
-	bool GLProgram::Compile(GLuint* shader, GLenum stage, const char* data, uint32_t size)
+	bool GLProgram::CompileShaderSource(GLuint* shader, GLenum stage, const char* data, u32 byteSize)
 	{
 		LD_DEBUG_ASSERT(shader != nullptr);
 
-		const GLint gl_size(size);
+		const GLint gl_size(byteSize);
 		char infoLog[512];
 		int compileStatus;
 		bool success = true;
@@ -116,12 +129,34 @@ namespace LD {
 
 		LD_DEBUG_CANARY(compileStatus == GL_TRUE, [&](const char*) {
 			glGetShaderInfoLog(*shader, sizeof(infoLog), NULL, infoLog);
-			std::cout << "GLProgram compile error at stage " << stage << "\n" << infoLog << std::endl;
+			std::cout << "GLProgram source compile error at stage " << stage << "\n" << infoLog << std::endl;
 			std::cout << "Full Shader Code:\n" << data << std::endl;
 			success = false;
 		})
 
 		return success;
 	}
+
+	bool GLProgram::CompileShaderBinary(GLuint* shader, GLenum stage, const char* spirv, u32 byteSize)
+	{
+		LD_DEBUG_ASSERT(shader != nullptr);
+
+		char infoLog[512];
+		int compileStatus;
+		bool success = true;
+
+		glShaderBinary(1, shader, GL_SHADER_BINARY_FORMAT_SPIR_V_ARB, spirv, byteSize);
+		glSpecializeShaderARB(*shader, "main", 0, nullptr, nullptr);
+		glGetShaderiv(*shader, GL_COMPILE_STATUS, &compileStatus);
+
+		LD_DEBUG_CANARY(compileStatus == GL_TRUE, [&](const char*) {
+			glGetShaderInfoLog(*shader, sizeof(infoLog), NULL, infoLog);
+			std::cout << "GLProgram binary compile error at stage " << stage << "\n" << infoLog << std::endl;
+			success = false;
+		})
+
+		return success;
+	}
+
 
 } // namespace LD
