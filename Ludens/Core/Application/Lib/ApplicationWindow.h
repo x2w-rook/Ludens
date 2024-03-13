@@ -2,18 +2,11 @@
 
 #include <string>
 #include "Core/Header/Include/Types.h"
+#include "Core/Application/Include/Application.h"
 
 class GLFWwindow;
 
 namespace LD {
-
-	struct ApplicationWindowConfig
-	{
-		std::string Name;
-		u32 Width;
-		u32 Height;
-		bool EnableVsync = true;
-	};
 
 	class ApplicationWindow
 	{

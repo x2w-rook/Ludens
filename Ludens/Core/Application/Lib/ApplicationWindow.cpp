@@ -14,11 +14,15 @@ namespace LD {
 		int result = glfwInit();
 		LD_DEBUG_ASSERT(result == GLFW_TRUE);
 
+		if (!config.IsVisible)
+			glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+
 		// TODO: currently GLFW creates a graphics context for us,
 		//       we should be managing this ourselves
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+		//glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		mHandle = glfwCreateWindow((int)mWidth, (int)mHeight, mName.c_str(), nullptr, nullptr);
 		LD_DEBUG_ASSERT(mHandle != nullptr);
 

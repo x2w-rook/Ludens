@@ -30,14 +30,8 @@ namespace LD {
 
 		mConfig = config;
 
-		ApplicationWindowConfig windowConfig{};
-		windowConfig.EnableVsync = true;
-		windowConfig.Name = mConfig.Name;
-		windowConfig.Width = mConfig.WindowWidth;
-		windowConfig.Height = mConfig.WindowHeight;
-
 		mWindow = MakeOwn<ApplicationWindow>();
-		mWindow->Setup(windowConfig);
+		mWindow->Setup(mConfig.Window);
 		mLayer = config.Layer;
 		mLayer->OnAttach(*this);
 

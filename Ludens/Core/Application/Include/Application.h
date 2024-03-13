@@ -19,12 +19,18 @@ namespace LD {
 	class ApplicationLayer;
 	class Event;
 
+	struct ApplicationWindowConfig
+	{
+		std::string Name;
+		u32 Width;
+		u32 Height;
+		bool EnableVsync = true;
+		bool IsVisible = true;
+	};
 
 	struct ApplicationConfig
 	{
-		std::string Name;
-		u32 WindowWidth  = LD_APPLICATION_DEFAULT_WINDOW_WIDTH;
-		u32 WindowHeight = LD_APPLICATION_DEFAULT_WINDOW_HEIGHT;
+		ApplicationWindowConfig Window;
 		double FixedUpdateInterval = LD_APPLICATION_DEFAULT_FIXED_UPDATE_INTERVAL;
 		Ref<ApplicationLayer> Layer;
 	};
@@ -45,7 +51,7 @@ namespace LD {
 		void Setup(const ApplicationConfig& config);
 		void Cleanup();
 
-		inline std::string GetName() const { return mConfig.Name; }
+		inline std::string GetName() const { return mConfig.Window.Name; }
 		void* GetWindowHandle();
 		void GetWindowSize(u32* width, u32* height) const;
 		void SetWindowCursorNormal();
