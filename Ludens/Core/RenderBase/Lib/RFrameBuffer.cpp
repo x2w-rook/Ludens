@@ -4,9 +4,12 @@
 
 namespace LD {
 	
-	RResult RFrameBuffer::GetInfo(RFrameBufferInfo* info)
+	RResult RFrameBuffer::GetInfo(RFrameBufferInfo& info)
 	{
-		*info = mFrameBuffer->Info;
+		info.Width = mFrameBuffer->Width;
+		info.Height = mFrameBuffer->Height;
+		info.DepthStencilAttachmentInfo = mFrameBuffer->DepthStencilAttachmentInfo;
+		info.ColorAttachmentInfos = { mFrameBuffer->ColorAttachmentCount, mFrameBuffer->ColorAttachmentInfos.Data()};
 
 		RResult result{};
 		mFrameBuffer->Device->Callback(result);

@@ -36,9 +36,8 @@ namespace LD {
 	{
 		RDeviceGL* deviceGL = dynamic_cast<RDeviceGL*>(Device);
 
-		size_t colorAttachmentCount = Info.ColorAttachmentInfos.Size();
-		Vector<GLTexture2D*> glColorAttachments{ colorAttachmentCount };
-		for (size_t i = 0; i < colorAttachmentCount; i++)
+		Vector<GLTexture2D*> glColorAttachments{ ColorAttachmentCount };
+		for (size_t i = 0; i < ColorAttachmentCount; i++)
 		{
 			RTextureGL& glTexture = Derive<RTextureGL>(ColorAttachments[i]);
 			glColorAttachments[i] = &glTexture.Texture2D;
@@ -52,8 +51,8 @@ namespace LD {
 		}
 
 		GLFrameBufferInfo glInfo{};
-		glInfo.Width = Info.Width;
-		glInfo.Height = Info.Height;
+		glInfo.Width = Width;
+		glInfo.Height = Height;
 		glInfo.ColorAttachmentCount = glColorAttachments.Size();
 		glInfo.ColorAttachments = glColorAttachments.Data();
 		glInfo.DepthStencilAttachment = glDepthStencilAttachment;
@@ -67,15 +66,13 @@ namespace LD {
 
 	RResult RFrameBufferGL::Invalidate(const RFrameBufferInfo& info)
 	{
-		RDeviceGL* deviceGL = dynamic_cast<RDeviceGL*>(Device);
-
 		// NOTE: Calling Cleanup and Setup with the new info is feasible, but doing so will regenerate a UID for RFrameBuffer handle.
 		//       Here we are trying to preserve the original UID of the RFrameBuffer handle, only the OpenGL objects are recreated.
 
 		CleanupAttachments();
 		CleanupGLAttachments();
 
-		Info = info;
+		ReadInfo(info);
 
 		SetupAttachments();
 		SetupGLAttachments();

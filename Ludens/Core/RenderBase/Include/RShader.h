@@ -6,19 +6,15 @@
 #include "Core/OS/Include/UID.h"
 #include "Core/IO/Include/FileSystem.h"
 #include "Core/DSA/Include/Vector.h"
+#include "Core/DSA/Include/View.h"
 #include "Core/Header/Include/Types.h"
+#include "Core/RenderBase/Include/RResult.h"
 #include "Core/RenderBase/Include/RDevice.h"
 
 
 namespace LD {
 
 	struct RPipelineLayout;
-
-	enum class RShaderType
-	{
-		VertexShader = 0,
-		FragmentShader
-	};
 
 	enum class RShaderSourceType
 	{
@@ -49,6 +45,9 @@ namespace LD {
 		friend class RShaderGL;
 	public:
 		using TBase = RShaderBase;
+
+		inline operator bool() const { return mID != 0 && mShader != nullptr; }
+		inline void Reset() { mID = 0; mShader = nullptr; }
 
 		inline operator RShaderBase*() const { return mShader; }
 

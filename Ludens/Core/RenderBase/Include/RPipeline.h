@@ -3,7 +3,7 @@
 #include <string>
 #include "Core/Header/Include/Types.h"
 #include "Core/OS/Include/UID.h"
-#include "Core/DSA/Include/Vector.h"
+#include "Core/DSA/Include/View.h"
 #include "Core/RenderBase/Include/RShader.h"
 
 namespace LD {
@@ -31,20 +31,19 @@ namespace LD {
 
 	struct RVertexBufferSlot
 	{
-		Vector<RVertexAttribute> Attributes;
+		View<RVertexAttribute> Attributes;
 		RAttributePollRate PollRate = RAttributePollRate::PerVertex;
 	};
 
 	// the layout of attributes in vertices during pipeline input assembly
 	struct RVertexLayout
 	{
-		Vector<RVertexBufferSlot> Slots;
+		View<RVertexBufferSlot> Slots;
 	};
 
 	struct RPipelineLayout
 	{
-		size_t GroupLayoutCount = 0;
-		RBindingGroupLayout* GroupLayouts = nullptr;
+		View<RBindingGroupLayout> GroupLayouts;
 	};
 
 	// Info to create a graphics pipeline.
@@ -68,6 +67,7 @@ namespace LD {
 
 		inline operator bool() const { return mID != 0 && mPipeline != nullptr; }
 		inline UID GetID() const { return mID; }
+		inline void Reset() { mID = 0; mPipeline = nullptr; }
 
 		inline bool operator==(const RPipeline& other) const { return mID == other.mID; }
 		inline bool operator!=(const RPipeline& other) const { return mID != other.mID; }

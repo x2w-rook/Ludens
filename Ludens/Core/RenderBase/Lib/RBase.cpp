@@ -16,7 +16,7 @@ namespace LD {
 	void RDeviceBase::Setup(RDevice& deviceH, const RDeviceInfo& info)
 	{
 		ID = CUID<RDeviceBase>::Get();
-		Callback = info.Callback.ValueOr([](const RResult&) {});
+		Callback = info.Callback ? info.Callback : [](const RResult&) {};
 
 		// connect
 		deviceH.mID = ID;
@@ -131,12 +131,29 @@ namespace LD {
 		LD_DEBUG_ASSERT(ID == 0);
 	}
 
+	void RFrameBufferBase::ReadInfo(const RFrameBufferInfo& info)
+	{
+		Width = info.Width;
+		Height = info.Height;
+
+		ColorAttachmentCount = info.ColorAttachmentInfos.Size();
+
+		for (size_t i = 0; i < ColorAttachmentCount; i++)
+		{
+			ColorAttachmentInfos[i] = info.ColorAttachmentInfos[i];
+		}
+
+		DepthStencilAttachmentInfo = info.DepthStencilAttachmentInfo;
+	}
+
 	void RFrameBufferBase::Setup(RFrameBuffer& frameBufferH, const RFrameBufferInfo& info, RDeviceBase* device)
 	{
 		ID = CUID<RFrameBufferBase>::Get();
-		Device = device;
-		Info = info;
 
+		Device = device;
+		ReadInfo(info);
+
+		LD_DEBUG_ASSERT(Width > 0 && Height > 0);
 		SetupAttachments();
 
 		// connect
@@ -158,45 +175,44 @@ namespace LD {
 
 	void RFrameBufferBase::SetupAttachments()
 	{
-		size_t numColorAttachments = Info.ColorAttachmentInfos.Size();
-		LD_DEBUG_ASSERT(numColorAttachments < ColorAttachments.Size());
+		LD_DEBUG_ASSERT(ColorAttachmentCount < ColorAttachments.Size());
 
-		for (size_t i = 0; i < numColorAttachments; i++)
+		for (size_t i = 0; i < ColorAttachmentCount; i++)
 		{
-			RAttachmentInfo& attachmentInfo = Info.ColorAttachmentInfos[i];
+			const RAttachmentInfo& attachmentInfo = ColorAttachmentInfos[i];
 
 			RTextureInfo textureInfo{};
 			textureInfo.Data = nullptr;
 			textureInfo.Type = RTextureType::Texture2D;
 			textureInfo.Format = attachmentInfo.Format;
-			textureInfo.Width = Info.Width;
-			textureInfo.Height = Info.Height;
+			textureInfo.Width = Width;
+			textureInfo.Height = Height;
 			Device->CreateTexture(ColorAttachments[i], textureInfo);
 		}
 
-		if (Info.DepthStencilAttachmentInfo.HasValue())
+		if (DepthStencilAttachmentInfo)
 		{
-			RAttachmentInfo& attachmentInfo = Info.DepthStencilAttachmentInfo.Value();
+			RAttachmentInfo& attachmentInfo = *DepthStencilAttachmentInfo;
 			LD_DEBUG_ASSERT(attachmentInfo.Format == RTextureFormat::D24S8);
 
 			RTextureInfo textureInfo{};
 			textureInfo.Data = nullptr;
 			textureInfo.Type = RTextureType::Texture2D;
 			textureInfo.Format = attachmentInfo.Format;
-			textureInfo.Width = Info.Width;
-			textureInfo.Height = Info.Height;
+			textureInfo.Width = Width;
+			textureInfo.Height = Height;
 			Device->CreateTexture(DepthStencilAttachment, textureInfo);
 		}
 	}
 
 	void RFrameBufferBase::CleanupAttachments()
 	{
-		if (Info.DepthStencilAttachmentInfo.HasValue())
+		if (DepthStencilAttachmentInfo)
 		{
 			Device->DeleteTexture(DepthStencilAttachment);
 		}
 
-		for (size_t i = 0; i < Info.ColorAttachmentInfos.Size(); i++)
+		for (size_t i = 0; i < ColorAttachmentCount; i++)
 		{
 			Device->DeleteTexture(ColorAttachments[i]);
 		}
@@ -204,18 +220,23 @@ namespace LD {
 
 	RResult RFrameBufferBase::GetColorAttachment(int idx, RTexture* colorAttachment)
 	{
-		// TODO: RResult error code
-		LD_DEBUG_ASSERT(0 <= idx && idx < (int)Info.ColorAttachmentInfos.Size());
+		RResult result{};
+
+		if (idx < 0 || idx >= ColorAttachmentCount)
+		{
+			result.Type = RResultType::InvalidIndex;
+			return result;
+		}
 
 		*colorAttachment = ColorAttachments[idx];
 
-		return {};
+		return result;
 	}
 
 	RResult RFrameBufferBase::GetDepthStencilAttachment(RTexture* depthStencilAttachment)
 	{
 		// TODO: RResult error code
-		LD_DEBUG_ASSERT(Info.DepthStencilAttachmentInfo.HasValue());
+		LD_DEBUG_ASSERT(DepthStencilAttachmentInfo);
 
 		*depthStencilAttachment = DepthStencilAttachment;
 
@@ -237,8 +258,9 @@ namespace LD {
 		Device = device;
 
 		// copy binding information
-		Bindings.Resize(info.BindingCount);
-		for (size_t i = 0; i < info.BindingCount; i++)
+		size_t bindingCount = info.Bindings.Size();
+		Bindings.Resize(bindingCount);
+		for (size_t i = 0; i < bindingCount; i++)
 		{
 			Bindings[i] = info.Bindings[i];
 		}
@@ -322,7 +344,7 @@ namespace LD {
 
 		const RPipelineLayout& pipelineLayout = info.PipelineLayout;
 
-		GroupLayoutsH.Resize(pipelineLayout.GroupLayoutCount);
+		GroupLayoutsH.Resize(pipelineLayout.GroupLayouts.Size());
 		for (size_t i = 0; i < GroupLayoutsH.Size(); i++)
 		{
 			GroupLayoutsH[i] = pipelineLayout.GroupLayouts[i];

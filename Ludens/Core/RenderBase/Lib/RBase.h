@@ -136,6 +136,8 @@ namespace LD {
 
 		RFrameBufferBase& operator=(const RFrameBufferBase&) = delete;
 
+		void ReadInfo(const RFrameBufferInfo& info);
+
 		void Setup(RFrameBuffer& bufferH, const RFrameBufferInfo& info, RDeviceBase* device);
 		void Cleanup(RFrameBuffer& bufferH);
 
@@ -149,7 +151,11 @@ namespace LD {
 
 		CUID<RFrameBufferBase> ID;
 		RDeviceBase* Device = nullptr;
-		RFrameBufferInfo Info;
+		u32 Width = 0;
+		u32 Height = 0;
+		RAttachmentInfo* DepthStencilAttachmentInfo = nullptr;
+		size_t ColorAttachmentCount = 0;
+		Array<RAttachmentInfo, 8> ColorAttachmentInfos;
 		Array<RTexture, 8> ColorAttachments;
 		RTexture DepthStencilAttachment;
 	};

@@ -6,13 +6,6 @@
 
 namespace LD {
 
-	enum class RBufferType
-	{
-		VertexBuffer = 0,
-		IndexBuffer,
-		UniformBuffer,
-	};
-
 	struct RBufferInfo
 	{
 		RBufferType Type;

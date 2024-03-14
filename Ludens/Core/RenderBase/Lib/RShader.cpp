@@ -282,7 +282,7 @@ namespace LD {
         // converts RenderBase canonical GLSL into OpenGL compatible GLSL
         // we first compile Vulkan GLSL to SPIRV, then patch and reflect SPIRV back to OpenGL GLSL
 
-        size_t groupCount = layout.GroupLayoutCount;
+        size_t groupCount = layout.GroupLayouts.Size();
         u32 textureUnitCtr = 0;
         u32 uboBaseCtr = 0;
         std::map<Qualifier, u32> textureUnitRemap;

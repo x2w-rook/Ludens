@@ -2,8 +2,7 @@
 
 #include "Core/Header/Include/Types.h"
 #include "Core/OS/Include/UID.h"
-#include "Core/DSA/Include/Vector.h"
-#include "Core/DSA/Include/Optional.h"
+#include "Core/DSA/Include/View.h"
 #include "Core/RenderBase/Include/RTexture.h"
 #include "Core/RenderBase/Include/RResult.h"
 
@@ -16,10 +15,10 @@ namespace LD {
 
 	struct RFrameBufferInfo
 	{
-		u16 Width = 0;
-		u16 Height = 0;
-		Vector<RAttachmentInfo> ColorAttachmentInfos;
-		Optional<RAttachmentInfo> DepthStencilAttachmentInfo;
+		u32 Width = 0;
+		u32 Height = 0;
+		View<RAttachmentInfo> ColorAttachmentInfos;
+		RAttachmentInfo* DepthStencilAttachmentInfo = nullptr;
 	};
 
 	// frame buffer handle and interface
@@ -30,7 +29,7 @@ namespace LD {
 	public:
 		using TBase = RFrameBufferBase;
 
-		RResult GetInfo(RFrameBufferInfo* info);
+		RResult GetInfo(RFrameBufferInfo& info);
 		RResult GetColorAttachment(int idx, RTexture* colorAttachment);
 		RResult GetDepthStencilAttachment(RTexture* depthStencilAttachment);
 
