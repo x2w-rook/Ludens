@@ -1,5 +1,6 @@
 set(MODULE_SRC
 	"Include/Array.h"
+	"Include/View.h"
 	"Include/Vector.h"
 	"Include/Optional.h")
 
