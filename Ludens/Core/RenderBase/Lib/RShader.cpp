@@ -135,7 +135,10 @@ namespace LD {
 
         bool operator<(const Qualifier& other) const
         {
-            return Group < other.Group || Binding < other.Binding;
+            if (Group != other.Group)
+                return Group < other.Group;
+
+            return Binding < other.Binding;
         }
     };
 
@@ -340,7 +343,8 @@ namespace LD {
                 compiler.unset_decoration(id, spv::DecorationDescriptorSet);
                 compiler.unset_decoration(id, spv::DecorationBinding);
 
-                u32 textureUnit = textureUnitRemap[{group, binding}];
+                LD_DEBUG_ASSERT(textureUnitRemap.find({ group, binding }) != textureUnitRemap.end());
+                u32 textureUnit = textureUnitRemap[{ group, binding }];
                 compiler.set_decoration(id, spv::DecorationBinding, textureUnit);
             }
 
