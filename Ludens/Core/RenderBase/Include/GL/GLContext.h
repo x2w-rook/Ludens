@@ -52,11 +52,14 @@ namespace LD {
 		void BindTexture2DArray(GLTexture2DArray& textureArray);
 		void BindProgram(GLProgram& program);
 		void BindFrameBuffer(GLFrameBuffer& frameBuffer);
+		void UnbindProgram();
 		void UnbindFrameBuffer();
 
 		inline GLuint GetVersion() const { return mVersion; }
 		inline const GLContextLimits& GetLimits() const { return sLimits; }
-		
+		inline GLVertexArray* GetBoundVAO() const { return mBoundVAO; }
+		inline UID GetBoundProgram() const { return mBoundProgram; }
+
 	private:
 		void QueryLimits();
 

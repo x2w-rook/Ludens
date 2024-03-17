@@ -26,6 +26,13 @@ namespace LD {
 
 	void GLVertexArray::Cleanup()
 	{
+		GLVertexArray* boundVAO = mContext->GetBoundVAO();
+
+		if (boundVAO == this)
+		{
+			mContext->BindVAO(nullptr);
+		}
+
 		glDeleteVertexArrays(1, &mVAO);
 
 		mHandle.Reset();

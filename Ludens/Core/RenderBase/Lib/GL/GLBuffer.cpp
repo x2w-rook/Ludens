@@ -109,7 +109,7 @@ namespace LD {
 		glCreateBuffers(1, &mUBO);
 		Bind();
 
-		glBufferData(GL_UNIFORM_BUFFER, mSize, nullptr, info.Usage);
+		glBufferData(GL_UNIFORM_BUFFER, mSize, info.Data, info.Usage);
 	}
 
 	void GLUniformBuffer::Cleanup()

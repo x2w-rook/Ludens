@@ -70,6 +70,7 @@ namespace LD {
 	{
 		GLenum Usage = GL_STATIC_DRAW;
 		u32 Size;
+		const void* Data = nullptr;
 	};
 
 	class GLUniformBuffer

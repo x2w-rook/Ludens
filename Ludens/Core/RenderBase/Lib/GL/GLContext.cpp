@@ -136,7 +136,6 @@ namespace LD {
 			LD_DEBUG_ASSERT([&]() { GLint actual; glGetIntegerv(GL_CURRENT_PROGRAM, &actual); return actual == (GLuint)shader; }());
 			return;
 		}
-
 		glUseProgram((GLuint)shader);
 		mBoundProgram = (UID)shader;
 	}
@@ -153,6 +152,12 @@ namespace LD {
 		// NOTE: currently only binds to GL_FRAMEBUFFER target, so GL_DRAW_FRAMEBUFFER and GL_READ_FRAMEBUFFER should always be the same.
 		glBindFramebuffer(GL_FRAMEBUFFER, (GLuint)frameBuffer);
 		mBoundFrameBuffer = (UID)frameBuffer;
+	}
+
+	void GLContext::UnbindProgram()
+	{
+		glUseProgram(0);
+		mBoundProgram = 0;
 	}
 
 	void GLContext::UnbindFrameBuffer()

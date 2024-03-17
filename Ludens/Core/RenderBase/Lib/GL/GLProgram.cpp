@@ -4,6 +4,7 @@
 #include "Core/RenderBase/Include/GL/GLContext.h"
 #include "Core/Header/Include/Error.h"
 #include "Core/OS/Include/Memory.h"
+#include "Core/OS/Include/Exit.h"
 
 
 namespace LD {
@@ -67,6 +68,7 @@ namespace LD {
 
 			glGetProgramInfoLog(mProgram, sizeof(infoLog), NULL, infoLog);
 			std::cout << "GLProgram linkage error\n" << infoLog << std::endl;
+			Exit(0);
 		});
 
 		if (mVSData)
@@ -79,6 +81,13 @@ namespace LD {
 
 	void GLProgram::Cleanup()
 	{
+		UID boundProgram = mContext->GetBoundProgram();
+
+		if (boundProgram == (UID)mHandle)
+		{
+			mContext->UnbindProgram();
+		}
+
 		glDeleteProgram(mProgram);
 
 		mHandle.Reset();
@@ -121,7 +130,6 @@ namespace LD {
 		const GLint gl_size(byteSize);
 		char infoLog[512];
 		int compileStatus;
-		bool success = true;
 
 		glShaderSource(*shader, 1, &data, &gl_size);
 		glCompileShader(*shader);
@@ -131,10 +139,10 @@ namespace LD {
 			glGetShaderInfoLog(*shader, sizeof(infoLog), NULL, infoLog);
 			std::cout << "GLProgram source compile error at stage " << stage << "\n" << infoLog << std::endl;
 			std::cout << "Full Shader Code:\n" << data << std::endl;
-			success = false;
+			Exit(0);
 		})
 
-		return success;
+		return compileStatus == GL_TRUE;
 	}
 
 	bool GLProgram::CompileShaderBinary(GLuint* shader, GLenum stage, const char* spirv, u32 byteSize)
@@ -143,7 +151,6 @@ namespace LD {
 
 		char infoLog[512];
 		int compileStatus;
-		bool success = true;
 
 		glShaderBinary(1, shader, GL_SHADER_BINARY_FORMAT_SPIR_V_ARB, spirv, byteSize);
 		glSpecializeShaderARB(*shader, "main", 0, nullptr, nullptr);
@@ -152,10 +159,10 @@ namespace LD {
 		LD_DEBUG_CANARY(compileStatus == GL_TRUE, [&](const char*) {
 			glGetShaderInfoLog(*shader, sizeof(infoLog), NULL, infoLog);
 			std::cout << "GLProgram binary compile error at stage " << stage << "\n" << infoLog << std::endl;
-			success = false;
+			Exit(0);
 		})
 
-		return success;
+		return compileStatus == GL_TRUE;
 	}
 
 
