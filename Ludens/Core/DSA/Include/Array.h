@@ -2,6 +2,7 @@
 
 #include <initializer_list>
 #include "Core/Header/Include/Error.h"
+#include "Core/DSA/Include/View.h"
 
 
 namespace LD {
@@ -27,7 +28,7 @@ namespace LD {
 			std::copy(list.begin(), list.end(), mData);
 			return *this;
 		}
-		
+
 		inline T* Data() { return mData; }
 		inline const T* Data() const { return mData; }
 		inline constexpr size_t Size() const { return TSize; }
@@ -42,6 +43,11 @@ namespace LD {
 		inline const T* end() const { return End(); }
 		inline T* begin() { return Begin(); }
 		inline T* end() { return End(); }
+
+		inline View<T> GetView() const
+		{
+			return View<T> { TSize, mData };
+		}
 
 		inline T& operator[](size_t index)
 		{
