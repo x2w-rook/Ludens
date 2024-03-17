@@ -302,7 +302,6 @@ namespace LD {
 
 		for (size_t i = 0; i < bindingCount; i++)
 		{
-			Bindings[i].Name = std::string{ info.BindingNames[i], strlen(info.BindingNames[i]) };
 			Bindings[i].Type = layout.Bindings[i].Type;
 		}
 
