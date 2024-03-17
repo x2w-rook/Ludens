@@ -6,6 +6,7 @@ namespace LD {
 
 	template <typename T> struct TMat4;
 	using Mat4 = TMat4<float>;
+	using IMat4 = TMat4<i32>;
 
 	#define LD_MAT4_SCALAR(OP) \
 		template<typename T> TMat4<T> \
@@ -36,11 +37,26 @@ namespace LD {
 		static const TMat4<T> Identity;
 		static const TMat4<T> Zero;
 
+		static TMat4<T> Translate(const TVec3<T>& offset);
 		static TMat4<T> Rotate(const TVec3<T>& axis, T degrees);
+		static TMat4<T> Scale(const TVec3<T>& axis);
 		static TMat4<T> LookAt(const TVec3<T>& position, const TVec3<T>& direction, const TVec3<T>& worldUp);
 		static TMat4<T> Perspective(T fovRadians, T aspect, T zNear, T zFar);
 		static TMat4<T> Orthographic(T left, T right, T bottom, T top, T near, T far);
 	};
+
+	template <typename T>
+	TMat4<T> TMat4<T>::Translate(const TVec3<T>& offset)
+	{
+		TMat4<T> translation = TMat4<T>::Identity;
+
+		translation[3][0] = offset.x;
+		translation[3][1] = offset.y;
+		translation[3][2] = offset.z;
+
+		return translation;
+	}
+
 
 	template <typename T>
 	TMat4<T> TMat4<T>::Rotate(const TVec3<T>& axis, T degrees)
@@ -64,6 +80,18 @@ namespace LD {
 		rotation[2][2] = c + temp.z * a.z;
 
 		return rotation;
+	}
+
+	template <typename T>
+	TMat4<T> TMat4<T>::Scale(const TVec3<T>& axis)
+	{
+		TMat4<T> scale = TMat4<T>::Identity;
+
+		scale[0][0] = axis.x;
+		scale[1][1] = axis.y;
+		scale[2][2] = axis.z;
+
+		return scale;
 	}
 
 	template <typename T>
@@ -120,18 +148,18 @@ namespace LD {
 
 	template <typename T>
 	const TMat4<T> TMat4<T>::Identity{
-		{ 1.0f, 0.0f, 0.0f, 0.0f },
-		{ 0.0f, 1.0f, 0.0f, 0.0f },
-		{ 0.0f, 0.0f, 1.0f, 0.0f },
-		{ 0.0f, 0.0f, 0.0f, 1.0f }
+		{ (T)1.0f, (T)0.0f, (T)0.0f, (T)0.0f },
+		{ (T)0.0f, (T)1.0f, (T)0.0f, (T)0.0f },
+		{ (T)0.0f, (T)0.0f, (T)1.0f, (T)0.0f },
+		{ (T)0.0f, (T)0.0f, (T)0.0f, (T)1.0f }
 	};
 
 	template <typename T>
 	const TMat4<T> TMat4<T>::Zero{
-		{ 0.0f, 0.0f, 0.0f, 0.0f },
-		{ 0.0f, 0.0f, 0.0f, 0.0f },
-		{ 0.0f, 0.0f, 0.0f, 0.0f },
-		{ 0.0f, 0.0f, 0.0f, 0.0f }
+		{ (T)0.0f, (T)0.0f, (T)0.0f, (T)0.0f },
+		{ (T)0.0f, (T)0.0f, (T)0.0f, (T)0.0f },
+		{ (T)0.0f, (T)0.0f, (T)0.0f, (T)0.0f },
+		{ (T)0.0f, (T)0.0f, (T)0.0f, (T)0.0f }
 	};
 
 	template <typename T>

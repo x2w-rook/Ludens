@@ -84,3 +84,58 @@ TEST_CASE("Mat4 Multiply")
 			}
 	}
 }
+
+TEST_CASE("Mat4 Translation")
+{
+	{
+		IVec4 p1 = { 0, 0, 0, 1 };
+		IMat4 trans = IMat4::Translate({ 0, 0, 0 });
+
+		IVec4 p2 = trans * p1;
+		CHECK(p2.x == 0);
+		CHECK(p2.y == 0);
+		CHECK(p2.z == 0);
+		CHECK(p2.w == 1);
+
+		IVec3 offset{ 3, 4, -5 };
+		trans = IMat4::Translate(offset);
+		p2 = trans * p1;
+		CHECK(p2.x ==  3);
+		CHECK(p2.y ==  4);
+		CHECK(p2.z == -5);
+		CHECK(p2.w == 1);
+
+		trans = IMat4::Translate(offset * -1); // TODO: unary -
+		p2 = trans * p2;
+		CHECK(p2.x == 0);
+		CHECK(p2.y == 0);
+		CHECK(p2.z == 0);
+		CHECK(p2.w == 1);
+	}
+}
+
+TEST_CASE("Mat4 Rotation")
+{
+	// TODO:
+}
+
+TEST_CASE("Mat4 Scale")
+{
+	{
+		IVec4 p1 = { 1, 2, -3, 1 };
+		IMat4 scale = IMat4::Scale({ 3, -2, 1 });
+
+		IVec4 p2 = scale * p1;
+		CHECK(p2.x ==  3);
+		CHECK(p2.y == -4);
+		CHECK(p2.z == -3);
+		CHECK(p2.w ==  1);
+
+		scale = IMat4::Scale({ -1, -1, -1 });
+		p2 = scale * p2;
+		CHECK(p2.x == -3);
+		CHECK(p2.y ==  4);
+		CHECK(p2.z ==  3);
+		CHECK(p2.w == 1);
+	}
+}
