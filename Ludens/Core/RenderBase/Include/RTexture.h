@@ -21,8 +21,8 @@ namespace LD {
 	{
 		RTextureType Type;
 		RTextureFormat Format;
-		u16 Width;
-		u16 Height;
+		u32 Width;
+		u32 Height;
 		const u8* Data;
 	};
 
