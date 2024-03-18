@@ -457,7 +457,7 @@ namespace LD {
 		if (result && mDevice->Stats)
 		{
 			mDevice->Stats->DrawVertexCalls++;
-			mDevice->Stats->TotalVertices += info.VertexCount;
+			mDevice->Stats->TotalVertices += info.VertexCount * info.InstanceCount;
 		}
 
 		mDevice->Callback(result);
@@ -478,7 +478,7 @@ namespace LD {
 		if (result && mDevice->Stats)
 		{
 			mDevice->Stats->DrawIndexedCalls++;
-			mDevice->Stats->TotalVertices += info.IndexCount;
+			mDevice->Stats->TotalVertices += info.IndexCount * info.InstanceCount;
 		}
 
 		mDevice->Callback(result);

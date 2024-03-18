@@ -69,6 +69,9 @@ namespace LD {
 	{
 		u32 DrawVertexCalls;
 		u32 DrawIndexedCalls;
+
+		// Every draw call increments this metric by (Instance Count) * (Vertex / Index Count).
+		// Note that per-instance vertices are *NOT* included.
 		u32 TotalVertices;
 
 		inline u32 DrawCalls() const

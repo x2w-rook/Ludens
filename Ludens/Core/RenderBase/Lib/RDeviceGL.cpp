@@ -329,24 +329,25 @@ namespace LD {
 
 	RResult RDeviceGL::DrawVertex(const RDrawVertexInfo& info)
 	{
-		LD_DEBUG_ASSERT(info.InstanceCount == 1);
 		LD_DEBUG_ASSERT(BoundPipelineH);
+		LD_DEBUG_ASSERT(info.VertexStart == 0);
 
 		RPipelineGL& pipeline = Derive<RPipelineGL>(BoundPipelineH);
 
-		GLCommand::DrawArrays(pipeline.PrimitiveTopology, info.VertexCount, info.VertexStart);
+		GLCommand::DrawArraysInstanced(pipeline.PrimitiveTopology, info.VertexCount, info.InstanceCount, info.InstanceStart);
 
 		return {};
 	}
 
 	RResult RDeviceGL::DrawIndexed(const RDrawIndexedInfo& info)
 	{
-		LD_DEBUG_ASSERT(info.InstanceCount == 1);
 		LD_DEBUG_ASSERT(BoundPipelineH);
+		LD_DEBUG_ASSERT(info.IndexStart == 0);
 
 		RPipelineGL& pipeline = Derive<RPipelineGL>(BoundPipelineH);
+		GLenum indexType = DeriveGLIndexType(info.IndexType);
 
-		GLCommand::DrawElements(pipeline.PrimitiveTopology, info.IndexCount, DeriveGLIndexType(info.IndexType));
+		GLCommand::DrawElementsInstanced(pipeline.PrimitiveTopology, info.IndexCount, indexType, info.InstanceCount, info.InstanceStart);
 
 		return {};
 	}

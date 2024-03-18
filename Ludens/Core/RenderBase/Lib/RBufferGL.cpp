@@ -45,6 +45,7 @@ namespace LD {
 			GLUniformBufferInfo uboInfo{};
 			uboInfo.Usage = GL_STATIC_DRAW;
 			uboInfo.Size = info.Size;
+			uboInfo.Data = info.Data;
 			UBO.Setup(device.Context, uboInfo);
 			break;
 		}

@@ -69,11 +69,11 @@ namespace LD {
 		virtual RResult SetIndexBuffer(RBuffer& buffer) = 0;
 		virtual RResult SetFrameBuffer(RFrameBuffer* frameBuffer) = 0;
 
-
 		virtual RResult DrawVertex(const RDrawVertexInfo& info) = 0;
 		virtual RResult DrawIndexed(const RDrawIndexedInfo& info) = 0;
 
 		CUID<RDeviceBase> ID;
+		RDrawStats* Stats = nullptr;
 		RResultCallback Callback;
 		RPipeline BoundPipelineH;
 	};

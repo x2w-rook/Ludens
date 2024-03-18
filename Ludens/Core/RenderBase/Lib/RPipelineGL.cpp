@@ -65,12 +65,13 @@ namespace LD {
 		VAO.Setup(device.Context);
 		VAO.Bind();
 
-		u32 vertexBufferSlotCount = info.VertexLayout.Slots.Size();
+		const RVertexLayout& vertexLayout = info.VertexLayout;
+		u32 vertexBufferSlotCount = vertexLayout.Slots.Size();
 		VertexStrides.Resize(vertexBufferSlotCount);
 
 		for (size_t slotIdx = 0; slotIdx < vertexBufferSlotCount; slotIdx++)
 		{
-			const RVertexBufferSlot& slot = info.VertexLayout.Slots[slotIdx];
+			const RVertexBufferSlot& slot = vertexLayout.Slots[slotIdx];
 
 			GLVertexLayout layout;
 			DeriveGLVertexLayout(slot, layout);
@@ -78,6 +79,12 @@ namespace LD {
 			const Vector<GLVertexAttribute>& attrs = layout.GetAttributes();
 			const Vector<u32>& offsets = layout.GetOffsets();
 			
+			if (slot.PollRate == RAttributePollRate::PerInstance)
+			{
+				// this vertex buffer slot contains per-instance attributes
+				glVertexBindingDivisor(slotIdx, 1);
+			}
+
 			for (size_t attrIdx = 0; attrIdx < attrs.Size(); attrIdx++)
 			{
 				const GLVertexAttribute& attr = attrs[attrIdx];
