@@ -105,7 +105,7 @@ TEST_CASE("Mat4 Translation")
 		CHECK(p2.z == -5);
 		CHECK(p2.w == 1);
 
-		trans = IMat4::Translate(offset * -1); // TODO: unary -
+		trans = IMat4::Translate(-offset);
 		p2 = trans * p2;
 		CHECK(p2.x == 0);
 		CHECK(p2.y == 0);

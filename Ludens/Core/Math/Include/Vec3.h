@@ -35,6 +35,16 @@ namespace LD {
 	LD_VEC3_ARITH(*);
 	LD_VEC3_ARITH(/);
 
+	#define LD_VEC3_UNARY(OP) \
+		template <typename T> \
+		inline TVec3<T> operator OP(const TVec3<T>& self) \
+		{ \
+			return TVec3<T>(OP self.x, OP self.y, OP self.z); \
+		}
+
+	LD_VEC3_UNARY(+);
+	LD_VEC3_UNARY(-);
+
 	template <typename T>
 	struct TVec3
 	{
