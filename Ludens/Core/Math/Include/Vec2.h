@@ -77,7 +77,7 @@ namespace LD {
 		}
 
 		#define LD_VEC2_SWIZZLE(RET_VEC, SWIZZLE, ...) \
-			RET_VEC<T> inline TVec2<T>::SWIZZLE() const \
+			inline RET_VEC<T> SWIZZLE() const \
 			{ \
 				return RET_VEC<T>(__VA_ARGS__); \
 			}

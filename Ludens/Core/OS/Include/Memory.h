@@ -30,6 +30,17 @@ namespace LD {
 	}
 	
 	template <typename T>
+	void MemoryPlacementFree(T* mem)
+	{
+		MemoryPlacementData* header = ((MemoryPlacementData*)mem) - 1;
+
+		for (size_t i = 0; i < header->Count; i++)
+			(mem + i)->~T();
+
+		MemoryFree((void*)header);
+	}
+
+	template <typename T>
 	T* MemoryPlacementRealloc(T* oldMem, size_t count)
 	{
 		if (oldMem == nullptr)
@@ -47,17 +58,6 @@ namespace LD {
 		MemoryPlacementFree<T>(oldMem);
 
 		return newMem;
-	}
-
-	template <typename T>
-	void MemoryPlacementFree(T* mem)
-	{
-		MemoryPlacementData* header = ((MemoryPlacementData*)mem) - 1;
-
-		for (size_t i = 0; i < header->Count; i++)
-			(mem + i)->~T();
-
-		MemoryFree((void*)header);
 	}
 
 	///

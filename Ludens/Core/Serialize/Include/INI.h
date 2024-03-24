@@ -25,8 +25,11 @@ namespace LD {
 	{
 	public:
 		INIParser() = delete;
+		INIParser(const INIParser&) = delete;
 		INIParser(const INIParserConfig& config) : mConfig(config) {}
 		~INIParser() {}
+
+		INIParser& operator=(const INIParser&) = delete;
 
 		void Config(const INIParserConfig& config);
 		void ParseString(const char* src, const INIParserCallback* callbacks);

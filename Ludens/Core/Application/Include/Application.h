@@ -52,7 +52,7 @@ namespace LD {
 		void Cleanup();
 
 		inline std::string GetName() const { return mConfig.Window.Name; }
-		void* GetWindowHandle();
+		void* GetWindowHandle() const;
 		void GetWindowSize(u32* width, u32* height) const;
 		void SetWindowCursorNormal();
 		void SetWindowCursorGrabbed();

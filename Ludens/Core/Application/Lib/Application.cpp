@@ -49,7 +49,7 @@ namespace LD {
 		sInstance = nullptr;
 	}
 
-	void* Application::GetWindowHandle()
+	void* Application::GetWindowHandle() const
 	{
 		return static_cast<void*>(mWindow->GetHandle());
 	}

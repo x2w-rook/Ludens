@@ -93,6 +93,10 @@ namespace LD {
 		mContext->BindIBO(*this);
 	}
 
+	GLUniformBuffer::GLUniformBuffer()
+	{
+	}
+
 	GLUniformBuffer::~GLUniformBuffer()
 	{
 		LD_DEBUG_ASSERT(mHandle == 0);
