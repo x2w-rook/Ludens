@@ -108,6 +108,11 @@ namespace LD {
 
 		inline void Clear() { mSize = 0; }
 
+		inline T&       Front()       { LD_DEBUG_ASSERT(mSize > 0); return mData[0]; }
+		inline const T& Front() const { LD_DEBUG_ASSERT(mSize > 0); return mData[0]; }
+		inline T&       Back()        { LD_DEBUG_ASSERT(mSize > 0); return mData[mSize - 1]; }
+		inline const T& Back() const  { LD_DEBUG_ASSERT(mSize > 0); return mData[mSize - 1]; }
+
 		inline const T* Begin() const { return mData; }
 		inline const T* End() const { return mData + mSize; }
 		inline T* Begin() { return mData; }

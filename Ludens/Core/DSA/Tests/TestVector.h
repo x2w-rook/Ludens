@@ -19,6 +19,12 @@ TEST_CASE("Vector ctor")
 		CHECK(v.Size() == 5);
 		CHECK(v.ByteSize() == 5);
 		CHECK(!v.IsEmpty());
+
+		v.Front() = 1;
+		v.Back() = 5;
+
+		CHECK(v.Front() == 1);
+		CHECK(v.Back() == 5);
 	}
 }
 
@@ -31,6 +37,8 @@ TEST_CASE("Vector Mutate")
 
 		CHECK(v.Size() == 10);
 		CHECK(v.ByteSize() == sizeof(int) * 10);
+		CHECK(v.Front() == 0);
+		CHECK(v.Back() == 9);
 
 		for (int i = 0; i < v.Size(); i++)
 		{
@@ -50,6 +58,8 @@ TEST_CASE("Vector Copy")
 		CHECK(v2.Size() == 5);
 		CHECK(v2[1] == 2);
 		CHECK(v2[4] == 5);
+		CHECK(v2.Front() == 1);
+		CHECK(v2.Back() == 5);
 
 		for (int i = 0; i < v2.Size(); i++)
 		{
@@ -67,6 +77,7 @@ TEST_CASE("Vector Copy")
 		v2.PushBack(7);
 		v2.PushBack(8);
 
+		CHECK(v2.Back() == 8);
 		CHECK(v2.Size() == 8);
 		CHECK(v1.Size() == 4);
 
