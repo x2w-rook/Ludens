@@ -123,4 +123,50 @@ namespace LD {
 		ChunkStack mFreeChunks;
 	};
 
+
+	class StackAllocator : public Allocator<StackAllocator>
+	{
+	public:
+
+		void Setup(size_t total)
+		{
+			mTotal = total;
+			mUsed = 0;
+			mBase = MemoryAlloc(mTotal);
+		}
+
+		void Cleanup()
+		{
+			MemoryFree(mBase);
+			mBase = nullptr;
+			mTotal = 0;
+			mUsed = 0;
+		}
+
+		void* Alloc(size_t size)
+		{
+			LD_DEBUG_ASSERT(size != 0);
+
+			if (mUsed + size > mTotal)
+				return nullptr;
+
+			void* mem = (void*)((char*)mBase + mUsed);
+			mUsed += size;
+			return mem;
+		}
+
+		void Free(void* mem)
+		{
+			LD_DEBUG_ASSERT(mem == mBase);
+
+			mUsed = 0;
+		}
+
+	private:
+
+		void* mBase = nullptr;
+		size_t mTotal = 0;
+		size_t mUsed = 0;
+	};
+
 } // namespace LD

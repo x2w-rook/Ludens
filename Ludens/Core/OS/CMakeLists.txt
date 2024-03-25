@@ -12,6 +12,7 @@ set(MODULE_LIB
 
 set(TEST_SRC
 	"Tests/TestPoolAllocator.h"
+	"Tests/TestStackAllocator.h"
 	"Tests/TestMemory.h"
 	"Tests/TestUID.h"
 	"Tests/OSTests.cpp")
