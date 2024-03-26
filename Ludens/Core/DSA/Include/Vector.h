@@ -3,6 +3,7 @@
 #include <initializer_list>
 #include "Core/Header/Include/Error.h"
 #include "Core/Math/Include/Bits.h"
+#include "Core/DSA/Include/View.h"
 #include "Core/OS/Include/Memory.h"
 #include "Core/OS/Include/Allocator.h"
 
@@ -123,6 +124,11 @@ namespace LD {
 		inline const T* end() const { return End(); }
 		inline T* begin() { return Begin(); }
 		inline T* end() { return End(); }
+
+		inline View<T> GetView()
+		{
+			return View<T> { mSize, mData };
+		}
 
 		inline T& operator[](size_t index)
 		{
