@@ -4,7 +4,8 @@ set(MODULE_SRC
 	"Include/Vec2.h"
 	"Include/Vec3.h"
 	"Include/Vec4.h"
-	"Include/Mat4.h")
+	"Include/Mat4.h"
+	"Include/Rect2D.h")
 
 set(TEST_SRC
 	"Tests/TestBits.h"
