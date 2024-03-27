@@ -14,6 +14,9 @@ LD_STATIC_ASSERT(sizeof(LD::u16) == 2);
 LD_STATIC_ASSERT(sizeof(LD::u32) == 4);
 LD_STATIC_ASSERT(sizeof(LD::u64) == 8);
 
+LD_STATIC_ASSERT(sizeof(LD::f32) == 4);
+LD_STATIC_ASSERT(sizeof(LD::f64) == 8);
+
 static int sCounter;
 static const char* sMessage;
 

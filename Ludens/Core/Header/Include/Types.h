@@ -14,4 +14,7 @@ namespace LD {
 	using i32 = int32_t;
 	using i64 = int64_t;
 
+	using f32 = float;
+	using f64 = double;
+
 } // namespace LD
