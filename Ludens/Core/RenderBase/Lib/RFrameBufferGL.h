@@ -16,10 +16,10 @@ namespace LD {
 
 		RFrameBufferGL& operator=(const RFrameBufferGL&) = delete;
 
-		void Setup(RFrameBuffer& frameBufferH, const RFrameBufferInfo& info, RDeviceGL& device);
+		void Startup(RFrameBuffer& frameBufferH, const RFrameBufferInfo& info, RDeviceGL& device);
 		void Cleanup(RFrameBuffer& frameBufferH);
 
-		void SetupGLAttachments();
+		void StartupGLAttachments();
 		void CleanupGLAttachments();
 
 		virtual RResult Invalidate(const RFrameBufferInfo& info) override;

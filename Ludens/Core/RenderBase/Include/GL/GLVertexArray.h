@@ -17,7 +17,7 @@ namespace LD {
 
 		GLVertexArray& operator=(const GLVertexArray&) = delete;
 
-		void Setup(GLContext& context);
+		void Startup(GLContext& context);
 		void Cleanup();
 
 		void Bind();

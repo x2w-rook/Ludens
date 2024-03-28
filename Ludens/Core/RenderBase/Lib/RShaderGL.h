@@ -22,7 +22,7 @@ namespace LD {
 		inline bool operator==(const RShaderGL& other) const { return ID == other.ID; }
 		inline bool operator!=(const RShaderGL& other) const { return ID != other.ID; }
 
-		void Setup(RShader& shaderH, const RShaderInfo& spec, RDeviceGL& device);
+		void Startup(RShader& shaderH, const RShaderInfo& spec, RDeviceGL& device);
 		void Cleanup(RShader& shaderH);
 
 		std::string Source;

@@ -39,7 +39,7 @@ namespace LD {
 
 		RDeviceBase& operator=(const RDeviceBase&) = delete;
 
-		void Setup(RDevice& deviceH, const RDeviceInfo& info);
+		void Startup(RDevice& deviceH, const RDeviceInfo& info);
 		void Cleanup(RDevice& deviceH);
 
 		virtual RResult CreateTexture(RTexture& texture, const RTextureInfo& info) = 0;
@@ -86,7 +86,7 @@ namespace LD {
 
 		RTextureBase& operator=(const RTextureBase&) = delete;
 
-		void Setup(RTexture& textureH, const RTextureInfo& info, RDeviceBase* device);
+		void Startup(RTexture& textureH, const RTextureInfo& info, RDeviceBase* device);
 		void Cleanup(RTexture& textureH);
 
 		CUID<RTextureBase> ID;
@@ -101,7 +101,7 @@ namespace LD {
 
 		RBufferBase& operator=(const RBufferBase&) = delete;
 
-		void Setup(RBuffer& bufferH, const RBufferInfo& info, RDeviceBase* device);
+		void Startup(RBuffer& bufferH, const RBufferInfo& info, RDeviceBase* device);
 		void Cleanup(RBuffer& bufferH);
 
 		virtual RResult SetData(u32 offset, u32 size, const void* data) = 0;
@@ -119,7 +119,7 @@ namespace LD {
 
 		RShaderBase& operator=(const RShaderBase&) = delete;
 
-		void Setup(RShader& shaderH, const RShaderInfo& info, RDeviceBase* device);
+		void Startup(RShader& shaderH, const RShaderInfo& info, RDeviceBase* device);
 		void Cleanup(RShader& shaderH);
 
 		CUID<RShaderBase> ID;
@@ -138,10 +138,10 @@ namespace LD {
 
 		void ReadInfo(const RFrameBufferInfo& info);
 
-		void Setup(RFrameBuffer& bufferH, const RFrameBufferInfo& info, RDeviceBase* device);
+		void Startup(RFrameBuffer& bufferH, const RFrameBufferInfo& info, RDeviceBase* device);
 		void Cleanup(RFrameBuffer& bufferH);
 
-		void SetupAttachments();
+		void StartupAttachments();
 		void CleanupAttachments();
 
 		virtual RResult Invalidate(const RFrameBufferInfo& info) = 0;
@@ -168,7 +168,7 @@ namespace LD {
 
 		RBindingGroupLayoutBase& operator=(const RBindingGroupLayoutBase&) = delete;
 
-		void Setup(RBindingGroupLayout& layoutH, const RBindingGroupLayoutInfo& info, RDeviceBase* device);
+		void Startup(RBindingGroupLayout& layoutH, const RBindingGroupLayoutInfo& info, RDeviceBase* device);
 		void Cleanup(RBindingGroupLayout& layoutH);
 
 		inline size_t GetBindingCount() const
@@ -201,7 +201,7 @@ namespace LD {
 
 		RBindingGroupBase& operator=(const RBindingGroupBase&) = delete;
 
-		void Setup(RBindingGroup& groupH, const RBindingGroupInfo& info, RDeviceBase* device);
+		void Startup(RBindingGroup& groupH, const RBindingGroupInfo& info, RDeviceBase* device);
 		void Cleanup(RBindingGroup& groupH);
 
 		virtual RResult BindTexture(u32 binding, RTexture& textureH) = 0;
@@ -233,7 +233,7 @@ namespace LD {
 
 		RPipelineBase& operator=(const RPipelineBase&) = delete;
 
-		void Setup(RPipeline& pipelineH, const RPipelineInfo& info, RDeviceBase* device);
+		void Startup(RPipeline& pipelineH, const RPipelineInfo& info, RDeviceBase* device);
 		void Cleanup(RPipeline& pipelineH);
 
 		CUID<RPipelineBase> ID;

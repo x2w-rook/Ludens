@@ -18,7 +18,7 @@ namespace LD {
 
 		RTextureGL& operator=(const RTextureGL&) = delete;
 
-		void Setup(RTexture& textureH, const RTextureInfo& info, RDeviceGL& device);
+		void Startup(RTexture& textureH, const RTextureInfo& info, RDeviceGL& device);
 		void Cleanup(RTexture& textureH);
 		void Bind(int unit);
 

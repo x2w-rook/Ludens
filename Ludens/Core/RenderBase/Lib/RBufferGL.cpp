@@ -14,9 +14,9 @@ namespace LD {
 		LD_DEBUG_ASSERT(Device == nullptr);
 	}
 
-	void RBufferGL::Setup(RBuffer& handle, const RBufferInfo& info, RDeviceGL& device)
+	void RBufferGL::Startup(RBuffer& handle, const RBufferInfo& info, RDeviceGL& device)
 	{
-		RBufferBase::Setup(handle, info, &device);
+		RBufferBase::Startup(handle, info, &device);
 
 		Target = DeriveGLTarget(info.Type);
 
@@ -28,7 +28,7 @@ namespace LD {
 			vboInfo.Usage = GL_STATIC_DRAW;
 			vboInfo.Data = info.Data;
 			vboInfo.Size = info.Size;
-			VBO.Setup(device.Context, vboInfo);
+			VBO.Startup(device.Context, vboInfo);
 			break;
 		}
 		case GL_ELEMENT_ARRAY_BUFFER:
@@ -37,7 +37,7 @@ namespace LD {
 			iboInfo.Usage = GL_STATIC_DRAW;
 			iboInfo.Data = info.Data;
 			iboInfo.Size = info.Size;
-			IBO.Setup(device.Context, iboInfo);
+			IBO.Startup(device.Context, iboInfo);
 			break;
 		}
 		case GL_UNIFORM_BUFFER:
@@ -46,7 +46,7 @@ namespace LD {
 			uboInfo.Usage = GL_STATIC_DRAW;
 			uboInfo.Size = info.Size;
 			uboInfo.Data = info.Data;
-			UBO.Setup(device.Context, uboInfo);
+			UBO.Startup(device.Context, uboInfo);
 			break;
 		}
 		default:

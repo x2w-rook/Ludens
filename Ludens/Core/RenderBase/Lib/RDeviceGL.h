@@ -26,7 +26,7 @@ namespace LD {
 		static RResult CreateRenderDevice(RDevice& deviceH, const RDeviceInfo& info);
 		static RResult DeleteRenderDevice(RDevice& deviceH);
 
-		virtual void Setup(RDevice& deviceH, const RDeviceInfo& info);
+		virtual void Startup(RDevice& deviceH, const RDeviceInfo& info);
 		virtual void Cleanup(RDevice& deviceH);
 
 		virtual RResult CreateTexture(RTexture& texture, const RTextureInfo& info) override;

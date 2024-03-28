@@ -5,7 +5,7 @@
 
 namespace LD {
 
-	void ApplicationWindow::Setup(const ApplicationWindowConfig& config)
+	void ApplicationWindow::Startup(const ApplicationWindowConfig& config)
 	{
 		mName = config.Name;
 		mWidth = config.Width;
@@ -31,14 +31,14 @@ namespace LD {
 		glfwMakeContextCurrent(mHandle);
 		glfwSwapInterval(config.EnableVsync ? 1 : 0);
 
-		SetupCallbacks();
+		InstallCallbacks();
 
-		mHasSetup = true;
+		mHasStartup = true;
 	}
 
 	void ApplicationWindow::Cleanup()
 	{
-		mHasSetup = false;
+		mHasStartup = false;
 
 		glfwDestroyWindow(mHandle);
 		glfwTerminate();
@@ -46,14 +46,14 @@ namespace LD {
 
 	double ApplicationWindow::GetTime()
 	{
-		LD_DEBUG_ASSERT(mHasSetup);
+		LD_DEBUG_ASSERT(mHasStartup);
 
 		return glfwGetTime();
 	}
 
 	void ApplicationWindow::GetCursorPosition(float& screenX, float& screenY)
 	{
-		LD_DEBUG_ASSERT(mHasSetup);
+		LD_DEBUG_ASSERT(mHasStartup);
 
 		double x, y;
 		glfwGetCursorPos(mHandle, &x, &y);
@@ -63,21 +63,21 @@ namespace LD {
 
 	void* ApplicationWindow::GetHandle()
 	{
-		LD_DEBUG_ASSERT(mHasSetup && mHandle != nullptr);
+		LD_DEBUG_ASSERT(mHasStartup && mHandle != nullptr);
 
 		return (void*)mHandle;
 	}
 
 	void ApplicationWindow::PollEvents()
 	{
-		LD_DEBUG_ASSERT(mHasSetup);
+		LD_DEBUG_ASSERT(mHasStartup);
 
 		glfwPollEvents();
 	}
 
 	void ApplicationWindow::SwapBuffers()
 	{
-		LD_DEBUG_ASSERT(mHasSetup);
+		LD_DEBUG_ASSERT(mHasStartup);
 
 		// TODO: this is a graphics context operation, related to the image swap chain.
 		//       currently we have GLFW manage our OpenGL context.
@@ -86,7 +86,7 @@ namespace LD {
 
 	bool ApplicationWindow::IsAlive()
 	{
-		LD_DEBUG_ASSERT(mHasSetup);
+		LD_DEBUG_ASSERT(mHasStartup);
 
 		return !glfwWindowShouldClose(mHandle);
 	}
@@ -106,7 +106,7 @@ namespace LD {
 		glfwSetInputMode(mHandle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	}
 
-	void ApplicationWindow::SetupCallbacks()
+	void ApplicationWindow::InstallCallbacks()
 	{
 		glfwSetWindowSizeCallback(mHandle, [](GLFWwindow* window, int width, int height) {
 			ApplicationWindow* appWindow = (ApplicationWindow*)glfwGetWindowUserPointer(window);

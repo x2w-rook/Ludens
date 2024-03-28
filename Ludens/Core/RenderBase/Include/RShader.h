@@ -41,8 +41,8 @@ namespace LD {
 	// shader handle and interface
 	class RShader
 	{
-		friend class RShaderBase;
-		friend class RShaderGL;
+		friend struct RShaderBase;
+		friend struct RShaderGL;
 	public:
 		using TBase = RShaderBase;
 
@@ -102,7 +102,7 @@ namespace LD {
 
 		RShaderCache& operator=(const RShaderCache&) = delete;
 
-		void Setup(const RShaderCacheInfo& info);
+		void Startup(const RShaderCacheInfo& info);
 		void Cleanup();
 
 		RResult GetOrCreateShader(const RPipelineLayout& layout, RShaderType type, const std::string& glsl, std::string name, RShader& shader);
@@ -118,7 +118,7 @@ namespace LD {
 		std::unordered_map<std::string, CacheInfo> mCacheInfo;
 		RDevice mDevice;
 		Path mCacheDirectory;
-		bool mHasSetup = false;
+		bool mHasStartup = false;
 	};
 
 } // namespace LD

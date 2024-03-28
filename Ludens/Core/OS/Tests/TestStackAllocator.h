@@ -11,7 +11,7 @@ TEST_CASE("StackAllocator")
 
 	char* base;
 	
-	sa.Setup(32);
+	sa.Startup(32);
 	
 	{
 		// alloc full stack at once

@@ -14,7 +14,7 @@ TEST_CASE("PoolAllocator")
 	std::set<u8*> offsets;
 	PoolAllocator<sizeof(Vec2)> pa;
 
-	pa.Setup(numChunks);
+	pa.Startup(numChunks);
 	{
 		for (int i = 0; i < numChunks; i++)
 		{

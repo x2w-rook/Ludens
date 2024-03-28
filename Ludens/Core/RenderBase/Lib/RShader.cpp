@@ -359,21 +359,21 @@ namespace LD {
 
     RShaderCache::~RShaderCache()
     {
-        LD_DEBUG_ASSERT(!mHasSetup && "RShaders not destroyed yet");
+        LD_DEBUG_ASSERT(!mHasStartup && "RShaders not destroyed yet");
     }
 
-    void RShaderCache::Setup(const RShaderCacheInfo& info)
+    void RShaderCache::Startup(const RShaderCacheInfo& info)
     {
         LD_DEBUG_ASSERT((bool)info.Device && "invalid device");
 
         mDevice = info.Device;
         mCacheDirectory = info.CacheDirectory;
-        mHasSetup = true;
+        mHasStartup = true;
     }
 
     void RShaderCache::Cleanup()
     {
-        mHasSetup = false;
+        mHasStartup = false;
 
         for (auto& kv : mCacheInfo)
         {

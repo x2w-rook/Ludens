@@ -17,10 +17,10 @@ namespace LD {
 
 		ApplicationWindow& operator=(const ApplicationWindow&) = delete;
 
-		void Setup(const ApplicationWindowConfig& config);
+		void Startup(const ApplicationWindowConfig& config);
 		void Cleanup();
 
-		// elapsed time in seconds since window Setup
+		// elapsed time in seconds since window Startup
 		double GetTime();
 
 		// mouse cursor position in screen space
@@ -40,13 +40,13 @@ namespace LD {
 		void SetCursorGrabbed();
 
 	private:
-		void SetupCallbacks();
+		void InstallCallbacks();
 
 		std::string mName;
 		u32 mWidth = 0;
 		u32 mHeight = 0;
 		GLFWwindow* mHandle = nullptr;
-		bool mHasSetup = false;
+		bool mHasStartup = false;
 	};
 
 }; // namespace LD

@@ -14,7 +14,7 @@ namespace LD {
 		LD_DEBUG_ASSERT(mHandle == 0);
 	}
 
-	void GLTexture2D::Setup(GLContext& context, const GLTexture2DInfo& info)
+	void GLTexture2D::Startup(GLContext& context, const GLTexture2DInfo& info)
 	{
 		mHandle = CUID<GLTexture2D>::Get();
 		mContext = &context;
@@ -59,7 +59,7 @@ namespace LD {
 		LD_DEBUG_ASSERT(mHandle == 0);
 	}
 
-	void GLTexture2DArray::Setup(GLContext& context, const GLTexture2DArrayInfo& info)
+	void GLTexture2DArray::Startup(GLContext& context, const GLTexture2DArrayInfo& info)
 	{
 		mHandle = CUID<GLTexture2DArray>::Get();
 		mContext = &context;

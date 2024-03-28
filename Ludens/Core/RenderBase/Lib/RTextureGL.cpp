@@ -16,9 +16,9 @@ namespace LD {
 		LD_DEBUG_ASSERT(ID == 0);
 	}
 
-	void RTextureGL::Setup(RTexture& textureH, const RTextureInfo& info, RDeviceGL& device)
+	void RTextureGL::Startup(RTexture& textureH, const RTextureInfo& info, RDeviceGL& device)
 	{
-		RTextureBase::Setup(textureH, info, &device);
+		RTextureBase::Startup(textureH, info, &device);
 
 		LD_DEBUG_ASSERT(info.Type == RTextureType::Texture2D);
 
@@ -31,7 +31,7 @@ namespace LD {
 			glInfo.Height = info.Height;
 			glInfo.Data = info.Data;
 			DeriveGLTextureFormat(info.Format, &glInfo.InternalFormat, &glInfo.DataFormat, &glInfo.DataType);
-			Texture2D.Setup(device.Context, glInfo);
+			Texture2D.Startup(device.Context, glInfo);
 		}
 		else
 			LD_DEBUG_UNREACHABLE;

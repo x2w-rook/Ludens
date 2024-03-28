@@ -37,7 +37,7 @@ namespace LD {
 	class PoolAllocator : public Allocator<PoolAllocator<TChunkSize>>
 	{
 	public:
-		void Setup(int maxChunks)
+		void Startup(int maxChunks)
 		{
 			mMaxChunks = maxChunks;
 			mStart = MemoryAlloc(TChunkSize * mMaxChunks);
@@ -128,7 +128,7 @@ namespace LD {
 	{
 	public:
 
-		void Setup(size_t total)
+		void Startup(size_t total)
 		{
 			mTotal = total;
 			mUsed = 0;

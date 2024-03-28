@@ -48,7 +48,7 @@ namespace LD {
 		static bool EventHandler(const Event& event);
 		static Application& Get();
 
-		void Setup(const ApplicationConfig& config);
+		void Startup(const ApplicationConfig& config);
 		void Cleanup();
 
 		inline std::string GetName() const { return mConfig.Window.Name; }
@@ -65,7 +65,7 @@ namespace LD {
 		void OnInputNewFrame();
 
 		static Application* sInstance;
-		bool mHasSetup = false;
+		bool mHasStartup = false;
 		bool mIsRunning = false;
 		bool mIsMinimized = false;
 		ApplicationConfig mConfig;

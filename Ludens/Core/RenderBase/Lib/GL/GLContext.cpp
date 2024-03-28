@@ -24,7 +24,7 @@ namespace LD {
 	{
 	}
 
-	void GLContext::Setup()
+	void GLContext::Startup()
 	{
 		// lazy initialization in first GLContext setup
 		if (!sHasGladInit)

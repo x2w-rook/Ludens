@@ -25,7 +25,7 @@ namespace LD {
 
 		GLVertexBuffer& operator=(const GLVertexBuffer&) = delete;
 
-		void Setup(GLContext& context, const GLVertexBufferInfo& info);
+		void Startup(GLContext& context, const GLVertexBufferInfo& info);
 		void Cleanup();
 		void Bind();
 		void SetData(u32 offset, u32 size, const void* data);
@@ -52,7 +52,7 @@ namespace LD {
 
 		GLIndexBuffer& operator=(const GLIndexBuffer&) = delete;
 
-		void Setup(GLContext& context, const GLIndexBufferInfo& spec);
+		void Startup(GLContext& context, const GLIndexBufferInfo& spec);
 		void Cleanup();
 		void Bind();
 		
@@ -82,7 +82,7 @@ namespace LD {
 
 		GLUniformBuffer& operator=(const GLUniformBuffer&) = delete;
 
-		void Setup(GLContext& context, const GLUniformBufferInfo& info);
+		void Startup(GLContext& context, const GLUniformBufferInfo& info);
 		void Cleanup();
 		void Bind();
 		void BindBase(int binding);

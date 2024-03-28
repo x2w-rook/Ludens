@@ -11,6 +11,8 @@ namespace LD {
 	struct RBindingInfo;
 	struct RBindingGroupInfo;
 	struct RBindingGroupLayoutInfo;
+	struct RBindingGroupBase;
+	struct RBindingGroupLayoutBase;
 	class RBindingGroupLayout;
 	class RBindingGroup;
 	class RTexture;
@@ -25,8 +27,8 @@ namespace LD {
 	// Describes a group of bindings that have similiar access frequencies in the shader.
 	class RBindingGroup
 	{
-		friend class RBindingGroupBase;
-		friend class RBindingGroupGL;
+		friend struct RBindingGroupBase;
+		friend struct RBindingGroupGL;
 	public:
 		using TBase = RBindingGroupBase;
 

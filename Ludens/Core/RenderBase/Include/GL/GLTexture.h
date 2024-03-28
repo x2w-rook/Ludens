@@ -27,7 +27,7 @@ namespace LD {
 
 		GLTexture2D& operator=(const GLTexture2D&) = delete;
 
-		void Setup(GLContext& context, const GLTexture2DInfo& info);
+		void Startup(GLContext& context, const GLTexture2DInfo& info);
 		void Cleanup();
 		void Bind(int unit);
 
@@ -61,7 +61,7 @@ namespace LD {
 
 		GLTexture2DArray& operator=(const GLTexture2DArray&) = delete;
 
-		void Setup(GLContext& context, const GLTexture2DArrayInfo& info);
+		void Startup(GLContext& context, const GLTexture2DArrayInfo& info);
 		void Cleanup();
 		void Bind(int unit);
 

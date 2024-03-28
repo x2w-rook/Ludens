@@ -15,9 +15,9 @@ namespace LD {
 		LD_DEBUG_ASSERT(ID == 0);
 	}
 
-	void RBindingGroupLayoutGL::Setup(RBindingGroupLayout& layoutH, const RBindingGroupLayoutInfo& info, RDeviceGL& device)
+	void RBindingGroupLayoutGL::Startup(RBindingGroupLayout& layoutH, const RBindingGroupLayoutInfo& info, RDeviceGL& device)
 	{
-		RBindingGroupLayoutBase::Setup(layoutH, info, &device);
+		RBindingGroupLayoutBase::Startup(layoutH, info, &device);
 	}
 
 	void RBindingGroupLayoutGL::Cleanup(RBindingGroupLayout& layoutH)
@@ -34,9 +34,9 @@ namespace LD {
 		LD_DEBUG_ASSERT(ID == 0);
 	}
 
-	void RBindingGroupGL::Setup(RBindingGroup& groupH, const RBindingGroupInfo& info, RDeviceGL& device)
+	void RBindingGroupGL::Startup(RBindingGroup& groupH, const RBindingGroupInfo& info, RDeviceGL& device)
 	{
-		RBindingGroupBase::Setup(groupH, info, &device);
+		RBindingGroupBase::Startup(groupH, info, &device);
 
 		groupH.mBackend = RBackend::OpenGL;
 	}

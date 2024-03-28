@@ -14,9 +14,9 @@ namespace LD {
 		LD_DEBUG_ASSERT(ID == 0);
 	}
 
-	void RPipelineGL::Setup(RPipeline& pipelineH, const RPipelineInfo& info, RDeviceGL& device)
+	void RPipelineGL::Startup(RPipeline& pipelineH, const RPipelineInfo& info, RDeviceGL& device)
 	{
-		RPipelineBase::Setup(pipelineH, info, &device);
+		RPipelineBase::Startup(pipelineH, info, &device);
 
 		PrimitiveTopology = DeriveGLPrimitiveTopology(info.PrimitiveTopology);
 
@@ -59,10 +59,10 @@ namespace LD {
 		programInfo.VertexShaderSize = vertexShader.Source.size();
 		programInfo.FragmentShaderData = fragmentShader.Source.data();
 		programInfo.FragmentShaderSize = fragmentShader.Source.size();
-		Program.Setup(device.Context, programInfo);
+		Program.Startup(device.Context, programInfo);
 
 		// One VAO per pipeline is used to capture how vertex attributes are polled from one or more vertex buffers.
-		VAO.Setup(device.Context);
+		VAO.Startup(device.Context);
 		VAO.Bind();
 
 		const RVertexLayout& vertexLayout = info.VertexLayout;

@@ -24,7 +24,7 @@ namespace LD {
 		inline bool operator==(const RPipelineGL& other) const { return ID == other.ID; }
 		inline bool operator!=(const RPipelineGL& other) const { return ID != other.ID; }
 
-		void Setup(RPipeline& handle, const RPipelineInfo& spec, RDeviceGL& device);
+		void Startup(RPipeline& handle, const RPipelineInfo& spec, RDeviceGL& device);
 		void Cleanup(RPipeline& handle);
 
 		GLVertexArray VAO;

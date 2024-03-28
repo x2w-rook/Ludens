@@ -23,7 +23,7 @@ namespace LD {
 		sInstance = nullptr;
 	}
 
-	void Application::Setup(const ApplicationConfig& config)
+	void Application::Startup(const ApplicationConfig& config)
 	{
 		LD_DEBUG_ASSERT(sInstance == this);
 		LD_DEBUG_ASSERT(config.Layer != nullptr);
@@ -31,16 +31,16 @@ namespace LD {
 		mConfig = config;
 
 		mWindow = MakeOwn<ApplicationWindow>();
-		mWindow->Setup(mConfig.Window);
+		mWindow->Startup(mConfig.Window);
 		mLayer = config.Layer;
 		mLayer->OnAttach(*this);
 
-		mHasSetup = true;
+		mHasStartup = true;
 	}
 
 	void Application::Cleanup()
 	{
-		mHasSetup = false;
+		mHasStartup = false;
 
 		mLayer->OnDetach(*this);
 		mWindow->Cleanup();
@@ -119,7 +119,7 @@ namespace LD {
 
 	void Application::Run()
 	{
-		LD_DEBUG_ASSERT(mHasSetup);
+		LD_DEBUG_ASSERT(mHasStartup);
 
 		// NOTE: currently uses the platform's window system timer
 		//       which may or may not be the OS clock

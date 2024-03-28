@@ -12,7 +12,7 @@ namespace LD {
 		LD_DEBUG_ASSERT(mHandle == 0);
 	}
 
-	void GLFrameBuffer::Setup(GLContext& context, const GLFrameBufferInfo& info)
+	void GLFrameBuffer::Startup(GLContext& context, const GLFrameBufferInfo& info)
 	{
 		mContext = &context;
 		mHandle = CUID<GLFrameBuffer>::Get();

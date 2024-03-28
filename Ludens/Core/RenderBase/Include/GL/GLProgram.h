@@ -33,7 +33,7 @@ namespace LD {
 		GLProgram& operator=(const GLProgram&) = delete;
 		GLProgram& operator=(GLProgram&&) = default;
 
-		void Setup(GLContext& context, const GLProgramInfo& info);
+		void Startup(GLContext& context, const GLProgramInfo& info);
 		void Cleanup();
 
 		void Bind();

@@ -14,7 +14,7 @@ namespace LD {
 		LD_DEBUG_ASSERT(mHandle == 0);
 	}
 
-	void GLVertexBuffer::Setup(GLContext& context, const GLVertexBufferInfo& info)
+	void GLVertexBuffer::Startup(GLContext& context, const GLVertexBufferInfo& info)
 	{
 		mHandle = CUID<GLVertexBuffer>::Get();
 		mContext = &context;
@@ -61,7 +61,7 @@ namespace LD {
 		glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
 	}
 
-	void GLIndexBuffer::Setup(GLContext& context, const GLIndexBufferInfo& info)
+	void GLIndexBuffer::Startup(GLContext& context, const GLIndexBufferInfo& info)
 	{
 		mHandle = CUID<GLIndexBuffer>::Get();
 		mContext = &context;
@@ -102,7 +102,7 @@ namespace LD {
 		LD_DEBUG_ASSERT(mHandle == 0);
 	}
 
-	void GLUniformBuffer::Setup(GLContext& context, const GLUniformBufferInfo& info)
+	void GLUniformBuffer::Startup(GLContext& context, const GLUniformBufferInfo& info)
 	{
 		mHandle = CUID<GLUniformBuffer>::Get();
 		mContext = &context;

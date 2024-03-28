@@ -37,7 +37,7 @@ namespace LD {
 
 		GLFrameBuffer& operator=(const GLFrameBuffer&) = delete;
 
-		void Setup(GLContext& context, const GLFrameBufferInfo& info);
+		void Startup(GLContext& context, const GLFrameBufferInfo& info);
 		void Cleanup();
 		void Bind();
 

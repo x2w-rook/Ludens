@@ -16,7 +16,7 @@ namespace LD {
 		LD_DEBUG_ASSERT(mContext == nullptr);
 	}
 
-	void GLVertexArray::Setup(GLContext& context)
+	void GLVertexArray::Startup(GLContext& context)
 	{
 		mHandle = CUID<GLVertexArray>::Get();
 		mContext = &context;

@@ -32,20 +32,20 @@ namespace LD {
 		LD_DEBUG_ASSERT(ID == 0);
 	}
 
-	void RDeviceGL::Setup(RDevice& handle, const RDeviceInfo& info)
+	void RDeviceGL::Startup(RDevice& handle, const RDeviceInfo& info)
 	{
-		RDeviceBase::Setup(handle, info);
+		RDeviceBase::Startup(handle, info);
 		handle.mBackend = RBackend::OpenGL;
 
-		Context.Setup();
+		Context.Startup();
 
-		TextureAllocator.Setup(MAX_TEXTURE_COUNT);
-		BufferAllocator.Setup(MAX_BUFFER_COUNT);
-		ShaderAllocator.Setup(MAX_SHADER_COUNT);
-		FrameBufferAllocator.Setup(MAX_FRAME_BUFFER_COUNT);
-		BindingGroupLayoutAllocator.Setup(MAX_BINDING_GROUP_LAYOUT_COUNT);
-		BindingGroupAllocator.Setup(MAX_BINDING_GROUP_COUNT);
-		PipelineAllocator.Setup(MAX_PIPELINE_COUNT);
+		TextureAllocator.Startup(MAX_TEXTURE_COUNT);
+		BufferAllocator.Startup(MAX_BUFFER_COUNT);
+		ShaderAllocator.Startup(MAX_SHADER_COUNT);
+		FrameBufferAllocator.Startup(MAX_FRAME_BUFFER_COUNT);
+		BindingGroupLayoutAllocator.Startup(MAX_BINDING_GROUP_LAYOUT_COUNT);
+		BindingGroupAllocator.Startup(MAX_BINDING_GROUP_COUNT);
+		PipelineAllocator.Startup(MAX_PIPELINE_COUNT);
 	}
 
 	void RDeviceGL::Cleanup(RDevice& handle)
@@ -68,7 +68,7 @@ namespace LD {
 		LD_DEBUG_ASSERT((UID)sDevice.ID == 0 && "multi device is not yet implemented");
 		LD_DEBUG_ASSERT(info.Backend == RBackend::OpenGL);
 		
-		sDevice.Setup(deviceH, info);
+		sDevice.Startup(deviceH, info);
 
 		return {};
 	}
@@ -86,7 +86,7 @@ namespace LD {
 	{
 		RTextureGL* texture = (RTextureGL*)TextureAllocator.Alloc(sizeof(RTextureGL));
 		new (texture) RTextureGL{};
-		texture->Setup(textureH, info, *this);
+		texture->Startup(textureH, info, *this);
 
 		return {};
 	}
@@ -106,7 +106,7 @@ namespace LD {
 	{
 		RBufferGL* buffer = (RBufferGL*)BufferAllocator.Alloc(sizeof(RBufferGL));
 		new (buffer) RBufferGL{};
-		buffer->Setup(bufferH, info, *this);
+		buffer->Startup(bufferH, info, *this);
 
 		return {};
 	}
@@ -126,7 +126,7 @@ namespace LD {
 	{
 		RShaderGL* shader = (RShaderGL*)ShaderAllocator.Alloc(sizeof(RShaderGL));
 		new (shader) RShaderGL{};
-		shader->Setup(shaderH, info, *this);
+		shader->Startup(shaderH, info, *this);
 
 		return {};
 	}
@@ -146,7 +146,7 @@ namespace LD {
 	{
 		RFrameBufferGL* frameBuffer = (RFrameBufferGL*)FrameBufferAllocator.Alloc(sizeof(RFrameBufferGL));
 		new (frameBuffer) RFrameBufferGL{};
-		frameBuffer->Setup(frameBufferH, info, *this);
+		frameBuffer->Startup(frameBufferH, info, *this);
 
 		return {};
 	}
@@ -166,7 +166,7 @@ namespace LD {
 	{
 		RBindingGroupLayoutGL* layout = (RBindingGroupLayoutGL*)BindingGroupLayoutAllocator.Alloc(sizeof(RBindingGroupLayoutGL));
 		new (layout) RBindingGroupLayoutGL{};
-		layout->Setup(layoutH, info, *this);
+		layout->Startup(layoutH, info, *this);
 
 		return {};
 	}
@@ -186,7 +186,7 @@ namespace LD {
 	{
 		RBindingGroupGL* group = (RBindingGroupGL*)BindingGroupAllocator.Alloc(sizeof(RBindingGroupGL));
 		new (group) RBindingGroupGL{};
-		group->Setup(groupH, info, *this);
+		group->Startup(groupH, info, *this);
 
 		return {};
 	}
@@ -206,7 +206,7 @@ namespace LD {
 	{
 		RPipelineGL* pipeline = (RPipelineGL*)PipelineAllocator.Alloc(sizeof(RPipelineGL));
 		new (pipeline) RPipelineGL{};
-		pipeline->Setup(pipelineH, info, *this);
+		pipeline->Startup(pipelineH, info, *this);
 
 		return {};
 	}

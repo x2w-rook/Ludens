@@ -19,7 +19,7 @@ namespace LD {
 		LD_DEBUG_ASSERT(mHandle == 0);
 	}
 
-	void GLProgram::Setup(GLContext& context, const GLProgramInfo& info)
+	void GLProgram::Startup(GLContext& context, const GLProgramInfo& info)
 	{
 		mHandle = CUID<GLProgram>::Get();
 		mContext = &context;

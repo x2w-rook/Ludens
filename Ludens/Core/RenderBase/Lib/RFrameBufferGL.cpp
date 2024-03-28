@@ -18,11 +18,11 @@ namespace LD {
 	{
 	}
 
-	void RFrameBufferGL::Setup(RFrameBuffer& frameBufferH, const RFrameBufferInfo& info, RDeviceGL& device)
+	void RFrameBufferGL::Startup(RFrameBuffer& frameBufferH, const RFrameBufferInfo& info, RDeviceGL& device)
 	{
-		RFrameBufferBase::Setup(frameBufferH, info, (RDeviceBase*)&device);
+		RFrameBufferBase::Startup(frameBufferH, info, (RDeviceBase*)&device);
 
-		SetupGLAttachments();
+		StartupGLAttachments();
 	}
 
 	void RFrameBufferGL::Cleanup(RFrameBuffer& frameBufferH)
@@ -32,7 +32,7 @@ namespace LD {
 		CleanupGLAttachments();
 	}
 
-	void RFrameBufferGL::SetupGLAttachments()
+	void RFrameBufferGL::StartupGLAttachments()
 	{
 		RDeviceGL* deviceGL = dynamic_cast<RDeviceGL*>(Device);
 
@@ -56,7 +56,7 @@ namespace LD {
 		glInfo.ColorAttachmentCount = glColorAttachments.Size();
 		glInfo.ColorAttachments = glColorAttachments.Data();
 		glInfo.DepthStencilAttachment = glDepthStencilAttachment;
-		FBO.Setup(deviceGL->Context, glInfo);
+		FBO.Startup(deviceGL->Context, glInfo);
 	}
 
 	void RFrameBufferGL::CleanupGLAttachments()
@@ -66,7 +66,7 @@ namespace LD {
 
 	RResult RFrameBufferGL::Invalidate(const RFrameBufferInfo& info)
 	{
-		// NOTE: Calling Cleanup and Setup with the new info is feasible, but doing so will regenerate a UID for RFrameBuffer handle.
+		// NOTE: Calling Cleanup and Startup with the new info is feasible, but doing so will regenerate a UID for RFrameBuffer handle.
 		//       Here we are trying to preserve the original UID of the RFrameBuffer handle, only the OpenGL objects are recreated.
 
 		CleanupAttachments();
@@ -74,8 +74,8 @@ namespace LD {
 
 		ReadInfo(info);
 
-		SetupAttachments();
-		SetupGLAttachments();
+		StartupAttachments();
+		StartupGLAttachments();
 
 		return {};
 	}

@@ -14,7 +14,7 @@ namespace LD {
 
 		RBindingGroupLayoutGL& operator=(const RBindingGroupLayoutGL&) = delete;
 
-		void Setup(RBindingGroupLayout& layoutH, const RBindingGroupLayoutInfo& info, RDeviceGL& device);
+		void Startup(RBindingGroupLayout& layoutH, const RBindingGroupLayoutInfo& info, RDeviceGL& device);
 		void Cleanup(RBindingGroupLayout& layoutH);
 
 		CUID<RBindingGroupLayoutGL> ID;
@@ -28,7 +28,7 @@ namespace LD {
 
 		RBindingGroupGL& operator=(const RBindingGroupGL&) = delete;
 
-		void Setup(RBindingGroup& groupH, const RBindingGroupInfo& info, RDeviceGL& device);
+		void Startup(RBindingGroup& groupH, const RBindingGroupInfo& info, RDeviceGL& device);
 		void Cleanup(RBindingGroup& groupH);
 
 		virtual RResult BindTexture(u32 binding, RTexture& textureH) override;

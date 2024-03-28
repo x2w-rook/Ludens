@@ -13,7 +13,7 @@ namespace LD {
 		LD_DEBUG_ASSERT(ID == 0);
 	}
 
-	void RDeviceBase::Setup(RDevice& deviceH, const RDeviceInfo& info)
+	void RDeviceBase::Startup(RDevice& deviceH, const RDeviceInfo& info)
 	{
 		ID = CUID<RDeviceBase>::Get();
 		Callback = info.Callback ? info.Callback : [](const RResult&) {};
@@ -41,7 +41,7 @@ namespace LD {
 		LD_DEBUG_ASSERT(ID == 0);
 	}
 
-	void RTextureBase::Setup(RTexture& textureH, const RTextureInfo& info, RDeviceBase* device)
+	void RTextureBase::Startup(RTexture& textureH, const RTextureInfo& info, RDeviceBase* device)
 	{
 		ID = CUID<RTextureBase>::Get();
 		Device = device;
@@ -70,7 +70,7 @@ namespace LD {
 		LD_DEBUG_ASSERT(ID == 0);
 	}
 
-	void RBufferBase::Setup(RBuffer& bufferH, const RBufferInfo& info, RDeviceBase* device)
+	void RBufferBase::Startup(RBuffer& bufferH, const RBufferInfo& info, RDeviceBase* device)
 	{
 		ID = CUID<RBufferBase>::Get();
 		Device = device;
@@ -100,7 +100,7 @@ namespace LD {
 		LD_DEBUG_ASSERT(ID == 0);
 	}
 
-	void RShaderBase::Setup(RShader& shaderH, const RShaderInfo& info, RDeviceBase* device)
+	void RShaderBase::Startup(RShader& shaderH, const RShaderInfo& info, RDeviceBase* device)
 	{
 		ID = CUID<RShaderBase>::Get();
 		Device = device;
@@ -146,7 +146,7 @@ namespace LD {
 		DepthStencilAttachmentInfo = info.DepthStencilAttachmentInfo;
 	}
 
-	void RFrameBufferBase::Setup(RFrameBuffer& frameBufferH, const RFrameBufferInfo& info, RDeviceBase* device)
+	void RFrameBufferBase::Startup(RFrameBuffer& frameBufferH, const RFrameBufferInfo& info, RDeviceBase* device)
 	{
 		ID = CUID<RFrameBufferBase>::Get();
 
@@ -154,7 +154,7 @@ namespace LD {
 		ReadInfo(info);
 
 		LD_DEBUG_ASSERT(Width > 0 && Height > 0);
-		SetupAttachments();
+		StartupAttachments();
 
 		// connect
 		frameBufferH.mID = ID;
@@ -173,7 +173,7 @@ namespace LD {
 		frameBufferH.mFrameBuffer = nullptr;
 	}
 
-	void RFrameBufferBase::SetupAttachments()
+	void RFrameBufferBase::StartupAttachments()
 	{
 		LD_DEBUG_ASSERT(ColorAttachmentCount < ColorAttachments.Size());
 
@@ -252,7 +252,7 @@ namespace LD {
 		LD_DEBUG_ASSERT(ID == 0);
 	}
 
-	void RBindingGroupLayoutBase::Setup(RBindingGroupLayout& layoutH, const RBindingGroupLayoutInfo& info, RDeviceBase* device)
+	void RBindingGroupLayoutBase::Startup(RBindingGroupLayout& layoutH, const RBindingGroupLayoutInfo& info, RDeviceBase* device)
 	{
 		ID = CUID<RBindingGroupLayoutBase>::Get();
 		Device = device;
@@ -289,7 +289,7 @@ namespace LD {
 		LD_DEBUG_ASSERT(ID == 0);
 	}
 
-	void RBindingGroupBase::Setup(RBindingGroup& groupH, const RBindingGroupInfo& info, RDeviceBase* device)
+	void RBindingGroupBase::Startup(RBindingGroup& groupH, const RBindingGroupInfo& info, RDeviceBase* device)
 	{
 		ID = CUID<RBindingGroupBase>::Get();
 		Device = device;
@@ -329,7 +329,7 @@ namespace LD {
 		LD_DEBUG_ASSERT(ID == 0);
 	}
 
-	void RPipelineBase::Setup(RPipeline& pipelineH, const RPipelineInfo& info, RDeviceBase* device)
+	void RPipelineBase::Startup(RPipeline& pipelineH, const RPipelineInfo& info, RDeviceBase* device)
 	{
 		ID = CUID<RPipelineBase>::Get();
 		Device = device;

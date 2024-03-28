@@ -20,7 +20,7 @@ namespace LD {
 
 		RBufferGL& operator=(const RBufferGL&) = delete;
 
-		void Setup(RBuffer& handle, const RBufferInfo& spec, RDeviceGL& device);
+		void Startup(RBuffer& handle, const RBufferInfo& spec, RDeviceGL& device);
 		void Cleanup(RBuffer& handle);
 		void Bind();
 		virtual RResult SetData(u32 offset, u32 size, const void* data) override;

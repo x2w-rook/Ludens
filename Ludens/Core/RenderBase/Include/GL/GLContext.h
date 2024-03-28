@@ -40,7 +40,7 @@ namespace LD {
 
 		GLContext& operator=(const GLContext&) = delete;
 
-		void Setup();
+		void Startup();
 		void Cleanup();
 
 		void BindVAO(GLVertexArray* vao);
