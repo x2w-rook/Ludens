@@ -96,8 +96,16 @@ namespace LD {
 	{
 		RResult result;
 
+		size_t expectDataSize = GetTextureFormatPixelSize(info.Format) * info.Width * info.Height;
+
 		if (texture)
 			result.Type = RResultType::InvalidHandle;
+		else if (info.Data != nullptr && info.Size != expectDataSize)
+		{
+			result.Type = RResultType::TextureSizeMismatch;
+			result.TextureSizeMismatch.Expect = expectDataSize;
+			result.TextureSizeMismatch.Actual = info.Size;
+		}
 		else
 			result = mDevice->CreateTexture(texture, info);
 

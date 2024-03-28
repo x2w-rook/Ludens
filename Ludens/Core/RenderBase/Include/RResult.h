@@ -21,6 +21,7 @@ namespace LD {
 		InvalidHandle,
 		InvalidIndex,
 		ResourceMissing,
+		TextureSizeMismatch,
 		BufferTypeMismatch,
 		ShaderTypeMismatch,
 		BindingGroupMismatch,
@@ -44,6 +45,12 @@ namespace LD {
 		RResourceType MissingType;
 	};
 
+	struct RTextureSizeMismatch
+	{
+		size_t Expect;
+		size_t Actual;
+	};
+
 	struct RBufferTypeMismatch
 	{
 		RBufferType Expect;
@@ -65,6 +72,7 @@ namespace LD {
 		union
 		{
 			RResourceMissing ResourceMissing;
+			RTextureSizeMismatch TextureSizeMismatch;
 			RBufferTypeMismatch BufferTypeMismatch;
 			RShaderTypeMismatch ShaderTypeMismatch;
 		};

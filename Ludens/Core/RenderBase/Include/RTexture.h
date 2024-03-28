@@ -13,6 +13,8 @@ namespace LD {
 		EnumCount
 	};
 
+	size_t GetTextureFormatPixelSize(RTextureFormat format);
+
 	enum class RTextureType
 	{
 		Texture2D = 0,
@@ -24,7 +26,8 @@ namespace LD {
 		RTextureFormat Format;
 		u32 Width;
 		u32 Height;
-		const u8* Data;
+		const void* Data;   // pixel data
+		size_t Size = 0;    // pixel data byte size
 	};
 
 	class RTexture
