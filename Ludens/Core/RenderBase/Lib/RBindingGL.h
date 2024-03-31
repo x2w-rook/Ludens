@@ -6,6 +6,8 @@
 
 namespace LD {
 
+	struct RDeviceGL;
+
 	struct RBindingGroupLayoutGL : RBindingGroupLayoutBase
 	{
 		RBindingGroupLayoutGL();
@@ -16,8 +18,6 @@ namespace LD {
 
 		void Startup(RBindingGroupLayout& layoutH, const RBindingGroupLayoutInfo& info, RDeviceGL& device);
 		void Cleanup(RBindingGroupLayout& layoutH);
-
-		CUID<RBindingGroupLayoutGL> ID;
 	};
 
 	struct RBindingGroupGL : RBindingGroupBase

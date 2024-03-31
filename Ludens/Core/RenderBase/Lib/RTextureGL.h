@@ -8,7 +8,7 @@
 
 namespace LD {
 
-	class RDeviceGL;
+	struct RDeviceGL;
 
 	struct RTextureGL : RTextureBase
 	{

@@ -9,8 +9,7 @@
 
 namespace LD {
 
-	class RDeviceGL;
-	class RPipeline;
+	struct RDeviceGL;
 
 	struct RBufferGL : RBufferBase
 	{
