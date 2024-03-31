@@ -23,6 +23,8 @@ namespace LD {
 		TRect2D() = default;
 		TRect2D(T x, T y, T w, T h)
 			: x(x), y(y), w(w), h(h) {}
+		TRect2D(const TVec2<T>& min, const TVec2<T>& max)
+			: x(min.x), y(min.y), w(max.x - min.x), h(max.y - min.y) {}
 		TRect2D(const TVec2<T>& pos, T w, T h)
 			: x(pos.x), y(pos.y), w(w), h(h) {}
 
