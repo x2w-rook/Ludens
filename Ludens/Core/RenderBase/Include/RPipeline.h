@@ -5,6 +5,7 @@
 #include "Core/OS/Include/UID.h"
 #include "Core/DSA/Include/View.h"
 #include "Core/RenderBase/Include/RShader.h"
+#include "Core/RenderBase/Include/RPass.h"
 
 namespace LD {
 
@@ -55,6 +56,7 @@ namespace LD {
 		RVertexLayout VertexLayout;
 		RShader VertexShader;
 		RShader FragmentShader;
+		RPass RenderPass;
 	};
 
 	// graphics pipeline handle and interface
