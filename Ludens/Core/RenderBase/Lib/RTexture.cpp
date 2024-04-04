@@ -10,6 +10,7 @@ namespace LD {
 
 	static TextureFormatData sTextureFormatData[] {
 		{ 1 }, // R8
+		{ 4 }, // BGRA8
 		{ 4 }, // RGBA8
 		{ 8 }, // RGBA16F
 		{ 4 }, // D24S8

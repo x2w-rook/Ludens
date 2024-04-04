@@ -7,6 +7,7 @@ namespace LD {
 	enum class RTextureFormat
 	{
 		R8 = 0,
+		BGRA8,
 		RGBA8,
 		RGBA16F,
 		D24S8,

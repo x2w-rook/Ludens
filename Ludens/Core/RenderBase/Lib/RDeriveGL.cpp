@@ -14,6 +14,7 @@ namespace LD {
 
     static const GLTextureFormat sGLTextureFormats[] = {
         { GL_R8,                GL_RED,            GL_UNSIGNED_BYTE },     // R8
+        { GL_RGBA8,             GL_BGRA,           GL_UNSIGNED_BYTE },     // BGRA8
         { GL_RGBA8,             GL_RGBA,           GL_UNSIGNED_BYTE },     // RGBA8
         { GL_RGBA16F,           GL_RGBA,           GL_HALF_FLOAT },        // RGBA16F
         { GL_DEPTH24_STENCIL8,  GL_DEPTH_STENCIL,  GL_UNSIGNED_INT_24_8 }, // D24S8
