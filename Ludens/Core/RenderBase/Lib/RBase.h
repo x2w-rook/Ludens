@@ -5,10 +5,20 @@
 #include "Core/RenderBase/Include/RTexture.h"
 #include "Core/RenderBase/Include/RBuffer.h"
 #include "Core/RenderBase/Include/RShader.h"
+#include "Core/RenderBase/Include/RBinding.h"
+#include "Core/RenderBase/Include/RPass.h"
 #include "Core/RenderBase/Include/RFrameBuffer.h"
 #include "Core/RenderBase/Include/RPipeline.h"
-#include "Core/RenderBase/Include/RBinding.h"
 
+// TODO: randomly hard coded values here, consolidate with graphihcs API backend to determine actual limit
+#define MAX_TEXTURE_COUNT                1024
+#define MAX_BUFFER_COUNT                 1024
+#define MAX_SHADER_COUNT                 1024
+#define MAX_BINDING_GROUP_LAYOUT_COUNT   512
+#define MAX_BINDING_GROUP_COUNT          512
+#define MAX_RENDER_PASS_COUNT            256
+#define MAX_FRAME_BUFFER_COUNT           256
+#define MAX_PIPELINE_COUNT               512
 
 namespace LD {
 
@@ -51,23 +61,34 @@ namespace LD {
 		virtual RResult CreateShader(RShader& shader, const RShaderInfo& info) = 0;
 		virtual RResult DeleteShader(RShader& shader) = 0;
 
-		virtual RResult CreateFrameBuffer(RFrameBuffer& frameBufferH, const RFrameBufferInfo& info) = 0;
-		virtual RResult DeleteFrameBuffer(RFrameBuffer& frameBufferH) = 0;
-
 		virtual RResult CreateBindingGroupLayout(RBindingGroupLayout& layout, const RBindingGroupLayoutInfo& info) = 0;
 		virtual RResult DeleteBindingGroupLayout(RBindingGroupLayout& layout) = 0;
 
 		virtual RResult CreateBindingGroup(RBindingGroup& group, const RBindingGroupInfo& info) = 0;
 		virtual RResult DeleteBindingGroup(RBindingGroup& group) = 0;
 
+		virtual RResult CreateRenderPass(RPass& passH, const RPassInfo& info) = 0;
+		virtual RResult DeleteRenderPass(RPass& passH) = 0;
+
+		virtual RResult CreateFrameBuffer(RFrameBuffer& frameBufferH, const RFrameBufferInfo& info) = 0;
+		virtual RResult DeleteFrameBuffer(RFrameBuffer& frameBufferH) = 0;
+
 		virtual RResult CreatePipeline(RPipeline& pipeline, const RPipelineInfo& info) = 0;
 		virtual RResult DeletePipeline(RPipeline& pipeline) = 0;
+
+		virtual RResult GetSwapChainTextureFormat(RTextureFormat& format) = 0;
+		virtual RResult GetSwapChainRenderPass(RPass& renderPass) = 0;
+		virtual RResult GetSwapChainFrameBuffer(RFrameBuffer& frameBuffer) = 0;
+
+		virtual RResult BeginFrame() = 0;
+		virtual RResult EndFrame() = 0;
+		virtual RResult BeginRenderPass(const RPassBeginInfo& info) = 0;
+		virtual RResult EndRenderPass() = 0;
 
 		virtual RResult SetPipeline(RPipeline& pipeline) = 0;
 		virtual RResult SetBindingGroup(u32 slot, RBindingGroup& group) = 0;
 		virtual RResult SetVertexBuffer(u32 slot, RBuffer& buffer) = 0;
-		virtual RResult SetIndexBuffer(RBuffer& buffer) = 0;
-		virtual RResult SetFrameBuffer(RFrameBuffer* frameBuffer) = 0;
+		virtual RResult SetIndexBuffer(RBuffer& buffer, RIndexType indexType) = 0;
 
 		virtual RResult DrawVertex(const RDrawVertexInfo& info) = 0;
 		virtual RResult DrawIndexed(const RDrawIndexedInfo& info) = 0;
@@ -86,6 +107,7 @@ namespace LD {
 
 		RTextureBase& operator=(const RTextureBase&) = delete;
 
+		void Startup(RTexture& textureH, RDeviceBase* device);
 		void Startup(RTexture& textureH, const RTextureInfo& info, RDeviceBase* device);
 		void Cleanup(RTexture& textureH);
 
@@ -126,38 +148,6 @@ namespace LD {
 		RDeviceBase* Device = nullptr;
 		RShaderSourceType SourceType;
 		RShaderType Type;
-	};
-
-	struct RFrameBufferBase
-	{
-		RFrameBufferBase() = default;
-		RFrameBufferBase(const RFrameBufferBase&) = delete;
-		virtual ~RFrameBufferBase();
-
-		RFrameBufferBase& operator=(const RFrameBufferBase&) = delete;
-
-		void ReadInfo(const RFrameBufferInfo& info);
-
-		void Startup(RFrameBuffer& bufferH, const RFrameBufferInfo& info, RDeviceBase* device);
-		void Cleanup(RFrameBuffer& bufferH);
-
-		void StartupAttachments();
-		void CleanupAttachments();
-
-		virtual RResult Invalidate(const RFrameBufferInfo& info) = 0;
-
-		RResult GetColorAttachment(int idx, RTexture* colorAttachment);
-		RResult GetDepthStencilAttachment(RTexture* depthStencilAttachment);
-
-		CUID<RFrameBufferBase> ID;
-		RDeviceBase* Device = nullptr;
-		u32 Width = 0;
-		u32 Height = 0;
-		RAttachmentInfo* DepthStencilAttachmentInfo = nullptr;
-		size_t ColorAttachmentCount = 0;
-		Array<RAttachmentInfo, 8> ColorAttachmentInfos;
-		Array<RTexture, 8> ColorAttachments;
-		RTexture DepthStencilAttachment;
 	};
 
 	struct RBindingGroupLayoutBase
@@ -223,6 +213,47 @@ namespace LD {
 		RDeviceBase* Device = nullptr;
 		Vector<Binding> Bindings;
 		RBindingGroupLayout GroupLayoutH;
+	};
+
+	struct RPassBase
+	{
+		RPassBase() = default;
+		RPassBase(const RPassBase&) = delete;
+		virtual ~RPassBase();
+
+		RPassBase& operator=(const RPassBase&) = delete;
+
+		void Startup(RPass& passH, const RPassInfo& info, RDeviceBase* device);
+		void Cleanup(RPass& passH);
+
+		CUID<RPassBase> ID;
+		RDeviceBase* Device = nullptr;
+	};
+
+	struct RFrameBufferBase
+	{
+		RFrameBufferBase() = default;
+		RFrameBufferBase(const RFrameBufferBase&) = delete;
+		virtual ~RFrameBufferBase();
+
+		RFrameBufferBase& operator=(const RFrameBufferBase&) = delete;
+
+		void ReadInfo(const RFrameBufferInfo& info);
+
+		void Startup(RFrameBuffer& bufferH, const RFrameBufferInfo& info, RDeviceBase* device);
+		void Cleanup(RFrameBuffer& bufferH);
+
+		virtual RResult Invalidate(const RFrameBufferInfo& info) = 0;
+
+		RResult GetColorAttachment(int idx, RTexture* colorAttachment);
+		RResult GetDepthStencilAttachment(RTexture* depthStencilAttachment);
+
+		CUID<RFrameBufferBase> ID;
+		RDeviceBase* Device = nullptr;
+		u32 Width = 0;
+		u32 Height = 0;
+		Optional<RTexture> DepthStencilAttachment;
+		Vector<RTexture> ColorAttachments;
 	};
 
 	struct RPipelineBase

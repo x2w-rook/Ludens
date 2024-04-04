@@ -41,7 +41,7 @@ namespace LD {
 		LD_DEBUG_ASSERT(ID == 0);
 	}
 
-	void RTextureBase::Startup(RTexture& textureH, const RTextureInfo& info, RDeviceBase* device)
+	void RTextureBase::Startup(RTexture& textureH, RDeviceBase* device)
 	{
 		ID = CUID<RTextureBase>::Get();
 		Device = device;
@@ -49,6 +49,13 @@ namespace LD {
 		// connect
 		textureH.mID = ID;
 		textureH.mTexture = this;
+	}
+
+	void RTextureBase::Startup(RTexture& textureH, const RTextureInfo& info, RDeviceBase* device)
+	{
+		(void)info;
+
+		Startup(textureH, device);
 	}
 
 	void RTextureBase::Cleanup(RTexture& textureH)
@@ -120,127 +127,6 @@ namespace LD {
 		// disconnect
 		shaderH.mID = 0;
 		shaderH.mShader = nullptr;
-	}
-
-	///
-	/// Frame Buffer Base
-	///
-	
-	RFrameBufferBase::~RFrameBufferBase()
-	{
-		LD_DEBUG_ASSERT(ID == 0);
-	}
-
-	void RFrameBufferBase::ReadInfo(const RFrameBufferInfo& info)
-	{
-		Width = info.Width;
-		Height = info.Height;
-
-		ColorAttachmentCount = info.ColorAttachmentInfos.Size();
-
-		for (size_t i = 0; i < ColorAttachmentCount; i++)
-		{
-			ColorAttachmentInfos[i] = info.ColorAttachmentInfos[i];
-		}
-
-		DepthStencilAttachmentInfo = info.DepthStencilAttachmentInfo;
-	}
-
-	void RFrameBufferBase::Startup(RFrameBuffer& frameBufferH, const RFrameBufferInfo& info, RDeviceBase* device)
-	{
-		ID = CUID<RFrameBufferBase>::Get();
-
-		Device = device;
-		ReadInfo(info);
-
-		LD_DEBUG_ASSERT(Width > 0 && Height > 0);
-		StartupAttachments();
-
-		// connect
-		frameBufferH.mID = ID;
-		frameBufferH.mFrameBuffer = this;
-	}
-
-	void RFrameBufferBase::Cleanup(RFrameBuffer& frameBufferH)
-	{
-		CleanupAttachments();
-
-		ID.Reset();
-		Device = nullptr;
-
-		// disconnect
-		frameBufferH.mID = 0;
-		frameBufferH.mFrameBuffer = nullptr;
-	}
-
-	void RFrameBufferBase::StartupAttachments()
-	{
-		LD_DEBUG_ASSERT(ColorAttachmentCount < ColorAttachments.Size());
-
-		for (size_t i = 0; i < ColorAttachmentCount; i++)
-		{
-			const RAttachmentInfo& attachmentInfo = ColorAttachmentInfos[i];
-
-			RTextureInfo textureInfo{};
-			textureInfo.Data = nullptr;
-			textureInfo.Type = RTextureType::Texture2D;
-			textureInfo.Format = attachmentInfo.Format;
-			textureInfo.Width = Width;
-			textureInfo.Height = Height;
-			Device->CreateTexture(ColorAttachments[i], textureInfo);
-		}
-
-		if (DepthStencilAttachmentInfo)
-		{
-			RAttachmentInfo& attachmentInfo = *DepthStencilAttachmentInfo;
-			LD_DEBUG_ASSERT(attachmentInfo.Format == RTextureFormat::D24S8);
-
-			RTextureInfo textureInfo{};
-			textureInfo.Data = nullptr;
-			textureInfo.Type = RTextureType::Texture2D;
-			textureInfo.Format = attachmentInfo.Format;
-			textureInfo.Width = Width;
-			textureInfo.Height = Height;
-			Device->CreateTexture(DepthStencilAttachment, textureInfo);
-		}
-	}
-
-	void RFrameBufferBase::CleanupAttachments()
-	{
-		if (DepthStencilAttachmentInfo)
-		{
-			Device->DeleteTexture(DepthStencilAttachment);
-		}
-
-		for (size_t i = 0; i < ColorAttachmentCount; i++)
-		{
-			Device->DeleteTexture(ColorAttachments[i]);
-		}
-	}
-
-	RResult RFrameBufferBase::GetColorAttachment(int idx, RTexture* colorAttachment)
-	{
-		RResult result{};
-
-		if (idx < 0 || idx >= ColorAttachmentCount)
-		{
-			result.Type = RResultType::InvalidIndex;
-			return result;
-		}
-
-		*colorAttachment = ColorAttachments[idx];
-
-		return result;
-	}
-
-	RResult RFrameBufferBase::GetDepthStencilAttachment(RTexture* depthStencilAttachment)
-	{
-		// TODO: RResult error code
-		LD_DEBUG_ASSERT(DepthStencilAttachmentInfo);
-
-		*depthStencilAttachment = DepthStencilAttachment;
-
-		return {};
 	}
 
 	///
@@ -318,6 +204,108 @@ namespace LD {
 		// disconnect
 		groupH.mID = 0;
 		groupH.mGroup = nullptr;
+	}
+
+	///
+	/// Render Pass Base
+	///
+
+	RPassBase::~RPassBase()
+	{
+		LD_DEBUG_ASSERT(ID == 0);
+	}
+
+	void RPassBase::Startup(RPass& passH, const RPassInfo& info, RDeviceBase* device)
+	{
+		ID = CUID<RPassBase>::Get();
+		Device = device;
+
+		// connect
+		passH.mID = ID;
+		passH.mPass = this;
+	}
+
+	void RPassBase::Cleanup(RPass& passH)
+	{
+		ID.Reset();
+		Device = nullptr;
+
+		// disconnect
+		passH.mID = 0;
+		passH.mPass = nullptr;
+	}
+
+	///
+	/// Frame Buffer Base
+	///
+	
+	RFrameBufferBase::~RFrameBufferBase()
+	{
+		LD_DEBUG_ASSERT(ID == 0);
+	}
+
+	void RFrameBufferBase::ReadInfo(const RFrameBufferInfo& info)
+	{
+		Width = info.Width;
+		Height = info.Height;
+
+		ColorAttachments.Resize(info.ColorAttachments.Size());
+
+		for (size_t i = 0; i < ColorAttachments.Size(); i++)
+		{
+			ColorAttachments[i] = info.ColorAttachments[i];
+		}
+
+		DepthStencilAttachment = info.DepthStencilAttachment;
+	}
+
+	void RFrameBufferBase::Startup(RFrameBuffer& frameBufferH, const RFrameBufferInfo& info, RDeviceBase* device)
+	{
+		ID = CUID<RFrameBufferBase>::Get();
+
+		Device = device;
+		ReadInfo(info);
+
+		LD_DEBUG_ASSERT(Width > 0 && Height > 0);
+
+		// connect
+		frameBufferH.mID = ID;
+		frameBufferH.mFrameBuffer = this;
+	}
+
+	void RFrameBufferBase::Cleanup(RFrameBuffer& frameBufferH)
+	{
+		ID.Reset();
+		Device = nullptr;
+
+		// disconnect
+		frameBufferH.mID = 0;
+		frameBufferH.mFrameBuffer = nullptr;
+	}
+
+	RResult RFrameBufferBase::GetColorAttachment(int idx, RTexture* colorAttachment)
+	{
+		RResult result{};
+
+		if (idx < 0 || idx >= ColorAttachments.Size())
+		{
+			result.Type = RResultType::InvalidIndex;
+			return result;
+		}
+
+		*colorAttachment = ColorAttachments[idx];
+
+		return result;
+	}
+
+	RResult RFrameBufferBase::GetDepthStencilAttachment(RTexture* depthStencilAttachment)
+	{
+		// TODO: RResult error code
+		LD_DEBUG_ASSERT(DepthStencilAttachment.HasValue());
+
+		*depthStencilAttachment = DepthStencilAttachment.Value();
+
+		return {};
 	}
 
 	///
