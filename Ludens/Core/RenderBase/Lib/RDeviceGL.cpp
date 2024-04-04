@@ -7,17 +7,11 @@
 #include "Core/RenderBase/Lib/RTextureGL.h"
 #include "Core/RenderBase/Lib/RBufferGL.h"
 #include "Core/RenderBase/Lib/RShaderGL.h"
+#include "Core/RenderBase/Lib/RPassGL.h"
 #include "Core/RenderBase/Lib/RFrameBufferGL.h"
 #include "Core/RenderBase/Lib/RBindingGL.h"
 #include "Core/RenderBase/Lib/RPipelineGL.h"
-
-#define MAX_BUFFER_COUNT     1024
-#define MAX_TEXTURE_COUNT    1024
-#define MAX_SHADER_COUNT     1024
-#define MAX_FRAME_BUFFER_COUNT           256
-#define MAX_BINDING_GROUP_LAYOUT_COUNT   512
-#define MAX_BINDING_GROUP_COUNT          512
-#define MAX_PIPELINE_COUNT               512
+#include "Core/RenderBase/Lib/RBase.h"
 
 namespace LD {
 
@@ -42,9 +36,10 @@ namespace LD {
 		TextureAllocator.Startup(MAX_TEXTURE_COUNT);
 		BufferAllocator.Startup(MAX_BUFFER_COUNT);
 		ShaderAllocator.Startup(MAX_SHADER_COUNT);
-		FrameBufferAllocator.Startup(MAX_FRAME_BUFFER_COUNT);
 		BindingGroupLayoutAllocator.Startup(MAX_BINDING_GROUP_LAYOUT_COUNT);
 		BindingGroupAllocator.Startup(MAX_BINDING_GROUP_COUNT);
+		RenderPassAllocator.Startup(MAX_RENDER_PASS_COUNT);
+		FrameBufferAllocator.Startup(MAX_FRAME_BUFFER_COUNT);
 		PipelineAllocator.Startup(MAX_PIPELINE_COUNT);
 	}
 
@@ -55,9 +50,10 @@ namespace LD {
 		Context.Cleanup();
 
 		PipelineAllocator.Cleanup();
+		FrameBufferAllocator.Cleanup();
+		RenderPassAllocator.Cleanup();
 		BindingGroupAllocator.Cleanup();
 		BindingGroupLayoutAllocator.Cleanup();
-		FrameBufferAllocator.Cleanup();
 		ShaderAllocator.Cleanup();
 		BufferAllocator.Cleanup();
 		TextureAllocator.Cleanup();
@@ -142,26 +138,6 @@ namespace LD {
 		return {};
 	}
 
-	RResult RDeviceGL::CreateFrameBuffer(RFrameBuffer& frameBufferH, const RFrameBufferInfo& info)
-	{
-		RFrameBufferGL* frameBuffer = (RFrameBufferGL*)FrameBufferAllocator.Alloc(sizeof(RFrameBufferGL));
-		new (frameBuffer) RFrameBufferGL{};
-		frameBuffer->Startup(frameBufferH, info, *this);
-
-		return {};
-	}
-
-	RResult RDeviceGL::DeleteFrameBuffer(RFrameBuffer& frameBufferH)
-	{
-		RFrameBufferGL& frameBuffer = Derive<RFrameBufferGL>(frameBufferH);
-
-		frameBuffer.Cleanup(frameBufferH);
-		frameBuffer.~RFrameBufferGL();
-		FrameBufferAllocator.Free(&frameBuffer);
-		
-		return {};
-	}
-
 	RResult RDeviceGL::CreateBindingGroupLayout(RBindingGroupLayout& layoutH, const RBindingGroupLayoutInfo& info)
 	{
 		RBindingGroupLayoutGL* layout = (RBindingGroupLayoutGL*)BindingGroupLayoutAllocator.Alloc(sizeof(RBindingGroupLayoutGL));
@@ -202,6 +178,45 @@ namespace LD {
 		return {};
 	}
 
+	RResult RDeviceGL::CreateRenderPass(RPass& passH, const RPassInfo & info)
+	{
+		RPassGL* pass = (RPassGL*)RenderPassAllocator.Alloc(sizeof(RPassGL));
+		new (pass) RPassGL{};
+		pass->Startup(passH, info, *this);
+
+		return {};
+	}
+
+	RResult RDeviceGL::DeleteRenderPass(RPass& passH)
+	{
+		RPassGL& pass = Derive<RPassGL>(passH);
+		pass.Cleanup(passH);
+		pass.~RPassGL();
+		RenderPassAllocator.Free(&pass);
+
+		return {};
+	}
+
+	RResult RDeviceGL::CreateFrameBuffer(RFrameBuffer& frameBufferH, const RFrameBufferInfo& info)
+	{
+		RFrameBufferGL* frameBuffer = (RFrameBufferGL*)FrameBufferAllocator.Alloc(sizeof(RFrameBufferGL));
+		new (frameBuffer) RFrameBufferGL{};
+		frameBuffer->Startup(frameBufferH, info, *this);
+
+		return {};
+	}
+
+	RResult RDeviceGL::DeleteFrameBuffer(RFrameBuffer& frameBufferH)
+	{
+		RFrameBufferGL& frameBuffer = Derive<RFrameBufferGL>(frameBufferH);
+
+		frameBuffer.Cleanup(frameBufferH);
+		frameBuffer.~RFrameBufferGL();
+		FrameBufferAllocator.Free(&frameBuffer);
+
+		return {};
+	}
+
 	RResult RDeviceGL::CreatePipeline(RPipeline& pipelineH, const RPipelineInfo& info)
 	{
 		RPipelineGL* pipeline = (RPipelineGL*)PipelineAllocator.Alloc(sizeof(RPipelineGL));
@@ -219,6 +234,52 @@ namespace LD {
 		pipeline->~RPipelineGL();
 		PipelineAllocator.Free(pipeline);
 
+		return {};
+	}
+
+	RResult RDeviceGL::GetSwapChainTextureFormat(RTextureFormat& format)
+	{
+		// TODO:
+		LD_DEBUG_UNREACHABLE;
+		return {};
+	}
+
+	RResult RDeviceGL::GetSwapChainRenderPass(RPass& renderPass)
+	{
+		// TODO:
+		LD_DEBUG_UNREACHABLE;
+		return {};
+	}
+
+	RResult RDeviceGL::GetSwapChainFrameBuffer(RFrameBuffer& frameBuffer)
+	{
+		// TODO:
+		LD_DEBUG_UNREACHABLE;
+		return {};
+	}
+
+	RResult RDeviceGL::BeginFrame()
+	{
+		return RResult();
+	}
+
+	RResult RDeviceGL::EndFrame()
+	{
+		return RResult();
+	}
+
+	RResult RDeviceGL::BeginRenderPass(const RPassBeginInfo& info)
+	{
+		RFrameBufferGL& frameBuffer = Derive<RFrameBufferGL>(info.FrameBuffer);
+		RPassGL& renderPass = Derive<RPassGL>(info.RenderPass);
+
+		Context.BindFrameBuffer(frameBuffer.FBO);
+
+		return {};
+	}
+
+	RResult RDeviceGL::EndRenderPass()
+	{
 		return {};
 	}
 
@@ -302,27 +363,14 @@ namespace LD {
 		return {};
 	}
 
-	RResult RDeviceGL::SetIndexBuffer(RBuffer& bufferH)
+	RResult RDeviceGL::SetIndexBuffer(RBuffer& bufferH, RIndexType indexType)
 	{
 		RBufferGL& buffer = Derive<RBufferGL>(bufferH);
 
 		LD_DEBUG_ASSERT(buffer.Target == GL_ELEMENT_ARRAY_BUFFER && "binding a non index buffer");
 
 		buffer.Bind();
-	
-		return {};
-	}
-
-	RResult RDeviceGL::SetFrameBuffer(RFrameBuffer* frameBufferH)
-	{
-		if (frameBufferH == nullptr)
-		{
-			Context.UnbindFrameBuffer();
-			return {};
-		}
-
-		RFrameBufferGL& frameBuffer = Derive<RFrameBufferGL>(*frameBufferH);
-		Context.BindFrameBuffer(frameBuffer.FBO);
+		IndexType = DeriveGLIndexType(indexType);
 
 		return {};
 	}
@@ -345,9 +393,8 @@ namespace LD {
 		LD_DEBUG_ASSERT(info.IndexStart == 0);
 
 		RPipelineGL& pipeline = Derive<RPipelineGL>(BoundPipelineH);
-		GLenum indexType = DeriveGLIndexType(info.IndexType);
 
-		GLCommand::DrawElementsInstanced(pipeline.PrimitiveTopology, info.IndexCount, indexType, info.InstanceCount, info.InstanceStart);
+		GLCommand::DrawElementsInstanced(pipeline.PrimitiveTopology, info.IndexCount, IndexType, info.InstanceCount, info.InstanceStart);
 
 		return {};
 	}

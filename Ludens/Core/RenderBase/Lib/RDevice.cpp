@@ -5,7 +5,9 @@
 #include "Core/RenderBase/Include/RShader.h"
 #include "Core/RenderBase/Include/RBuffer.h"
 #include "Core/RenderBase/Include/RBinding.h"
+#include "Core/RenderBase/Include/RPass.h"
 #include "Core/RenderBase/Lib/RDeviceGL.h"
+#include "Core/RenderBase/Lib/RDeviceVK.h"
 #include "Core/RenderBase/Lib/RBindingGL.h"
 
 namespace LD {
@@ -63,8 +65,9 @@ namespace LD {
 		case RBackend::OpenGL:
 			result = RDeviceGL::CreateRenderDevice(device, info);
 			break;
-		default:
-			LD_DEBUG_UNREACHABLE;
+		case RBackend::Vulkan:
+			result = RDeviceVK::CreateRenderDevice(device, info);
+			break;
 		}
 
 		return result;
@@ -85,8 +88,9 @@ namespace LD {
 		case RBackend::OpenGL:
 			result = RDeviceGL::DeleteRenderDevice(device);
 			break;
-		default:
-			LD_DEBUG_UNREACHABLE;
+		case RBackend::Vulkan:
+			result = RDeviceVK::DeleteRenderDevice(device);
+			break;
 		}
 
 		return result;
@@ -178,32 +182,6 @@ namespace LD {
 		return result;
 	}
 
-	RResult RDevice::CreateFrameBuffer(RFrameBuffer& frameBuffer, const RFrameBufferInfo& info)
-	{
-		RResult result;
-
-		if (frameBuffer)
-			result.Type = RResultType::InvalidHandle;
-		else
-			result = mDevice->CreateFrameBuffer(frameBuffer, info);
-		
-		mDevice->Callback(result);
-		return result;
-	}
-
-	RResult RDevice::DeleteFrameBuffer(RFrameBuffer& frameBuffer)
-	{
-		RResult result;
-
-		if (!frameBuffer)
-			result.Type = RResultType::InvalidHandle;
-		else
-			result = mDevice->DeleteFrameBuffer(frameBuffer);
-
-		mDevice->Callback(result);
-		return result;
-	}
-
 	RResult RDevice::CreateBindingGroupLayout(RBindingGroupLayout& layout, const RBindingGroupLayoutInfo& info)
 	{
 		RResult result;
@@ -251,6 +229,58 @@ namespace LD {
 			result.Type = RResultType::InvalidHandle;
 		else
 			result = mDevice->DeleteBindingGroup(group);
+
+		mDevice->Callback(result);
+		return result;
+	}
+
+	RResult RDevice::CreateRenderPass(RPass& pass, const RPassInfo& info)
+	{
+		RResult result;
+
+		if (pass)
+			result.Type = RResultType::InvalidHandle;
+		else
+			result = mDevice->CreateRenderPass(pass, info);
+
+		mDevice->Callback(result);
+		return result;
+	}
+
+	RResult RDevice::DeleteRenderPass(RPass& pass)
+	{
+		RResult result;
+
+		if (!pass)
+			result.Type = RResultType::InvalidHandle;
+		else
+			result = mDevice->DeleteRenderPass(pass);
+
+		mDevice->Callback(result);
+		return result;
+	}
+
+	RResult RDevice::CreateFrameBuffer(RFrameBuffer& frameBuffer, const RFrameBufferInfo& info)
+	{
+		RResult result;
+
+		if (frameBuffer)
+			result.Type = RResultType::InvalidHandle;
+		else
+			result = mDevice->CreateFrameBuffer(frameBuffer, info);
+
+		mDevice->Callback(result);
+		return result;
+	}
+
+	RResult RDevice::DeleteFrameBuffer(RFrameBuffer& frameBuffer)
+	{
+		RResult result;
+
+		if (!frameBuffer)
+			result.Type = RResultType::InvalidHandle;
+		else
+			result = mDevice->DeleteFrameBuffer(frameBuffer);
 
 		mDevice->Callback(result);
 		return result;
@@ -312,15 +342,83 @@ namespace LD {
 		return result;
 	}
 
-	RResult RDevice::SetPipeline(RPipeline& pipelineH)
+	RResult RDevice::GetSwapChainTextureFormat(RTextureFormat& format)
 	{
 		RResult result;
 
-		if (mDevice->BoundPipelineH == pipelineH)
-		{
-			mDevice->Callback(result);
-			return result;
-		}
+		result = mDevice->GetSwapChainTextureFormat(format);
+
+		mDevice->Callback(result);
+		return {};
+	}
+
+	RResult RDevice::GetSwapChainRenderPass(RPass& renderPass)
+	{
+		RResult result;
+
+		result = mDevice->GetSwapChainRenderPass(renderPass);
+
+		mDevice->Callback(result);
+		return {};
+	}
+
+	RResult RDevice::GetSwapChainFrameBuffer(RFrameBuffer& frameBuffer)
+	{
+		RResult result;
+
+		result = mDevice->GetSwapChainFrameBuffer(frameBuffer);
+
+		mDevice->Callback(result);
+		return {};
+	}
+
+	RResult RDevice::BeginFrame()
+	{
+		RResult result;
+
+		result = mDevice->BeginFrame();
+
+		mDevice->Callback(result);
+		return result;
+	}
+
+	RResult RDevice::EndFrame()
+	{
+		RResult result;
+
+		result = mDevice->EndFrame();
+
+		mDevice->Callback(result);
+		return result;
+	}
+
+	RResult RDevice::BeginRenderPass(const RPassBeginInfo& info)
+	{
+		RResult result;
+
+		// TODO: since RClearValue uses optional type, we can perform validation
+		//       against each attachment's storeOp and loadOp to check for
+		//       abscent or redundant clear value types.
+
+		result = mDevice->BeginRenderPass(info);
+
+		mDevice->Callback(result);
+		return result;
+	}
+
+	RResult RDevice::EndRenderPass()
+	{
+		RResult result;
+
+		result = mDevice->EndRenderPass();
+
+		mDevice->Callback(result);
+		return result;
+	}
+
+	RResult RDevice::SetPipeline(RPipeline& pipelineH)
+	{
+		RResult result;
 
 		mDevice->BoundPipelineH = pipelineH;
 		result = mDevice->SetPipeline(pipelineH);
@@ -396,7 +494,7 @@ namespace LD {
 		return result;
 	}
 
-	RResult RDevice::SetIndexBuffer(RBuffer& bufferH)
+	RResult RDevice::SetIndexBuffer(RBuffer& bufferH, RIndexType indexType)
 	{
 		RResult result;
 
@@ -415,19 +513,11 @@ namespace LD {
 			return result;
 		}
 
-		result = mDevice->SetIndexBuffer(bufferH);
+		result = mDevice->SetIndexBuffer(bufferH, indexType);
 		mDevice->Callback(result);
 		return result;
 	}
 	
-	// NOTE: temporary solution, will remove later.
-	RResult RDevice::SetFrameBuffer(RFrameBuffer* frameBuffer)
-	{
-		RResult result = mDevice->SetFrameBuffer(frameBuffer);
-		mDevice->Callback(result);
-		return result;
-	}
-
 	RResult RDevice::BeginDrawStats(RDrawStats* stats)
 	{
 		RResult result;

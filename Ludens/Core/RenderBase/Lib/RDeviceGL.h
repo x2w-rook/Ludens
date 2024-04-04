@@ -8,8 +8,9 @@
 #include "Core/RenderBase/Lib/RTextureGL.h"
 #include "Core/RenderBase/Lib/RBufferGL.h"
 #include "Core/RenderBase/Lib/RShaderGL.h"
-#include "Core/RenderBase/Lib/RFrameBufferGL.h"
 #include "Core/RenderBase/Lib/RBindingGL.h"
+#include "Core/RenderBase/Lib/RPassGL.h"
+#include "Core/RenderBase/Lib/RFrameBufferGL.h"
 #include "Core/RenderBase/Lib/RPipelineGL.h"
 #include "Core/RenderBase/Lib/RBase.h"
 
@@ -37,9 +38,6 @@ namespace LD {
 
 		virtual RResult CreateShader(RShader& shader, const RShaderInfo& info) override;
 		virtual RResult DeleteShader(RShader& shader) override;
-		
-		virtual RResult CreateFrameBuffer(RFrameBuffer& frameBufferH, const RFrameBufferInfo& info) override;
-		virtual RResult DeleteFrameBuffer(RFrameBuffer& frameBufferH) override;
 
 		virtual RResult CreateBindingGroupLayout(RBindingGroupLayout& layoutH, const RBindingGroupLayoutInfo& info) override;
 		virtual RResult DeleteBindingGroupLayout(RBindingGroupLayout& layoutH) override;
@@ -47,14 +45,28 @@ namespace LD {
 		virtual RResult CreateBindingGroup(RBindingGroup& groupH, const RBindingGroupInfo& info) override;
 		virtual RResult DeleteBindingGroup(RBindingGroup& groupH) override;
 
+		virtual RResult CreateRenderPass(RPass& passH, const RPassInfo& info) override;
+		virtual RResult DeleteRenderPass(RPass& passH) override;
+
+		virtual RResult CreateFrameBuffer(RFrameBuffer& frameBufferH, const RFrameBufferInfo& info) override;
+		virtual RResult DeleteFrameBuffer(RFrameBuffer& frameBufferH) override;
+
 		virtual RResult CreatePipeline(RPipeline& pipeline, const RPipelineInfo& info) override;
 		virtual RResult DeletePipeline(RPipeline& pipeline) override;
+
+		virtual RResult GetSwapChainTextureFormat(RTextureFormat& format) override;
+		virtual RResult GetSwapChainRenderPass(RPass& renderPass) override;
+		virtual RResult GetSwapChainFrameBuffer(RFrameBuffer& frameBuffer) override;
+
+		virtual RResult BeginFrame() override;
+		virtual RResult EndFrame() override;
+		virtual RResult BeginRenderPass(const RPassBeginInfo& info) override;
+		virtual RResult EndRenderPass() override;
 
 		virtual RResult SetPipeline(RPipeline& pipeline) override;
 		virtual RResult SetBindingGroup(u32 groupIdx, RBindingGroup& groupH) override;
 		virtual RResult SetVertexBuffer(u32 slot, RBuffer& buffer) override;
-		virtual RResult SetIndexBuffer(RBuffer& buffer) override;
-		virtual RResult SetFrameBuffer(RFrameBuffer* frameBuffer) override;
+		virtual RResult SetIndexBuffer(RBuffer& buffer, RIndexType indexType) override;
 
 		virtual RResult DrawVertex(const RDrawVertexInfo& info) override;
 		virtual RResult DrawIndexed(const RDrawIndexedInfo& info) override;
@@ -62,11 +74,13 @@ namespace LD {
 		PoolAllocator<sizeof(RTextureGL)> TextureAllocator;
 		PoolAllocator<sizeof(RBufferGL)> BufferAllocator;
 		PoolAllocator<sizeof(RShaderGL)> ShaderAllocator;
-		PoolAllocator<sizeof(RFrameBufferGL)> FrameBufferAllocator;
 		PoolAllocator<sizeof(RBindingGroupLayoutGL)> BindingGroupLayoutAllocator;
 		PoolAllocator<sizeof(RBindingGroupGL)> BindingGroupAllocator;
+		PoolAllocator<sizeof(RPassGL)> RenderPassAllocator;
+		PoolAllocator<sizeof(RFrameBufferGL)> FrameBufferAllocator;
 		PoolAllocator<sizeof(RPipelineGL)> PipelineAllocator;
 		GLContext Context;
+		GLenum IndexType;
 	};
 
 } // namespace LD
