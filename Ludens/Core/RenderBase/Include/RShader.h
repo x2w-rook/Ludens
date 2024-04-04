@@ -32,6 +32,7 @@ namespace LD {
 
 	struct RShaderInfo
 	{
+		const char* Name = nullptr;
 		RShaderType Type;
 		RShaderSourceType SourceType;
 		const void* Data = nullptr;

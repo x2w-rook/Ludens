@@ -163,12 +163,17 @@ namespace LD {
 
     void RShaderCompiler::Compile(const RPipelineLayout& layout, RShaderType type, const std::string& glsl, Vector<u32>& spirv)
     {
-        LD_DEBUG_ASSERT(mTargetBackend == RBackend::OpenGL);
+        std::string input_glsl(glsl);
 
-        std::string opengl_glsl(glsl);
-        PatchOpenGL(layout, type, opengl_glsl);
+        if (mTargetBackend == RBackend::OpenGL)
+        {
+            PatchOpenGL(layout, type, input_glsl);
+            printf("=== Patched GLSL Begin === \n");
+            printf("%s\n", input_glsl.c_str());
+            printf("=== Patched GLSL End === \n");
+        }
 
-        GlslangCompile(mTargetBackend, type, opengl_glsl, spirv);
+        GlslangCompile(mTargetBackend, type, input_glsl, spirv);
     }
 
     void RShaderCompiler::Compile(const RPipelineLayout& layout, RShaderType type, const std::string& glsl, Vector<u8>& spirv)
@@ -250,10 +255,10 @@ namespace LD {
             bool result = shader.parse(&sDefaultTBuiltInResource, 100, false, EShMsgDefault);
             const char* log;
             
-            if ((log = shader.getInfoLog()))
+            if ((log = shader.getInfoLog()) && strlen(log) > 0)
                 printf("%s\n", log);
 
-            if ((log = shader.getInfoDebugLog()))
+            if ((log = shader.getInfoDebugLog()) && strlen(log) > 0)
                 printf("%s\n", log);
 
             LD_DEBUG_ASSERT(result);
@@ -384,11 +389,12 @@ namespace LD {
 
     RResult RShaderCache::GetOrCreateShader(const RPipelineLayout& layout, RShaderType type, const std::string& glsl, std::string name, RShader& shader)
     {
+        name = (mDevice.GetBackend() == RBackend::Vulkan ? "vk_" : "gl_") + name;
         size_t sourceHash = std::hash<std::string>{}(glsl);
         std::string sourceHashStr = std::to_string(sourceHash);
         std::string basePath { mCacheDirectory.ToString() + "/" + name };
-        Path spirvPath{ basePath + ".spv" };
-        Path hashPath{ basePath + ".txt" };
+        Path spirvPath { basePath + ".spv"};
+        Path hashPath  { basePath + ".txt" };
         Vector<u8> spirv;
         RResult result;
         File file;
