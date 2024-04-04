@@ -3,63 +3,40 @@
 #include "Core/Header/Include/Types.h"
 #include "Core/OS/Include/UID.h"
 #include "Core/DSA/Include/Optional.h"
+#include "Core/RenderBase/Include/RTypes.h"
 #include "Core/RenderBase/Include/RResult.h"
+#include "Core/RenderBase/Include/RPass.h"
+#include "Core/RenderBase/Include/RFrameBuffer.h"
 
 namespace LD {
 
 
 	class RDevice;
-	class RDeviceBase;
 	class RTexture;
-	class RTextureInfo;
 	class RBuffer;
-	class RBufferInfo;
 	class RShader;
-	class RShaderInfo;
-	class RFrameBuffer;
-	class RFrameBufferInfo;
-	class RBindingGroup;
-	class RBindingGroupInfo;
 	class RBindingGroupLayout;
-	class RBindingGroupLayoutInfo;
+	class RBindingGroup;
+	class RPass;
+	class RFrameBuffer;
 	class RPipeline;
-	class RPipelineInfo;
+	struct RDeviceBase;
+	struct RTextureInfo;
+	struct RBufferInfo;
+	struct RShaderInfo;
+	struct RBindingGroupLayoutInfo;
+	struct RBindingGroupInfo;
+	struct RPassInfo;
+	struct RPassBeginInfo;
+	struct RFrameBufferInfo;
+	struct RPipelineInfo;
 
 	using RResultCallback = void (*)(const RResult&);
 
-	enum class RBackend
-	{
-		OpenGL = 0,
-		Vulkan,     // not implemented yet, but shaders are written in Vulkan GLSL
-	};
-
 	struct RDeviceInfo
 	{
-		RBackend Backend = RBackend::OpenGL;
+		RBackend Backend;
 		RResultCallback Callback = nullptr;
-	};
-
-	struct RDrawVertexInfo
-	{
-		u32 VertexCount = 0;
-		u32 VertexStart = 0;
-		u32 InstanceCount = 1;
-		u32 InstanceStart = 0;
-	};
-
-	enum class RIndexType
-	{
-		u16 = 0,
-		u32
-	};
-
-	struct RDrawIndexedInfo
-	{
-		RIndexType IndexType;
-		u32 IndexCount = 0;
-		u32 IndexStart = 0;
-		u32 InstanceCount = 1;
-		u32 InstanceStart = 0;
 	};
 
 	RResult CreateRenderDevice(RDevice& device, const RDeviceInfo& info);
@@ -85,6 +62,7 @@ namespace LD {
 	{
 		friend struct RDeviceBase;
 		friend struct RDeviceGL;
+		friend struct RDeviceVK;
 	public:
 		using TBase = RDeviceBase;
 
@@ -97,26 +75,37 @@ namespace LD {
 		RResult CreateShader(RShader& shader, const RShaderInfo& info);
 		RResult DeleteShader(RShader& shader);
 
-		RResult CreateFrameBuffer(RFrameBuffer& frameBufferH, const RFrameBufferInfo& info);
-		RResult DeleteFrameBuffer(RFrameBuffer& frameBufferH);
-
 		RResult CreateBindingGroupLayout(RBindingGroupLayout& layout, const RBindingGroupLayoutInfo& info);
 		RResult DeleteBindingGroupLayout(RBindingGroupLayout& layout);
 		
 		RResult CreateBindingGroup(RBindingGroup& group, const RBindingGroupInfo& info);
 		RResult DeleteBindingGroup(RBindingGroup& group);
 
+		RResult CreateRenderPass(RPass& passH, const RPassInfo& info);
+		RResult DeleteRenderPass(RPass& passH);
+
+		RResult CreateFrameBuffer(RFrameBuffer& frameBufferH, const RFrameBufferInfo& info);
+		RResult DeleteFrameBuffer(RFrameBuffer& frameBufferH);
+
 		RResult CreatePipeline(RPipeline& pipeline, const RPipelineInfo& info);
 		RResult DeletePipeline(RPipeline& pipeline);
+
+		RResult GetSwapChainTextureFormat(RTextureFormat& format);
+		RResult GetSwapChainRenderPass(RPass& renderPass);
+		RResult GetSwapChainFrameBuffer(RFrameBuffer& frameBuffer);
+
+		// NOTE: Temporary API for single render device in a single thread.
+		//       Will refactor later once we introduce job systems and render graphs for multi-threading.
+
+		RResult BeginFrame();
+		RResult EndFrame();
+		RResult BeginRenderPass(const RPassBeginInfo& info);
+		RResult EndRenderPass();
 
 		RResult SetPipeline(RPipeline& pipeline);
 		RResult SetBindingGroup(u32 slot, RBindingGroup& group);
 		RResult SetVertexBuffer(u32 slot, RBuffer& buffer);
-		RResult SetIndexBuffer(RBuffer& buffer);
-
-		// TODO: Temporary solution before render pass and swap chain API, currently we are using OpenGL-like binding API.
-		//       Calling with nullptr will bind the 'default' frame buffer of the swap chain.
-		RResult SetFrameBuffer(RFrameBuffer* frameBuffer);
+		RResult SetIndexBuffer(RBuffer& buffer, RIndexType indexType);
 		
 		// TODO: Multiple drawstats overlapping on one device.
 		RResult BeginDrawStats(RDrawStats* stats);

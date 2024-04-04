@@ -3,6 +3,7 @@
 #include <string>
 #include <cstdint>
 #include "Core/Header/Include/Types.h"
+#include "Core/RenderBase/Include/RTypes.h"
 #include "Core/Application/Include/Event.h"
 #include "Core/Application/Include/ApplicationLayer.h"
 #include "Core/OS/Include/Memory.h"
@@ -32,6 +33,7 @@ namespace LD {
 	{
 		ApplicationWindowConfig Window;
 		double FixedUpdateInterval = LD_APPLICATION_DEFAULT_FIXED_UPDATE_INTERVAL;
+		RBackend RendererBackend;
 		Ref<ApplicationLayer> Layer;
 	};
 
@@ -52,6 +54,7 @@ namespace LD {
 		void Cleanup();
 
 		inline std::string GetName() const { return mConfig.Window.Name; }
+		inline RBackend GetRendererBackend() const { return mConfig.RendererBackend; }
 		void* GetWindowHandle() const;
 		void GetWindowSize(u32* width, u32* height) const;
 		void SetWindowCursorNormal();

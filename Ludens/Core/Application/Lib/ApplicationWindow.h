@@ -17,7 +17,7 @@ namespace LD {
 
 		ApplicationWindow& operator=(const ApplicationWindow&) = delete;
 
-		void Startup(const ApplicationWindowConfig& config);
+		void Startup(const ApplicationWindowConfig& config, const Application* app);
 		void Cleanup();
 
 		// elapsed time in seconds since window Startup
@@ -42,6 +42,7 @@ namespace LD {
 	private:
 		void InstallCallbacks();
 
+		const Application* mApp = nullptr;
 		std::string mName;
 		u32 mWidth = 0;
 		u32 mHeight = 0;

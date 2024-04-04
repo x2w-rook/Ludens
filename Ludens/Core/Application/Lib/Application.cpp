@@ -31,7 +31,7 @@ namespace LD {
 		mConfig = config;
 
 		mWindow = MakeOwn<ApplicationWindow>();
-		mWindow->Startup(mConfig.Window);
+		mWindow->Startup(mConfig.Window, this);
 		mLayer = config.Layer;
 		mLayer->OnAttach(*this);
 
