@@ -4,18 +4,6 @@
 
 namespace LD {
 	
-	RResult RFrameBuffer::GetInfo(RFrameBufferInfo& info)
-	{
-		info.Width = mFrameBuffer->Width;
-		info.Height = mFrameBuffer->Height;
-		info.DepthStencilAttachmentInfo = mFrameBuffer->DepthStencilAttachmentInfo;
-		info.ColorAttachmentInfos = { mFrameBuffer->ColorAttachmentCount, mFrameBuffer->ColorAttachmentInfos.Data()};
-
-		RResult result{};
-		mFrameBuffer->Device->Callback(result);
-		return result;
-	}
-
 	RResult RFrameBuffer::GetColorAttachment(int idx, RTexture* colorAttachment)
 	{
 		RResult result = mFrameBuffer->GetColorAttachment(idx, colorAttachment);
