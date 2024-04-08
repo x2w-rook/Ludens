@@ -6,12 +6,17 @@ namespace LD {
 	enum class RBackend
 	{
 		OpenGL = 0,
-		Vulkan,     // not implemented yet, but shaders are written in Vulkan GLSL
+		Vulkan,
 	};
 
 	enum class RMemoryUsage
 	{
+		// memory that is initialized and uploaded once to GPU during resource creation.
+		// note that the memory is only immutable from the CPU side, GPU can still write.
 		Immutable = 0,
+
+		// memory that is expected to be written by CPU every frame.
+		FrameDynamic,
 	};
 
 	struct RDrawVertexInfo

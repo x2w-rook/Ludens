@@ -3,6 +3,7 @@
 #include "Core/Application/Lib/ApplicationWindow.h"
 #include "Core/Header/Include/Error.h"
 #include "Core/OS/Include/Time.h"
+#include "Core/OS/Include/Memory.h"
 
 
 namespace LD {
@@ -30,7 +31,7 @@ namespace LD {
 
 		mConfig = config;
 
-		mWindow = MakeOwn<ApplicationWindow>();
+		mWindow = new ApplicationWindow();
 		mWindow->Startup(mConfig.Window, this);
 		mLayer = config.Layer;
 		mLayer->OnAttach(*this);
@@ -44,6 +45,7 @@ namespace LD {
 
 		mLayer->OnDetach(*this);
 		mWindow->Cleanup();
+		delete mWindow;
 		mWindow = nullptr;
 
 		sInstance = nullptr;

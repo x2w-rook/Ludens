@@ -85,6 +85,12 @@ namespace LD {
 			return mHasValue ? Get() : fallback;
 		}
 
+		const T* Data() const
+		{
+			LD_DEBUG_ASSERT(mHasValue);
+			return reinterpret_cast<const T*>(mValue);
+		}
+
 	private:
 		inline T& Get() { return *reinterpret_cast<T*>(mValue); }
 		inline const T& Get() const { return *reinterpret_cast<const T*>(mValue); }

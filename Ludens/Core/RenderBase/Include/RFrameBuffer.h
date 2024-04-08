@@ -20,6 +20,9 @@ namespace LD {
 		RPass RenderPass;
 	};
 
+	struct RFrameBufferBase;
+	struct RFrameBufferGL;
+
 	// frame buffer handle and interface
 	class RFrameBuffer
 	{

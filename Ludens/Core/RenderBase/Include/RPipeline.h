@@ -59,11 +59,14 @@ namespace LD {
 		RPass RenderPass;
 	};
 
+	struct RPipelineBase;
+	struct RPipelineGL;
+
 	// graphics pipeline handle and interface
 	class RPipeline
 	{
-		friend class RPipelineBase;
-		friend class RPipelineGL;
+		friend struct RPipelineBase;
+		friend struct RPipelineGL;
 	public:
 		using TBase = RPipelineBase;
 

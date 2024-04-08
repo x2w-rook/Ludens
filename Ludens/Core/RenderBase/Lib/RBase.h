@@ -22,7 +22,7 @@
 
 namespace LD {
 
-	template <typename THandle, typename TBase = THandle::TBase>
+	template <typename THandle, typename TBase = typename THandle::TBase>
 	inline TBase& Unwrap(const THandle& handle)
 	{
 		LD_DEBUG_ASSERT((bool)handle);
@@ -30,7 +30,7 @@ namespace LD {
 		return *static_cast<TBase*>(handle);
 	}
 
-	template <typename TDerived, typename THandle, typename TBase = THandle::TBase>
+	template <typename TDerived, typename THandle, typename TBase = typename THandle::TBase>
 	inline TDerived& Derive(const THandle& handle)
 	{
 		LD_DEBUG_ASSERT((bool)handle);
@@ -201,12 +201,8 @@ namespace LD {
 		{
 			std::string Name;
 			RBindingType Type;
-
-			union
-			{
-				RTexture TextureH;
-				RBuffer BufferH;
-			};
+			RTexture TextureH;
+			RBuffer BufferH;
 		};
 
 		CUID<RBindingGroupBase> ID;
@@ -240,8 +236,8 @@ namespace LD {
 
 		void ReadInfo(const RFrameBufferInfo& info);
 
-		void Startup(RFrameBuffer& bufferH, const RFrameBufferInfo& info, RDeviceBase* device);
-		void Cleanup(RFrameBuffer& bufferH);
+		void Startup(RFrameBuffer& frameBufferH, const RFrameBufferInfo& info, RDeviceBase* device);
+		void Cleanup(RFrameBuffer& frameBufferH);
 
 		virtual RResult Invalidate(const RFrameBufferInfo& info) = 0;
 

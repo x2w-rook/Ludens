@@ -1,20 +1,30 @@
 #pragma once
 
+#include <cstddef>
 #include "Core/OS/Include/UID.h"
+
 
 namespace LD {
 
 	enum class RTextureFormat
 	{
-		R8 = 0,
+		Undefined = 0,
+		R8,
 		BGRA8,
 		RGBA8,
 		RGBA16F,
 		D24S8,
+		D32F,
 		EnumCount
 	};
 
 	size_t GetTextureFormatPixelSize(RTextureFormat format);
+
+	enum RTextureUsageFlags : u8
+	{
+		// this texture can be used as a frame buffer attachment
+		TEXTURE_USAGE_FRAME_BUFFER_ATTACHMENT_BIT = (1 << 0),
+	};
 
 	enum class RTextureType
 	{
@@ -25,16 +35,20 @@ namespace LD {
 	{
 		RTextureType Type;
 		RTextureFormat Format;
+		RTextureUsageFlags TextureUsage;
 		u32 Width;
 		u32 Height;
 		const void* Data;   // pixel data
 		size_t Size = 0;    // pixel data byte size
 	};
 
+	struct RTextureBase;
+	struct RTextureGL;
+
 	class RTexture
 	{
-		friend class RTextureBase;
-		friend class RTextureGL;
+		friend struct RTextureBase;
+		friend struct RTextureGL;
 	public:
 		using TBase = RTextureBase;
 

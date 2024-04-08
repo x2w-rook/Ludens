@@ -24,8 +24,8 @@ namespace LD {
 		Undefined = 0,
 		ColorAttachment,
 		Present,
-		DepthRead,
-		DepthWrite,
+		DepthStencilRead,
+		DepthStencilWrite,
 		ShaderResource,
 	};
 
@@ -43,6 +43,10 @@ namespace LD {
 		const char* Name = nullptr;
 		View<RPassAttachment> Attachments;
 	};
+
+	struct RPassBase;
+	struct RPassGL;
+	struct RPassVK;
 
 	// render pass handle and interface
 	class RPass

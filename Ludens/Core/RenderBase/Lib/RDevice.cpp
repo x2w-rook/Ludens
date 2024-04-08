@@ -1,5 +1,3 @@
-#pragma once
-
 #include <iostream>
 #include "Core/RenderBase/Include/RDevice.h"
 #include "Core/RenderBase/Include/RShader.h"
@@ -399,6 +397,8 @@ namespace LD {
 		// TODO: since RClearValue uses optional type, we can perform validation
 		//       against each attachment's storeOp and loadOp to check for
 		//       abscent or redundant clear value types.
+
+		// TODO: check if framebuffer color attachments are in the ShaderResource state
 
 		result = mDevice->BeginRenderPass(info);
 

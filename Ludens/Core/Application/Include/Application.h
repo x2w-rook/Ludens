@@ -72,7 +72,7 @@ namespace LD {
 		bool mIsRunning = false;
 		bool mIsMinimized = false;
 		ApplicationConfig mConfig;
-		Own<ApplicationWindow> mWindow = nullptr;
+		ApplicationWindow* mWindow = nullptr;
 		Ref<ApplicationLayer> mLayer = nullptr;
 	};
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include "Core/Header/Include/Error.h"
 
 namespace LD {

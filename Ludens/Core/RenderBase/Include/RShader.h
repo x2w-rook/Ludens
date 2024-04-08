@@ -39,6 +39,9 @@ namespace LD {
 		u32 Size = 0;
 	};
 
+	struct RShaderBase;
+	struct RShaderGL;
+
 	// shader handle and interface
 	class RShader
 	{

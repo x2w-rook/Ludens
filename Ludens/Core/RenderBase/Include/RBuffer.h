@@ -9,15 +9,19 @@ namespace LD {
 	struct RBufferInfo
 	{
 		RBufferType Type;
+		RMemoryUsage MemoryUsage;
 		const void* Data = nullptr;
 		u32 Size = 0;
 	};
 
+	struct RBufferBase;
+	struct RBufferGL;
+
 	// render buffer handle and interface
 	class RBuffer
 	{
-		friend class RBufferBase;
-		friend class RBufferGL;
+		friend struct RBufferBase;
+		friend struct RBufferGL;
 	public:
 		using TBase = RBufferBase;
 

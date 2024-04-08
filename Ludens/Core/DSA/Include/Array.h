@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <initializer_list>
 #include "Core/Header/Include/Error.h"
 #include "Core/DSA/Include/View.h"
