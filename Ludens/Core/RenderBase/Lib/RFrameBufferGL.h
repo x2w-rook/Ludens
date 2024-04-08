@@ -10,6 +10,8 @@ namespace LD {
 
 	struct RFrameBufferGL : RFrameBufferBase
 	{
+		friend struct RDeviceGL;
+
 		RFrameBufferGL();
 		RFrameBufferGL(const RFrameBufferGL&) = delete;
 		~RFrameBufferGL();
@@ -24,6 +26,7 @@ namespace LD {
 
 		virtual RResult Invalidate(const RFrameBufferInfo& info) override;
 
+		bool IsDefaultFrameBuffer = false;
 		GLFrameBuffer FBO;
 	};
 

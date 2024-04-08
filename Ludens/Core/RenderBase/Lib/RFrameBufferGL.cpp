@@ -16,10 +16,18 @@ namespace LD {
 
 	RFrameBufferGL::~RFrameBufferGL()
 	{
+		LD_DEBUG_ASSERT(ID == 0);
 	}
 
 	void RFrameBufferGL::Startup(RFrameBuffer& frameBufferH, const RFrameBufferInfo& info, RDeviceGL& device)
 	{
+		if (IsDefaultFrameBuffer)
+		{
+			frameBufferH.mID = CUID<RFrameBufferBase>::Get();
+			frameBufferH.mFrameBuffer = this;
+			return;
+		}
+
 		RFrameBufferBase::Startup(frameBufferH, info, (RDeviceBase*)&device);
 
 		StartupGLAttachments();
@@ -27,6 +35,13 @@ namespace LD {
 
 	void RFrameBufferGL::Cleanup(RFrameBuffer& frameBufferH)
 	{
+		if (IsDefaultFrameBuffer)
+		{
+			frameBufferH.mID = 0;
+			frameBufferH.mFrameBuffer = nullptr;
+			return;
+		}
+
 		RFrameBufferBase::Cleanup(frameBufferH);
 
 		CleanupGLAttachments();

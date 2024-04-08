@@ -47,7 +47,7 @@ namespace LD {
 
 		virtual RResult CreateRenderPass(RPass& passH, const RPassInfo& info) override;
 		virtual RResult DeleteRenderPass(RPass& passH) override;
-
+		
 		virtual RResult CreateFrameBuffer(RFrameBuffer& frameBufferH, const RFrameBufferInfo& info) override;
 		virtual RResult DeleteFrameBuffer(RFrameBuffer& frameBufferH) override;
 
@@ -71,6 +71,12 @@ namespace LD {
 		virtual RResult DrawVertex(const RDrawVertexInfo& info) override;
 		virtual RResult DrawIndexed(const RDrawIndexedInfo& info) override;
 
+		// create a handle referencing the default frame buffer created along OpenGL context
+		RResult CreateDefaultFrameBuffer(RFrameBuffer& frameBufferH);
+
+		// delete a handle referencing the default frame buffer
+		RResult DeleteDefaultFrameBuffer(RFrameBuffer& frameBufferH);
+
 		PoolAllocator<sizeof(RTextureGL)> TextureAllocator;
 		PoolAllocator<sizeof(RBufferGL)> BufferAllocator;
 		PoolAllocator<sizeof(RShaderGL)> ShaderAllocator;
@@ -81,6 +87,9 @@ namespace LD {
 		PoolAllocator<sizeof(RPipelineGL)> PipelineAllocator;
 		GLContext Context;
 		GLenum IndexType;
+
+		RPass DefaultRenderPass;
+		RFrameBuffer DefaultFrameBuffer;
 	};
 
 } // namespace LD

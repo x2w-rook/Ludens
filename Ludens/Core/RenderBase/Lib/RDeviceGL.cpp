@@ -31,8 +31,6 @@ namespace LD {
 		RDeviceBase::Startup(handle, info);
 		handle.mBackend = RBackend::OpenGL;
 
-		Context.Startup();
-
 		TextureAllocator.Startup(MAX_TEXTURE_COUNT);
 		BufferAllocator.Startup(MAX_BUFFER_COUNT);
 		ShaderAllocator.Startup(MAX_SHADER_COUNT);
@@ -41,11 +39,34 @@ namespace LD {
 		RenderPassAllocator.Startup(MAX_RENDER_PASS_COUNT);
 		FrameBufferAllocator.Startup(MAX_FRAME_BUFFER_COUNT);
 		PipelineAllocator.Startup(MAX_PIPELINE_COUNT);
+
+		Context.Startup();
+		
+		// TODO: query default frame buffer texture format, guarantee
+		//       that default render pass works with default frame buffer.
+
+		Array<RPassAttachment, 1> attachments;
+		attachments[0].Format = RTextureFormat::RGBA8;
+		attachments[0].InitialState = RState::Undefined;
+		attachments[0].FinalState = RState::Present;
+		attachments[0].LoadOp = RLoadOp::Clear;
+		attachments[0].StoreOp = RStoreOp::Store;
+
+		RPassInfo passI;
+		passI.Name = "Swap Chain Render Pass";
+		passI.Attachments = attachments.GetView();
+		CreateRenderPass(DefaultRenderPass, passI);
+
+		CreateDefaultFrameBuffer(DefaultFrameBuffer);
 	}
 
 	void RDeviceGL::Cleanup(RDevice& handle)
 	{
 		RDeviceBase::Cleanup(handle);
+
+		DeleteDefaultFrameBuffer(DefaultFrameBuffer);
+
+		DeleteRenderPass(DefaultRenderPass);
 		
 		Context.Cleanup();
 
@@ -246,26 +267,30 @@ namespace LD {
 
 	RResult RDeviceGL::GetSwapChainRenderPass(RPass& renderPass)
 	{
-		// TODO:
-		LD_DEBUG_UNREACHABLE;
+		LD_DEBUG_ASSERT(DefaultRenderPass);
+
+		renderPass = DefaultRenderPass;
+
 		return {};
 	}
 
 	RResult RDeviceGL::GetSwapChainFrameBuffer(RFrameBuffer& frameBuffer)
 	{
-		// TODO:
-		LD_DEBUG_UNREACHABLE;
+		LD_DEBUG_ASSERT(DefaultFrameBuffer);
+
+		frameBuffer = DefaultFrameBuffer;
+
 		return {};
 	}
 
 	RResult RDeviceGL::BeginFrame()
 	{
-		return RResult();
+		return {};
 	}
 
 	RResult RDeviceGL::EndFrame()
 	{
-		return RResult();
+		return {};
 	}
 
 	RResult RDeviceGL::BeginRenderPass(const RPassBeginInfo& info)
@@ -273,7 +298,28 @@ namespace LD {
 		RFrameBufferGL& frameBuffer = Derive<RFrameBufferGL>(info.FrameBuffer);
 		RPassGL& renderPass = Derive<RPassGL>(info.RenderPass);
 
-		Context.BindFrameBuffer(frameBuffer.FBO);
+		if (frameBuffer.IsDefaultFrameBuffer)
+			Context.UnbindFrameBuffer();
+		else
+			Context.BindFrameBuffer(frameBuffer.FBO);
+
+		// TODO: clear value per attachment
+		LD_DEBUG_ASSERT(info.ClearValues.Size() >= 1);
+		const RClearValue& clearValue = info.ClearValues[0];
+
+		GLbitfield masks = 0;
+
+		if (clearValue.Color.HasValue())
+		{
+			const RClearColorValue& color = clearValue.Color.Value();
+			glClearColor(color.r, color.g, color.b, color.a);
+			masks |= GL_COLOR_BUFFER_BIT;
+		}
+
+		if (masks != 0)
+		{
+			glClear(masks);
+		}
 
 		return {};
 	}
@@ -395,6 +441,30 @@ namespace LD {
 		RPipelineGL& pipeline = Derive<RPipelineGL>(BoundPipelineH);
 
 		GLCommand::DrawElementsInstanced(pipeline.PrimitiveTopology, info.IndexCount, IndexType, info.InstanceCount, info.InstanceStart);
+
+		return {};
+	}
+
+	RResult RDeviceGL::CreateDefaultFrameBuffer(RFrameBuffer& frameBufferH)
+	{
+		RFrameBufferGL* frameBuffer = (RFrameBufferGL*)FrameBufferAllocator.Alloc(sizeof(RFrameBufferGL));
+		new (frameBuffer) RFrameBufferGL{};
+
+		frameBuffer->IsDefaultFrameBuffer = true;
+		frameBuffer->Startup(frameBufferH, {}, *this);
+
+		return {};
+	}
+
+	RResult RDeviceGL::DeleteDefaultFrameBuffer(RFrameBuffer& frameBufferH)
+	{
+		RFrameBufferGL& frameBuffer = Derive<RFrameBufferGL>(frameBufferH);
+		
+		LD_DEBUG_ASSERT(frameBuffer.IsDefaultFrameBuffer);
+		frameBuffer.Cleanup(frameBufferH);
+
+		frameBuffer.~RFrameBufferGL();
+		FrameBufferAllocator.Free(&frameBuffer);
 
 		return {};
 	}
