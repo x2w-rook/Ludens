@@ -298,28 +298,41 @@ namespace LD {
 		RFrameBufferGL& frameBuffer = Derive<RFrameBufferGL>(info.FrameBuffer);
 		RPassGL& renderPass = Derive<RPassGL>(info.RenderPass);
 
+		// TODO: clear value code path for default frame buffer
 		if (frameBuffer.IsDefaultFrameBuffer)
+		{
 			Context.UnbindFrameBuffer();
-		else
-			Context.BindFrameBuffer(frameBuffer.FBO);
-
-		// TODO: clear value per attachment
-		LD_DEBUG_ASSERT(info.ClearValues.Size() >= 1);
-		const RClearValue& clearValue = info.ClearValues[0];
-
-		GLbitfield masks = 0;
-
-		if (clearValue.Color.HasValue())
-		{
-			const RClearColorValue& color = clearValue.Color.Value();
-			glClearColor(color.r, color.g, color.b, color.a);
-			masks |= GL_COLOR_BUFFER_BIT;
+			return {};
 		}
 
-		if (masks != 0)
+		Context.BindFrameBuffer(frameBuffer.FBO);
+		frameBuffer.FBO.BindDrawBuffers();
+
+		for (size_t i = 0; i < info.ClearValues.Size(); i++)
 		{
-			glClear(masks);
+			const RClearValue& clearValue = info.ClearValues[i];
+
+			if (clearValue.Color.HasValue())
+			{
+				const RClearColorValue& colorValue = clearValue.Color.Value();
+				glClearBufferfv(GL_COLOR, i, colorValue.Data);
+			}
+			else if (clearValue.DepthStencil.HasValue())
+			{
+				if (frameBuffer.FBO.HasDepthBits())
+				{
+					GLfloat depthValue = (GLfloat)clearValue.DepthStencil.Value().Depth;
+					glClearBufferfv(GL_DEPTH, 0, &depthValue);
+				}
+
+				if (frameBuffer.FBO.HasStencilBits())
+				{
+					GLint stencilValue = (GLint)clearValue.DepthStencil.Value().Stencil;
+					glClearBufferiv(GL_STENCIL, 0, &stencilValue);
+				}
+			}
 		}
+
 
 		return {};
 	}
@@ -337,7 +350,7 @@ namespace LD {
 		pipeline.VAO.Bind();
 		pipeline.Program.Bind();
 
-		// TODO: reset binding group
+		// TODO: depth testing should be a state of RPipeline
 
 		return {};
 	}

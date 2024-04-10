@@ -18,6 +18,11 @@ namespace LD {
 		EnumCount
 	};
 
+	inline bool IsColorTextureFormat(RTextureFormat format)
+	{
+		return 0 < (int)format && (int)format < (int)RTextureFormat::D24S8;
+	}
+
 	size_t GetTextureFormatPixelSize(RTextureFormat format);
 
 	enum RTextureUsageFlags : u8

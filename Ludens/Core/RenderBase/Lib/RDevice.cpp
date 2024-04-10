@@ -1,3 +1,5 @@
+#pragma once
+
 #include <iostream>
 #include "Core/RenderBase/Include/RDevice.h"
 #include "Core/RenderBase/Include/RShader.h"
@@ -393,10 +395,44 @@ namespace LD {
 	RResult RDevice::BeginRenderPass(const RPassBeginInfo& info)
 	{
 		RResult result;
+		RPassBase& pass = Unwrap(info.RenderPass);
 
-		// TODO: since RClearValue uses optional type, we can perform validation
-		//       against each attachment's storeOp and loadOp to check for
-		//       abscent or redundant clear value types.
+		if (pass.Attachments.Size() != info.ClearValues.Size())
+		{
+			result.Type = RResultType::PassBeginError;
+			result.PassBeginError.MissingClearValueIndex = -1;
+			result.PassBeginError.NumClearValuesExpect = info.ClearValues.Size();
+			result.PassBeginError.NumClearValuesActual = pass.Attachments.Size();
+			mDevice->Callback(result);
+			return result;
+		}
+		
+		int attachmentCount = (int)pass.Attachments.Size();
+
+		for (int i = 0; i < attachmentCount; i++)
+		{
+			const RPassAttachment& attachment = pass.Attachments[i];
+			bool isColorAttachment = IsColorTextureFormat(attachment.Format);
+			bool isMissingClearValue = false;
+
+			// check clear value for color attachment
+			if (isColorAttachment && attachment.LoadOp == RLoadOp::Clear && !info.ClearValues[i].Color.HasValue())
+				isMissingClearValue = true;
+
+			// check clear value for depth stencil attachment
+			if (!isColorAttachment && attachment.LoadOp == RLoadOp::Clear && !info.ClearValues[i].DepthStencil.HasValue())
+				isMissingClearValue = true;
+
+			if (isMissingClearValue)
+			{
+				result.Type = RResultType::PassBeginError;
+				result.PassBeginError.MissingClearValueIndex = i;
+				result.PassBeginError.NumClearValuesExpect = attachmentCount;
+				result.PassBeginError.NumClearValuesActual = attachmentCount;
+				mDevice->Callback(result);
+				return result;
+			}
+		}
 
 		// TODO: check if framebuffer color attachments are in the ShaderResource state
 

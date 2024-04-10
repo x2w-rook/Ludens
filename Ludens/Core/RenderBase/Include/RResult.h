@@ -1,7 +1,5 @@
 #pragma once
 
-#include <cstddef>
-
 namespace LD {
 
 	enum class RBufferType
@@ -28,6 +26,7 @@ namespace LD {
 		ShaderTypeMismatch,
 		BindingGroupMismatch,
 		BindingMismatch,
+		PassBeginError,
 	};
 
 	enum class RResourceType
@@ -65,6 +64,13 @@ namespace LD {
 		RShaderType Actual;
 	};
 
+	struct RPassBeginError
+	{
+		size_t NumClearValuesExpect;
+		size_t NumClearValuesActual;
+		int MissingClearValueIndex;
+	};
+
 	struct RResult
 	{
 		RResultType Type = RResultType::Ok;
@@ -77,6 +83,7 @@ namespace LD {
 			RTextureSizeMismatch TextureSizeMismatch;
 			RBufferTypeMismatch BufferTypeMismatch;
 			RShaderTypeMismatch ShaderTypeMismatch;
+			RPassBeginError PassBeginError;
 		};
 	};
 
