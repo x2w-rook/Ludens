@@ -40,6 +40,10 @@ namespace LD {
 		void Startup(GLContext& context, const GLFrameBufferInfo& info);
 		void Cleanup();
 		void Bind();
+		void BindDrawBuffers();
+
+		inline bool HasDepthBits() const { return mHasDepthBits; }
+		inline bool HasStencilBits() const { return mHasStencilBits; }
 
 		inline UID GetHandle() const { return (UID)mHandle; }
 		inline explicit operator UID() const { return (UID)mHandle; }
@@ -50,6 +54,9 @@ namespace LD {
 		GLContext* mContext = nullptr;
 		GLFrameBufferInfo mInfo;
 		GLuint mFrameBuffer;
+		size_t mColorAttachmentCount = 0;
+		bool mHasDepthBits;
+		bool mHasStencilBits;
 	};
 
 } // namespace LD

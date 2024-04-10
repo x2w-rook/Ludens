@@ -21,9 +21,9 @@ namespace LD {
 		glCreateFramebuffers(1, &mFrameBuffer);
 		mContext->BindFrameBuffer(*this);
 
-		size_t colorAttachmentCount = info.ColorAttachmentCount;
+		mColorAttachmentCount = info.ColorAttachmentCount;
 
-		for (size_t i = 0; i < colorAttachmentCount; i++)
+		for (size_t i = 0; i < mColorAttachmentCount; i++)
 		{
 			GLTexture2D& attachment = *info.ColorAttachments[i];
 
@@ -34,19 +34,32 @@ namespace LD {
 		if (info.DepthStencilAttachment)
 		{
 			GLTexture2D& attachment = *info.DepthStencilAttachment;
+			GLenum format = attachment.GetDataFormat();
+			GLenum attachmentType;
 
-			// TODO: currently assumes GL_DEPTH_STENCIL_ATTACHMENT, check if attachment is depth only or stencil only
+			if (format == GL_DEPTH_COMPONENT)
+			{
+				attachmentType = GL_DEPTH_ATTACHMENT;
+				mHasDepthBits = true;
+				mHasStencilBits = false;
+			}
+			else if (format == GL_DEPTH_STENCIL)
+			{
+				attachmentType = GL_DEPTH_STENCIL_ATTACHMENT;
+				mHasDepthBits = true;
+				mHasStencilBits = true;
+			}
+			else
+				LD_DEBUG_UNREACHABLE;
 
 			attachment.Bind(0);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, (GLuint)attachment, 0);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, attachmentType, GL_TEXTURE_2D, (GLuint)attachment, 0);
 		}
-
-		Vector<GLenum> drawBuffers(colorAttachmentCount);
-		for (size_t i = 0; i < colorAttachmentCount; i++)
+		else
 		{
-			drawBuffers[i] = GL_COLOR_ATTACHMENT0 + i;
+			mHasDepthBits = false;
+			mHasStencilBits = false;
 		}
-		glDrawBuffers(colorAttachmentCount, drawBuffers.Data());
 
 		LD_DEBUG_ASSERT(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
 
@@ -64,6 +77,18 @@ namespace LD {
 	void GLFrameBuffer::Bind()
 	{
 		mContext->BindFrameBuffer(*this);
+	}
+
+	void GLFrameBuffer::BindDrawBuffers()
+	{
+		Vector<GLenum> drawBuffers(mColorAttachmentCount);
+
+		for (size_t i = 0; i < mColorAttachmentCount; i++)
+		{
+			drawBuffers[i] = GL_COLOR_ATTACHMENT0 + i;
+		}
+
+		glDrawBuffers(drawBuffers.Size(), drawBuffers.Data());
 	}
 
 } // namespace LD

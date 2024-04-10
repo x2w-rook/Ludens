@@ -224,6 +224,7 @@ namespace LD {
 
 		CUID<RPassBase> ID;
 		RDeviceBase* Device = nullptr;
+		Vector<RPassAttachment> Attachments;
 	};
 
 	struct RFrameBufferBase

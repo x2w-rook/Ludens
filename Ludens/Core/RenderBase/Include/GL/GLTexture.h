@@ -31,6 +31,10 @@ namespace LD {
 		void Cleanup();
 		void Bind(int unit);
 
+		inline GLenum GetInternalFormat() const { return mInternalFormat; }
+		inline GLenum GetDataFormat() const { return mDataFormat; }
+		inline GLenum GetDataType() const { return mDataType; }
+
 		inline UID GetHandle() const { return (UID)mHandle; }
 		inline explicit operator UID() const { return (UID)mHandle; }
 		inline explicit operator GLuint() const { return mTexture; }
@@ -39,6 +43,9 @@ namespace LD {
 		CUID<GLTexture2D> mHandle;
 		GLContext* mContext = nullptr;
 		GLuint mTexture;
+		GLenum mInternalFormat;
+		GLenum mDataFormat;
+		GLenum mDataType;
 	};
 
 	struct GLTexture2DArrayInfo

@@ -18,6 +18,9 @@ namespace LD {
 	{
 		mHandle = CUID<GLTexture2D>::Get();
 		mContext = &context;
+		mInternalFormat = info.InternalFormat;
+		mDataFormat = info.DataFormat;
+		mDataType = info.DataType;
 
 		glCreateTextures(GL_TEXTURE_2D, 1, &mTexture);
 		Bind(0);
@@ -29,7 +32,7 @@ namespace LD {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		glTexImage2D(GL_TEXTURE_2D, 0, info.InternalFormat, (GLsizei)info.Width, (GLsizei)info.Height, 0, info.DataFormat, info.DataType, info.Data);
+		glTexImage2D(GL_TEXTURE_2D, 0, mInternalFormat, (GLsizei)info.Width, (GLsizei)info.Height, 0, mDataFormat, mDataType, info.Data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 

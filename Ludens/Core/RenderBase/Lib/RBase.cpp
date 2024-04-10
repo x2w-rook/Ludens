@@ -220,6 +220,9 @@ namespace LD {
 		ID = CUID<RPassBase>::Get();
 		Device = device;
 
+		Attachments.Resize(info.Attachments.Size());
+		std::copy(info.Attachments.Begin(), info.Attachments.End(), Attachments.Begin());
+
 		// connect
 		passH.mID = ID;
 		passH.mPass = this;
@@ -250,11 +253,7 @@ namespace LD {
 		Height = info.Height;
 
 		ColorAttachments.Resize(info.ColorAttachments.Size());
-
-		for (size_t i = 0; i < ColorAttachments.Size(); i++)
-		{
-			ColorAttachments[i] = info.ColorAttachments[i];
-		}
+		std::copy(info.ColorAttachments.Begin(), info.ColorAttachments.End(), ColorAttachments.Begin());
 
 		DepthStencilAttachment = info.DepthStencilAttachment;
 	}
