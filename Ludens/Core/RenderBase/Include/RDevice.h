@@ -5,8 +5,6 @@
 #include "Core/DSA/Include/Optional.h"
 #include "Core/RenderBase/Include/RTypes.h"
 #include "Core/RenderBase/Include/RResult.h"
-#include "Core/RenderBase/Include/RPass.h"
-#include "Core/RenderBase/Include/RFrameBuffer.h"
 
 namespace LD {
 
@@ -30,6 +28,7 @@ namespace LD {
 	struct RPassBeginInfo;
 	struct RFrameBufferInfo;
 	struct RPipelineInfo;
+	enum class RTextureFormat;
 
 	using RResultCallback = void (*)(const RResult&);
 

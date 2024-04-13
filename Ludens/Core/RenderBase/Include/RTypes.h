@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Core/Header/Include/Types.h"
+#include "Core/DSA/Include/Optional.h"
+#include "Core/Math/Include/Vec4.h"
 
 namespace LD {
 
@@ -39,6 +42,20 @@ namespace LD {
 		u32 IndexStart = 0;
 		u32 InstanceCount = 1;
 		u32 InstanceStart = 0;
+	};
+
+	using RClearColorValue = Vec4;
+
+	struct RClearDepthStencilValue
+	{
+		f32 Depth = 1.0f;
+		u8 Stencil = 0;
+	};
+
+	struct RClearValue
+	{
+		Optional<RClearColorValue> Color;
+		Optional<RClearDepthStencilValue> DepthStencil;
 	};
 
 } // namespace LD

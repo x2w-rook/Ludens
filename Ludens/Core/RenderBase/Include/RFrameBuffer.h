@@ -5,9 +5,10 @@
 #include "Core/OS/Include/UID.h"
 #include "Core/DSA/Include/View.h"
 #include "Core/DSA/Include/Optional.h"
+#include "Core/RenderBase/Include/RPass.h"
+#include "Core/RenderBase/Include/RTypes.h"
 #include "Core/RenderBase/Include/RTexture.h"
 #include "Core/RenderBase/Include/RResult.h"
-#include "Core/RenderBase/Include/RPass.h"
 
 namespace LD {
 
@@ -46,20 +47,6 @@ namespace LD {
 	private:
 		UID mID = 0;
 		RFrameBufferBase* mFrameBuffer = nullptr;
-	};
-
-	using RClearColorValue = Vec4;
-	
-	struct RClearDepthStencilValue
-	{
-		f32 Depth = 1.0f;
-		u8 Stencil = 0;
-	};
-
-	struct RClearValue
-	{
-		Optional<RClearColorValue> Color;
-		Optional<RClearDepthStencilValue> DepthStencil;
 	};
 
 	struct RPassBeginInfo
