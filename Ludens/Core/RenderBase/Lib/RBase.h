@@ -271,6 +271,11 @@ namespace LD {
 		RShader VertexShaderH;
 		RShader FragmentShaderH;
 		Vector<RBindingGroupLayout> GroupLayoutsH;
+
+		bool DepthTestEnabled;
+		bool DepthWriteEnabled;
+		RCullMode CullMode;
+		RPolygonMode PolygonMode;
 	};
 
 

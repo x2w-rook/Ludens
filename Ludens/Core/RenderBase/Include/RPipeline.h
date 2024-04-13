@@ -47,6 +47,20 @@ namespace LD {
 		View<RBindingGroupLayout> GroupLayouts;
 	};
 
+	enum class RCullMode
+	{
+		BackFace,
+		FrontFace,
+		None,
+	};
+
+	enum class RPolygonMode
+	{
+		Fill,
+		Line,
+		Point,
+	};
+
 	// Info to create a graphics pipeline.
 	struct RPipelineInfo
 	{
@@ -57,6 +71,18 @@ namespace LD {
 		RShader VertexShader;
 		RShader FragmentShader;
 		RPass RenderPass;
+
+		struct
+		{
+			bool DepthTestEnabled = true;
+			bool DepthWriteEnabled = true;
+		} DepthStencilState;
+
+		struct
+		{
+			RCullMode CullMode = RCullMode::BackFace;
+			RPolygonMode PolygonMode = RPolygonMode::Fill;
+		} RasterizationState;
 	};
 
 	struct RPipelineBase;

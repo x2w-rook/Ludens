@@ -18,7 +18,9 @@ namespace LD {
 	{
 		RPipelineBase::Startup(pipelineH, info, &device);
 
-		PrimitiveTopology = DeriveGLPrimitiveTopology(info.PrimitiveTopology);
+		GLPrimitiveTopology = DeriveGLPrimitiveTopology(info.PrimitiveTopology);
+		GLPolygonMode = PolygonMode == RPolygonMode::Fill ? GL_FILL : (PolygonMode == RPolygonMode::Line ? GL_LINE : GL_POINT);
+		GLCullMode = CullMode == RCullMode::BackFace ? GL_BACK : (CullMode == RCullMode::FrontFace ? GL_FRONT : GL_NONE);
 
 		RShaderGL& vertexShader = Derive<RShaderGL>(VertexShaderH);
 		RShaderGL& fragmentShader = Derive<RShaderGL>(FragmentShaderH);

@@ -327,6 +327,10 @@ namespace LD {
 		VertexLayout = info.VertexLayout;
 		VertexShaderH = info.VertexShader;
 		FragmentShaderH = info.FragmentShader;
+		DepthTestEnabled = info.DepthStencilState.DepthTestEnabled;
+		DepthWriteEnabled = info.DepthStencilState.DepthWriteEnabled;
+		CullMode = info.RasterizationState.CullMode;
+		PolygonMode = info.RasterizationState.PolygonMode;
 
 		const RPipelineLayout& pipelineLayout = info.PipelineLayout;
 

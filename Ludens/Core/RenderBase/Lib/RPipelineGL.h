@@ -29,7 +29,9 @@ namespace LD {
 
 		GLVertexArray VAO;
 		GLProgram Program;
-		GLenum PrimitiveTopology;
+		GLenum GLPrimitiveTopology;
+		GLenum GLPolygonMode;
+		GLenum GLCullMode;
 		Vector<u32> VertexStrides; // vertex byte size at each vertex buffer slot
 		
 		// for each binding group, map RTexture binding to OpenGL Texture Unit

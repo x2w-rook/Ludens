@@ -298,16 +298,48 @@ namespace LD {
 		RFrameBufferGL& frameBuffer = Derive<RFrameBufferGL>(info.FrameBuffer);
 		RPassGL& renderPass = Derive<RPassGL>(info.RenderPass);
 
-		// TODO: clear value code path for default frame buffer
 		if (frameBuffer.IsDefaultFrameBuffer)
 		{
 			Context.UnbindFrameBuffer();
+
+			GLenum clearMask = 0;
+
+			// select clear values for default framebuffer attachments
+			for (size_t i = 0; i < info.ClearValues.Size(); i++)
+			{
+				const RClearValue& clearValue = info.ClearValues[i];
+				if (clearValue.Color.HasValue())
+				{
+					RClearColorValue color = clearValue.Color.Value();
+
+					clearMask |= GL_COLOR_BUFFER_BIT;
+					glClearColor(color.r, color.g, color.b, color.a);
+				}
+				if (clearValue.DepthStencil.HasValue())
+				{
+					RClearDepthStencilValue depthStencil = clearValue.DepthStencil.Value();
+
+					// TODO: query if default framebuffer has depth stencil bits
+					
+					clearMask |= GL_DEPTH_BUFFER_BIT;
+					glClearDepth(depthStencil.Depth);
+
+					clearMask |= GL_STENCIL_BUFFER_BIT;
+					glClearStencil(depthStencil.Stencil);
+				}
+			}
+
+			// clear the default framebuffer attachments
+			if (clearMask != 0)
+				glClear(clearMask);
+
 			return {};
 		}
 
 		Context.BindFrameBuffer(frameBuffer.FBO);
 		frameBuffer.FBO.BindDrawBuffers();
 
+		// clear individual framebuffer attachments
 		for (size_t i = 0; i < info.ClearValues.Size(); i++)
 		{
 			const RClearValue& clearValue = info.ClearValues[i];
@@ -333,7 +365,6 @@ namespace LD {
 			}
 		}
 
-
 		return {};
 	}
 
@@ -350,7 +381,34 @@ namespace LD {
 		pipeline.VAO.Bind();
 		pipeline.Program.Bind();
 
-		// TODO: depth testing should be a state of RPipeline
+		// set rasterization states
+		if (pipeline.GLCullMode == GL_NONE)
+		{
+			glDisable(GL_CULL_FACE);
+			glPolygonMode(GL_FRONT_AND_BACK, pipeline.GLPolygonMode);
+		}
+		else
+		{
+			GLenum rasterizeFace = pipeline.GLCullMode == GL_BACK ? GL_FRONT : GL_BACK;
+
+			glEnable(GL_CULL_FACE);
+			glFrontFace(GL_CCW);
+			glCullFace(pipeline.GLCullMode);
+			glPolygonMode(rasterizeFace, pipeline.GLPolygonMode);
+		}
+
+		// set depth stencil states
+		if (pipeline.DepthTestEnabled)
+		{
+			glEnable(GL_DEPTH_TEST);
+			glDepthFunc(GL_LESS);
+		}
+		else
+		{
+			glDisable(GL_DEPTH_TEST);
+		}
+
+		glDepthMask(pipeline.DepthWriteEnabled);
 
 		return {};
 	}
@@ -441,7 +499,7 @@ namespace LD {
 
 		RPipelineGL& pipeline = Derive<RPipelineGL>(BoundPipelineH);
 
-		GLCommand::DrawArraysInstanced(pipeline.PrimitiveTopology, info.VertexCount, info.InstanceCount, info.InstanceStart);
+		GLCommand::DrawArraysInstanced(pipeline.GLPrimitiveTopology, info.VertexCount, info.InstanceCount, info.InstanceStart);
 
 		return {};
 	}
@@ -453,7 +511,7 @@ namespace LD {
 
 		RPipelineGL& pipeline = Derive<RPipelineGL>(BoundPipelineH);
 
-		GLCommand::DrawElementsInstanced(pipeline.PrimitiveTopology, info.IndexCount, IndexType, info.InstanceCount, info.InstanceStart);
+		GLCommand::DrawElementsInstanced(pipeline.GLPrimitiveTopology, info.IndexCount, IndexType, info.InstanceCount, info.InstanceStart);
 
 		return {};
 	}
