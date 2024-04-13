@@ -164,16 +164,22 @@ namespace LD {
     void RShaderCompiler::Compile(const RPipelineLayout& layout, RShaderType type, const std::string& glsl, Vector<u32>& spirv)
     {
         std::string input_glsl(glsl);
+        std::string preamble;
 
         if (mTargetBackend == RBackend::OpenGL)
         {
             PatchOpenGL(layout, type, input_glsl);
+            preamble = "#define LD_OPENGL\n";
+
+            // dirty debug dump
             printf("=== Patched GLSL Begin === \n");
             printf("%s\n", input_glsl.c_str());
             printf("=== Patched GLSL End === \n");
         }
+        else if (mTargetBackend == RBackend::Vulkan)
+            preamble = "#define LD_VULKAN\n";
 
-        GlslangCompile(mTargetBackend, type, input_glsl, spirv);
+        GlslangCompile(mTargetBackend, type, input_glsl, preamble, spirv);
     }
 
     void RShaderCompiler::Compile(const RPipelineLayout& layout, RShaderType type, const std::string& glsl, Vector<u8>& spirv)
@@ -234,7 +240,7 @@ namespace LD {
             *pversion = version;
     }
 
-    void RShaderCompiler::GlslangCompile(RBackend backend, RShaderType type, const std::string& glsl, Vector<u32>& spirv)
+    void RShaderCompiler::GlslangCompile(RBackend backend, RShaderType type, const std::string& glsl, const std::string& glslPreamble, Vector<u32>& spirv)
     {
         EShLanguage shaderType;
         glslang::EShClient client;
@@ -243,12 +249,13 @@ namespace LD {
         GlslangShaderType(type, &shaderType);
         GlslangBackend(backend, &client, &clientVersion);
 
+        std::string preamble = "#define group set\n" + glslPreamble;
         glslang::TShader shader(shaderType);
         {
             const char* glslSource = glsl.c_str();
             shader.setStrings(&glslSource, 1);
             shader.setEntryPoint("main");
-            shader.setPreamble("#define group set\n");
+            shader.setPreamble(preamble.c_str());
             shader.setEnvTarget(glslang::EShTargetSpv, glslang::EShTargetSpv_1_0);
             shader.setEnvClient(client, clientVersion);
 
@@ -319,8 +326,12 @@ namespace LD {
             }
         }
 
+        // even though ludens source GLSL is using the Vulkan dialect, we will still reconstruct
+        // OpenGL GLSL later, so we respect the LD_OPENGL directives in the source GLSL
+        std::string preamble = "#define LD_OPENGL\n";
+
         Vector<u32> spirv;
-        GlslangCompile(RBackend::Vulkan, type, glsl, spirv);
+        GlslangCompile(RBackend::Vulkan, type, glsl, preamble, spirv);
 
         // TODO: validate shader reflection result with the pipeline layout, find any conflicts
         try

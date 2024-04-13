@@ -82,7 +82,7 @@ namespace LD {
 	private:
 		void GlslangShaderType(RShaderType type, EShLanguage* language);
 		void GlslangBackend(RBackend backend, glslang::EShClient* client, glslang::EShTargetClientVersion* version);
-		void GlslangCompile(RBackend backend, RShaderType type, const std::string& glsl, Vector<u32>& spirv);
+		void GlslangCompile(RBackend backend, RShaderType type, const std::string& glsl, const std::string& glslPreamble, Vector<u32>& spirv);
 		void PatchOpenGL(const RPipelineLayout& layout, RShaderType type, std::string& glsl);
 
 		RBackend mTargetBackend;
