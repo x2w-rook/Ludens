@@ -72,6 +72,35 @@ namespace LD {
 		}
 	}
 
+	inline GLenum DeriveGLBlendOp(RBlendMode mode)
+	{
+		switch (mode)
+		{
+		case RBlendMode::Add:    return GL_FUNC_ADD;
+		default:
+			break;
+		}
+		
+		LD_DEBUG_UNREACHABLE;
+	}
+
+	inline GLenum DeriveGLBlendFactor(RBlendFactor factor)
+	{
+		switch (factor)
+		{
+		case RBlendFactor::Zero:               return GL_ZERO;
+		case RBlendFactor::One:                return GL_ONE;
+		case RBlendFactor::SrcAlpha:           return GL_SRC_ALPHA;
+		case RBlendFactor::DstAlpha:           return GL_DST_ALPHA;
+		case RBlendFactor::OneMinusSrcAlpha:   return GL_ONE_MINUS_SRC_ALPHA;
+		case RBlendFactor::OneMinusDstAlpha:   return GL_ONE_MINUS_DST_ALPHA;
+		default:
+			break;
+		}
+
+		LD_DEBUG_UNREACHABLE;
+	}
+
 	void DeriveGLTextureFormat(const RTextureFormat& format, GLenum* internalFormat, GLenum* dataFormat, GLenum* type);
 
 } // namespace LD

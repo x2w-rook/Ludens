@@ -61,6 +61,21 @@ namespace LD {
 		Point,
 	};
 
+	enum class RBlendMode
+	{
+		Add,
+	};
+
+	enum class RBlendFactor
+	{
+		Zero,
+		One,
+		SrcAlpha,
+		DstAlpha,
+		OneMinusSrcAlpha,
+		OneMinusDstAlpha,
+	};
+
 	// Info to create a graphics pipeline.
 	struct RPipelineInfo
 	{
@@ -71,6 +86,17 @@ namespace LD {
 		RShader VertexShader;
 		RShader FragmentShader;
 		RPass RenderPass;
+
+		struct
+		{
+			bool BlendEnabled = false;
+			RBlendFactor ColorSrcFactor = RBlendFactor::SrcAlpha;
+			RBlendFactor ColorDstFactor = RBlendFactor::OneMinusSrcAlpha;
+			RBlendMode ColorBlendMode = RBlendMode::Add;
+			RBlendFactor AlphaSrcFactor = RBlendFactor::One;
+			RBlendFactor AlphaDstFactor = RBlendFactor::Zero;
+			RBlendMode AlphaBlendMode = RBlendMode::Add;
+		} BlendState;
 
 		struct
 		{

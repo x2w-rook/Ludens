@@ -32,6 +32,13 @@ namespace LD {
 		GLenum GLPrimitiveTopology;
 		GLenum GLPolygonMode;
 		GLenum GLCullMode;
+		GLenum GLColorBlendOp;
+		GLenum GLColorBlendSrcFactor;
+		GLenum GLColorBlendDstFactor;
+		GLenum GLAlphaBlendOp;
+		GLenum GLAlphaBlendSrcFactor;
+		GLenum GLAlphaBlendDstFactor;
+		bool BlendEnabled;
 		Vector<u32> VertexStrides; // vertex byte size at each vertex buffer slot
 		
 		// for each binding group, map RTexture binding to OpenGL Texture Unit

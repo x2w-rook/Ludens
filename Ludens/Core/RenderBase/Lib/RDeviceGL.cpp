@@ -410,6 +410,18 @@ namespace LD {
 
 		glDepthMask(pipeline.DepthWriteEnabled);
 
+		// set blend states
+		if (pipeline.BlendEnabled)
+		{
+			glEnable(GL_BLEND);
+			glBlendFuncSeparate(pipeline.GLColorBlendSrcFactor, pipeline.GLColorBlendDstFactor, pipeline.GLAlphaBlendSrcFactor, pipeline.GLAlphaBlendDstFactor);
+			glBlendEquationSeparate(pipeline.GLColorBlendOp, pipeline.GLAlphaBlendOp);
+		}
+		else
+		{
+			glDisable(GL_BLEND);
+		}
+
 		return {};
 	}
 
