@@ -317,7 +317,8 @@ namespace LD {
                 switch (bindingInfo.Type)
                 {
                 case RBindingType::Texture:
-                    textureUnitRemap[{(u32)groupIdx, (u32)bindingIdx}] = textureUnitCtr++;
+                    textureUnitRemap[{(u32)groupIdx, (u32)bindingIdx}] = textureUnitCtr;
+                    textureUnitCtr += bindingInfo.Count; // an array of samplers uses one texture unit for each sampled texture
                     break;
                 case RBindingType::UniformBuffer:
                     uboBaseRemap[{(u32)groupIdx, (u32)bindingIdx}] = uboBaseCtr++;

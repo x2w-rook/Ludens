@@ -189,6 +189,9 @@ namespace LD {
 		for (size_t i = 0; i < bindingCount; i++)
 		{
 			Bindings[i].Type = layout.Bindings[i].Type;
+
+			if (Bindings[i].Type == RBindingType::Texture)
+				Bindings[i].TextureH.Resize(layout.Bindings[i].Count);
 		}
 
 		// connect

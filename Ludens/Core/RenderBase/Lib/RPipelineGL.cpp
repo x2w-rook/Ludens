@@ -42,10 +42,13 @@ namespace LD {
 
 				for (size_t bindingIdx = 0; bindingIdx < groupLayout.Bindings.Size(); bindingIdx++)
 				{
-					switch (groupLayout.Bindings[bindingIdx].Type)
+					const RBindingInfo& binding = groupLayout.Bindings[bindingIdx];
+
+					switch (binding.Type)
 					{
 					case RBindingType::Texture:
-						TextureUnitBinding[groupIdx][bindingIdx] = textureUnit++;
+						TextureUnitBinding[groupIdx][bindingIdx] = textureUnit;
+						textureUnit += binding.Count;
 						break;
 					case RBindingType::UniformBuffer:
 						UniformBufferBinding[groupIdx][bindingIdx] = uniformBufferBase++;

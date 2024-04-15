@@ -3,9 +3,9 @@
 
 namespace LD {
 
-	RResult RBindingGroup::BindTexture(u32 bindingIdx, RTexture& textureH)
+	RResult RBindingGroup::BindTexture(u32 bindingIdx, RTexture& textureH, int arrayIndex)
 	{
-		return mGroup->BindTexture(bindingIdx, textureH);
+		return mGroup->BindTexture(bindingIdx, textureH, arrayIndex);
 	}
 
 	RResult RBindingGroup::BindUniformBuffer(u32 bindingIdx, RBuffer& bufferH)

@@ -31,7 +31,7 @@ namespace LD {
 		void Startup(RBindingGroup& groupH, const RBindingGroupInfo& info, RDeviceGL& device);
 		void Cleanup(RBindingGroup& groupH);
 
-		virtual RResult BindTexture(u32 binding, RTexture& textureH) override;
+		virtual RResult BindTexture(u32 binding, RTexture& textureH, int arrayIndex) override;
 		virtual RResult BindUniformBuffer(u32 binding, RBuffer& bufferH) override;
 	};
 

@@ -194,14 +194,13 @@ namespace LD {
 		void Startup(RBindingGroup& groupH, const RBindingGroupInfo& info, RDeviceBase* device);
 		void Cleanup(RBindingGroup& groupH);
 
-		virtual RResult BindTexture(u32 binding, RTexture& textureH) = 0;
+		virtual RResult BindTexture(u32 binding, RTexture& textureH, int arrayIndex) = 0;
 		virtual RResult BindUniformBuffer(u32 binding, RBuffer& bufferH) = 0;
 
 		struct Binding
 		{
-			std::string Name;
 			RBindingType Type;
-			RTexture TextureH;
+			Vector<RTexture> TextureH;
 			RBuffer BufferH;
 		};
 

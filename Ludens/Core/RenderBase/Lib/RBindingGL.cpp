@@ -46,16 +46,17 @@ namespace LD {
 		RBindingGroupBase::Cleanup(groupH);
 	}
 
-	RResult RBindingGroupGL::BindTexture(u32 binding, RTexture& textureH)
+	RResult RBindingGroupGL::BindTexture(u32 binding, RTexture& textureH, int arrayIndex)
 	{
 		RBindingGroupLayoutGL& layout = Derive<RBindingGroupLayoutGL>(GroupLayoutH);
 
 		LD_DEBUG_ASSERT(0 <= binding && binding < layout.Bindings.Size());
 		LD_DEBUG_ASSERT(layout.Bindings.Size() == Bindings.Size());
 		LD_DEBUG_ASSERT(layout.Bindings[binding].Type == RBindingType::Texture);
+		LD_DEBUG_ASSERT(0 <= arrayIndex && arrayIndex < Bindings[binding].TextureH.Size());
 
 		// this texture will be visible to shader after RDeviceGL::SetBindingGroup
-		Bindings[binding].TextureH = textureH;
+		Bindings[binding].TextureH[arrayIndex] = textureH;
 
 		return {};
 	}

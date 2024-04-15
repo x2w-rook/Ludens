@@ -39,7 +39,7 @@ namespace LD {
 
 		inline operator RBindingGroupBase*() const { return mGroup; }
 
-		RResult BindTexture(u32 binding, RTexture& textureH);
+		RResult BindTexture(u32 binding, RTexture& textureH, int arrayIndex = 0);
 		RResult BindUniformBuffer(u32 binding, RBuffer& bufferH);
 
 	private:
@@ -72,6 +72,7 @@ namespace LD {
 	struct RBindingInfo
 	{
 		RBindingType Type;
+		int Count = 1;
 	};
 
 	// Info to create a binding group.

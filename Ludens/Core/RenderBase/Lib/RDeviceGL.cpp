@@ -435,14 +435,18 @@ namespace LD {
 			{
 			case RBindingType::Texture:
 			{
-				if (!binding.TextureH)
-					break;
+				int textureUnitBase = (int)textureUnitBinding[bindingIdx];
+				
+				for (int arrayIdx = 0; arrayIdx < binding.TextureH.Size(); arrayIdx++)
+				{
+					if (!binding.TextureH[arrayIdx])
+						continue;
 
-				RTextureGL& texture = Derive<RTextureGL>(binding.TextureH);
-
-				// bind OpenGL texture at correct unit
-				int textureUnit = (int)textureUnitBinding[bindingIdx];
-				texture.Bind(textureUnit);
+					RTextureGL& texture = Derive<RTextureGL>(binding.TextureH[arrayIdx]);
+					
+					// bind OpenGL texture at correct unit
+					texture.Bind(textureUnitBase + arrayIdx);
+				}
 				break;
 			}
 			case RBindingType::UniformBuffer:
