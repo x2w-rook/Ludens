@@ -90,6 +90,14 @@ namespace LD {
 		stream.close();
 	}
 
+	void File::ReadString(std::string& string)
+	{
+		string.resize(mSize);
+		
+		if (mSize > 0)
+			memcpy(string.data(), mData, mSize);
+	}
+
 	FileSystem::FileSystem()
 	{
 	}

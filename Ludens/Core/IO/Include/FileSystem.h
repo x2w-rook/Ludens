@@ -1,6 +1,7 @@
 #pragma once
 
 #include <filesystem>
+#include <string>
 #include "Core/Header/Include/Types.h"
 #include "Core/OS/Include/Memory.h"
 
@@ -49,6 +50,7 @@ namespace LD {
 		bool Open(const Path& path, FileMode mode = FileMode::Read);
 		void Close();
 		void Write(const u8* data, size_t size);
+		void ReadString(std::string& string);
 
 		inline const u8* Data() const { return mData; }
 		inline size_t Size() const { return mSize; }
