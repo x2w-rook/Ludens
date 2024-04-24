@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include "Core/Header/Include/Error.h"
 #include "Core/OS/Include/Memory.h"
 
@@ -75,6 +76,21 @@ namespace LD {
 			LD_DEBUG_ASSERT(mFreeChunks.Size < mMaxChunks);
 
 			mFreeChunks.Push({ (Chunk*)chunk });
+		}
+
+		/// @brief checks if an address is a chunk in the allocator
+		/// @param chunk address of an allocated chunk
+		/// @return true if the input address is the base address of a chunk in the memory pool
+		/// @warning even if the chunk is not in use, this function may return true, only pass in an address returned by Alloc.
+		bool Contains(void* chunk)
+		{
+            std::ptrdiff_t distance = (u8*)chunk - (u8*)mStart;
+            
+			if (distance < 0 || distance % TChunkSize != 0)
+                return false;
+
+			int index = distance / TChunkSize;
+            return 0 <= index && index < mMaxChunks;
 		}
 
 		inline size_t CountFreeChunks() const
