@@ -1,10 +1,12 @@
 set(MODULE_SRC
 	"Include/Array.h"
+	"Include/Buffer.h"
 	"Include/View.h"
 	"Include/Vector.h"
 	"Include/Optional.h")
 
 set(TEST_SRC
+	"Tests/TestBuffer.h"
 	"Tests/TestVector.h"
 	"Tests/TestArray.h"
 	"Tests/TestOptional.h"
