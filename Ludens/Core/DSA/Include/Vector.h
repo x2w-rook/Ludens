@@ -223,4 +223,80 @@ private:
     Buffer mBuffer;
 };
 
+template <typename T, size_t TLocalSize>
+class SmallVector : public VectorBase<T>
+{
+public:
+    SmallVector()
+    {
+        mData = reinterpret_cast<T*>(mLocal);
+        mSize = 0;
+    }
+
+    SmallVector(size_t size)
+    {
+        Resize(size);
+    }
+
+    SmallVector(const std::initializer_list<T>& list)
+    {
+        Resize(list.size());
+        std::copy(list.begin(), list.end(), Begin());
+    }
+
+    SmallVector(const SmallVector& other)
+    {
+        Resize(other.Size());
+        std::copy(other.Begin(), other.End(), Begin());
+    }
+
+    ~SmallVector()
+    {
+        Resize(0);
+    }
+
+    SmallVector& operator=(const SmallVector& other) = delete;
+
+    virtual void Resize(size_t size) override
+    {
+        if (size <= mSize)
+        {
+            for (size_t i = size; i < mSize; i++)
+            {
+                mData[i].~T();
+            }
+            mSize = size;
+            return;
+        }
+
+        if (mData == reinterpret_cast<T*>(mLocal))
+        {
+            if (size > TLocalSize)
+            {
+                // once we exceed local array size, we start allocating heap memory,
+                // the local array is never used again even if we shrink later.
+                mBuffer.Resize(sizeof(T) * size);
+                mData = (T*)mBuffer.Data();
+                memcpy(mData, mLocal, sizeof(T) * mSize);
+            }
+        }
+        else
+        {
+            mBuffer.Resize(sizeof(T) * size);
+            mData = (T*)mBuffer.Data();
+        }
+
+        for (size_t i = mSize; i < size; i++)
+        {
+            new (mData + i) T();
+        }
+
+        mSize = size;
+    }
+
+private:
+    Buffer mBuffer;
+    char* mLocal[sizeof(T) * TLocalSize];
+};
+
 } // namespace LD

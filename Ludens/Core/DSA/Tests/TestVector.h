@@ -5,87 +5,214 @@
 
 using namespace LD;
 
+class Foo
+{
+public:
+    Foo()
+    {
+        Value = 0;
+        CtorCounter++;
+    }
+
+    Foo(int value) : Value(value)
+    {
+        CtorCounter++;
+    }
+
+    Foo(const Foo& other)
+    {
+        Value = other.Value;
+    }
+
+    ~Foo()
+    {
+        DtorCounter++;
+    }
+
+    Foo& operator=(const Foo& other)
+    {
+        Value = other.Value;
+        return *this;
+    }
+
+    int Value;
+
+    static void Reset()
+    {
+        CtorCounter = 0;
+        DtorCounter = 0;
+    }
+    
+    static int CtorCount()
+    {
+        return CtorCounter;
+    }
+
+    static int DtorCount()
+    {
+        return DtorCounter;
+    }
+
+private:
+    static int CtorCounter;
+    static int DtorCounter;
+};
+
+int Foo::CtorCounter = 0;
+int Foo::DtorCounter = 0;
+
 TEST_CASE("Vector ctor")
 {
-	{
-		Vector<float> v;
-		CHECK(v.Size() == 0);
-		CHECK(v.ByteSize() == 0);
-		CHECK(v.IsEmpty());
-	}
+    {
+        Vector<float> v;
+        CHECK(v.Size() == 0);
+        CHECK(v.ByteSize() == 0);
+        CHECK(v.IsEmpty());
+    }
 
-	{
-		Vector<char> v(5);
-		CHECK(v.Size() == 5);
-		CHECK(v.ByteSize() == 5);
-		CHECK(!v.IsEmpty());
+    {
+        Vector<char> v(5);
+        CHECK(v.Size() == 5);
+        CHECK(v.ByteSize() == 5);
+        CHECK(!v.IsEmpty());
 
-		v.Front() = 1;
-		v.Back() = 5;
+        v.Front() = 1;
+        v.Back() = 5;
 
-		CHECK(v.Front() == 1);
-		CHECK(v.Back() == 5);
-	}
+        CHECK(v.Front() == 1);
+        CHECK(v.Back() == 5);
+    }
+}
+
+template <typename TVectorInt>
+static void TestVectorMutate()
+{
+    {
+        TVectorInt v;
+        for (int i = 0; i < 10; i++)
+            v.PushBack(i);
+
+        CHECK(v.Size() == 10);
+        CHECK(v.ByteSize() == sizeof(int) * 10);
+        CHECK(v.Front() == 0);
+        CHECK(v.Back() == 9);
+
+        for (int i = 0; i < v.Size(); i++)
+        {
+            CHECK(v[i] == i);
+            ++v[i];
+            CHECK(v[i] == i + 1);
+        }
+    }
 }
 
 TEST_CASE("Vector Mutate")
 {
-	{
-		Vector<int> v;
-		for (int i = 0; i < 10; i++)
-			v.PushBack(i);
+    TestVectorMutate<Vector<int>>();
+    TestVectorMutate<SmallVector<int, 5>>();
+}
 
-		CHECK(v.Size() == 10);
-		CHECK(v.ByteSize() == sizeof(int) * 10);
-		CHECK(v.Front() == 0);
-		CHECK(v.Back() == 9);
+template <typename TVectorInt>
+static void TestVectorCopy()
+{
+    {
+       TVectorInt v1 = {1, 2, 3, 4, 5};
+       TVectorInt v2(v1);
 
-		for (int i = 0; i < v.Size(); i++)
-		{
-			CHECK(v[i] == i);
-			++v[i];
-			CHECK(v[i] == i + 1);
-		}
-	}
+        CHECK(v2.Size() == 5);
+        CHECK(v2[1] == 2);
+        CHECK(v2[4] == 5);
+        CHECK(v2.Front() == 1);
+        CHECK(v2.Back() == 5);
+
+        for (int i = 0; i < v2.Size(); i++)
+        {
+            v2[i]++;
+            CHECK(v2[i] - v1[i] == 1);
+        }
+    }
+
+    {
+       TVectorInt v1 = {1, 2, 3, 4};
+       TVectorInt v2 = v1;
+
+        v2.PushBack(5);
+        v2.PushBack(6);
+        v2.PushBack(7);
+        v2.PushBack(8);
+
+        CHECK(v2.Back() == 8);
+        CHECK(v2.Size() == 8);
+        CHECK(v1.Size() == 4);
+
+        for (int i = 0; i < v1.Size(); i++)
+        {
+            CHECK(v1[i] == v2[i]);
+            v1[i] += 4;
+            CHECK(v1[i] == v2[i + 4]);
+        }
+    }
 }
 
 TEST_CASE("Vector Copy")
 {
-	{
-		Vector<int> v1 = { 1, 2, 3, 4, 5 };
-		Vector<int> v2(v1);
+    TestVectorCopy<Vector<int>>();
+    TestVectorCopy<SmallVector<int, 1>>();
+}
 
-		CHECK(v2.Size() == 5);
-		CHECK(v2[1] == 2);
-		CHECK(v2[4] == 5);
-		CHECK(v2.Front() == 1);
-		CHECK(v2.Back() == 5);
+template <typename TVectorFoo>
+static void TestVectorElementLifetime()
+{
+    Foo::Reset();
 
-		for (int i = 0; i < v2.Size(); i++)
-		{
-			v2[i]++;
-			CHECK(v2[i] - v1[i] == 1);
-		}
-	}
+    {
+        TVectorFoo v;
+        CHECK(Foo::CtorCount() == 0);
+        CHECK(Foo::DtorCount() == 0);
 
-	{
-		Vector<int> v1 = { 1, 2, 3, 4 };
-		Vector<int> v2 = v1;
+        // growing should default construct elements
+        v.Resize(27);
+        CHECK(Foo::CtorCount() == 27);
+        CHECK(Foo::DtorCount() == 0);
 
-		v2.PushBack(5);
-		v2.PushBack(6);
-		v2.PushBack(7);
-		v2.PushBack(8);
+        // shrinking should destruct the unused elements
+        v.Resize(20);
+        CHECK(Foo::CtorCount() == 27);
+        CHECK(Foo::DtorCount() == 7);
+    }
 
-		CHECK(v2.Back() == 8);
-		CHECK(v2.Size() == 8);
-		CHECK(v1.Size() == 4);
+    CHECK(Foo::CtorCount() == 27);
+    CHECK(Foo::DtorCount() == 27);
 
-		for (int i = 0; i < v1.Size(); i++)
-		{
-			CHECK(v1[i] == v2[i]);
-			v1[i] += 4;
-			CHECK(v1[i] == v2[i + 4]);
-		}
-	}
+    Foo::Reset();
+
+    {
+        TVectorFoo v1(10);
+        CHECK(Foo::CtorCount() == 10);
+        CHECK(Foo::DtorCount() == 0);
+
+        v1.PushBack({});
+        v1.PushBack({});
+        CHECK(v1.Size() == 12);
+        CHECK(Foo::CtorCount() == 14);
+        CHECK(Foo::DtorCount() == 2);
+
+        TVectorFoo v2 = v1;
+        CHECK(v2.Size() == 12);
+        CHECK(Foo::CtorCount() == 26);
+        CHECK(Foo::DtorCount() == 2);
+
+        v2.Clear();
+        CHECK(Foo::CtorCount() == 26);
+        CHECK(Foo::DtorCount() == 14);
+    }
+
+    CHECK(Foo::CtorCount() == 26);
+    CHECK(Foo::DtorCount() == 26);
+}
+
+TEST_CASE("Vector Element Lifetime")
+{
+    TestVectorElementLifetime<Vector<Foo>>();
+    TestVectorElementLifetime<SmallVector<Foo, 8>>();
 }
