@@ -2,15 +2,20 @@ set(MODULE_SRC
 	"Include/Array.h"
 	"Include/Buffer.h"
 	"Include/View.h"
+	"Include/Stack.h"
 	"Include/Vector.h"
-	"Include/Optional.h")
+	"Include/Optional.h"
+)
 
 set(TEST_SRC
 	"Tests/TestBuffer.h"
+	"Tests/TestStack.h"
 	"Tests/TestVector.h"
 	"Tests/TestArray.h"
 	"Tests/TestOptional.h"
-	"Tests/DSATests.cpp")
+	"Tests/DSATests.h"
+	"Tests/DSATests.cpp"
+)
 
 add_executable(LDDSATests "${MODULE_SRC}" "${TEST_SRC}")
 target_include_directories(LDDSATests PRIVATE
