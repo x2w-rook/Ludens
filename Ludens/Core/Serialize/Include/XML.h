@@ -134,6 +134,8 @@ private:
 
 struct XMLParserConfig
 {
+    /// if set to true, skips xml header parsing
+    bool SkipHeader = false;
 };
 
 struct XMLTag
@@ -157,9 +159,13 @@ public:
 private:
     
     /// @brief try and parse a single element and its contents
-    /// @return true is an element is parsed, false otherwise
+    /// @return true if an element is parsed, false otherwise
     bool ParseElement(XMLDocument& doc);
     void ParseElementContent(XMLDocument& doc);
+
+    /// @brief try and parse the xml header, storing result to mHeader
+    /// @return true if the header is valid and parsed, false otherwise
+    bool ParseHeader(XMLDocument& doc); 
 
     /// @brief try and parse a single tag
     /// @return 0 if a closing tag is parsed, 1 if a self closing tag is parsed, 2 if an opening tag is parsed
@@ -170,6 +176,7 @@ private:
     int ParseAttributes(XMLDocument& doc, XMLAttribute** frist, XMLAttribute** last);
 
     Stack<XMLTag> mTagStack;
+    XMLParserConfig mConfig;
     XMLElement* mElement;
     const char* mXML;
     int mCursor;
@@ -248,6 +255,11 @@ public:
         return mFirstChild;
     }
 
+    inline XMLElement* GetHeader()
+    {
+        return mHeader;
+    }
+
     /// add a child element to the document
     XMLElement* AddElement(const XMLString& name);
 
@@ -258,6 +270,7 @@ private:
     void FreeNode(XMLNode* node);
 
     Vector<NodeAllocator> mPages;
+    XMLElement* mHeader = nullptr;
     XMLNode* mFirstChild = nullptr;
     XMLNode* mLastChild = nullptr;
 };

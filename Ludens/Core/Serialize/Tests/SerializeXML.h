@@ -21,9 +21,66 @@ static bool Equal(const XMLString& xml, const char* str)
     return true;
 }
 
+TEST_CASE("XML Header")
+{
+    XMLParserConfig config{};
+    XMLParser parser(config);
+
+    {
+        auto fuzz = [](XMLParser& parser, const char* xml) {
+            Ref<XMLDocument> doc = parser.ParseString(xml);
+            CHECK(doc);
+
+            XMLElement* header = doc->GetHeader();
+            CHECK(header);
+            CHECK(Equal(header->GetName(), "xml"));
+
+            XMLAttribute* attr = header->GetFirstAttribute();
+            CHECK(!attr);
+        };
+
+        fuzz(parser, "<?xml?>");
+        fuzz(parser, "<?xml  ?>");
+    }
+
+    {
+        auto fuzz = [](XMLParser& parser, const char* xml) {
+            Ref<XMLDocument> doc = parser.ParseString(xml);
+            CHECK(doc);
+
+            XMLElement* header = doc->GetHeader();
+            CHECK(header);
+            CHECK(Equal(header->GetName(), "xml"));
+
+            XMLAttribute* attr = header->GetFirstAttribute();
+            CHECK(attr);
+            CHECK(Equal(attr->GetName(), "version"));
+            CHECK(Equal(attr->GetValue(), "1.0"));
+
+            attr = attr->GetNext();
+            CHECK(attr);
+            CHECK(Equal(attr->GetName(), "encoding"));
+            CHECK(Equal(attr->GetValue(), "UTF-8"));
+
+            attr = attr->GetNext();
+            CHECK(attr);
+            CHECK(Equal(attr->GetName(), "standalone"));
+            CHECK(Equal(attr->GetValue(), "no"));
+
+            attr = attr->GetNext();
+            CHECK(!attr);
+        };
+
+        fuzz(parser, "<?xml version='1.0' encoding='UTF-8' standalone='no'?>");
+        fuzz(parser, "<?xml version = '1.0' encoding = 'UTF-8' standalone = 'no' ?>");
+    }
+}
+
 TEST_CASE("XML Single Element")
 {
     XMLParserConfig config{};
+    config.SkipHeader = true;
+
     XMLParser parser(config);
 
     // single element, no content
@@ -116,6 +173,8 @@ TEST_CASE("XML Single Element")
 TEST_CASE("XML Top Level Elements")
 {
     XMLParserConfig config{};
+    config.SkipHeader = true;
+
     XMLParser parser(config);
 
     // multiple top level elements
@@ -208,6 +267,8 @@ TEST_CASE("XML Top Level Elements")
 TEST_CASE("XML Nested Elements")
 {
     XMLParserConfig config{};
+    config.SkipHeader = true;
+
     XMLParser parser(config);
 
     {
@@ -284,6 +345,8 @@ TEST_CASE("XML Nested Elements")
 TEST_CASE("XML Mixed Content")
 {
     XMLParserConfig config{};
+    config.SkipHeader = true;
+
     XMLParser parser(config);
 
     {

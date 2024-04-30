@@ -62,6 +62,22 @@ static inline bool StringEqual(const XMLString& lhs, const XMLString& rhs)
     return true;
 }
 
+static inline bool StringEqual(const XMLString& str, const char* cstr)
+{
+    size_t len = strlen(cstr);
+
+    if (str.Size() != len)
+        return false;
+
+    const char* data = str.Data();
+
+    for (size_t i = 0; i < len; i++)
+        if (data[i] != cstr[i])
+            return false;
+
+    return true;
+}
+
 XMLText::XMLText()
 {
 }
@@ -160,7 +176,7 @@ void XMLAttribute::SetValue(const XMLString& value)
     mValue = value;
 }
 
-XMLParser::XMLParser(const XMLParserConfig& config)
+XMLParser::XMLParser(const XMLParserConfig& config) : mConfig(config)
 {
     mTagStack.Clear();
     mElement = nullptr;
@@ -179,6 +195,14 @@ Ref<XMLDocument> XMLParser::ParseString(const char* xml)
     mXML = xml;
     mCursor = 0;
     mElement = nullptr;
+
+    if (!mConfig.SkipHeader)
+    {
+        bool validHeader = ParseHeader(*doc);
+
+        if (!validHeader)
+            return nullptr;
+    }
 
     while (ParseElement(*doc))
         mElement = nullptr;
@@ -235,6 +259,39 @@ void XMLParser::ParseElementContent(XMLDocument& doc)
         mElement->AddText(text);
         mCursor = textEnd;
     }
+}
+
+bool XMLParser::ParseHeader(XMLDocument& doc)
+{
+    EatWhiteSpace(mXML, &mCursor);
+
+    if (mXML[mCursor] != '<' || mXML[mCursor + 1] != '?')
+        return false;
+
+    mCursor += 2;
+    EatWhiteSpace(mXML, &mCursor);
+
+    XMLString word = EatWord(mXML, &mCursor, "?");
+    if (!StringEqual(word, "xml"))
+        return false;
+
+    // NOTE: Even if header parsing fails, these header attributes are not freed.
+    //       All nodes will eventually be freed during ~XMLDocument without leakage.
+    XMLAttribute* firstAttr;
+    XMLAttribute* lastAttr;
+    ParseAttributes(doc, &firstAttr, &lastAttr);
+
+    if (mXML[mCursor] != '?' || mXML[mCursor + 1] != '>')
+        return false;
+
+    mCursor += 2;
+
+    doc.mHeader = (XMLElement*)doc.AllocNode(XMLType::Element);
+    doc.mHeader->mName = { 3, "xml" };
+    doc.mHeader->mFirstAttribute = firstAttr;
+    doc.mHeader->mLastAttribute = lastAttr;
+
+    return true;
 }
 
 int XMLParser::ParseTag(XMLDocument& doc)
@@ -349,11 +406,12 @@ int XMLParser::ParseAttributes(XMLDocument& doc, XMLAttribute** first, XMLAttrib
     XMLAttribute* head = nullptr;
     XMLAttribute* tail = nullptr;
     int numAttrs = 0;
-    char c = mXML[mCursor];
 
     EatWhiteSpace(mXML, &mCursor);
 
-    while (c && c != '>' && c != '/')
+    char c = mXML[mCursor];
+
+    while (c && c != '>' && c != '/' && c != '?')
     {
         XMLString name = EatWord(mXML, &mCursor, "=");
 
