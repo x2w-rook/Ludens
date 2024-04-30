@@ -280,3 +280,42 @@ TEST_CASE("XML Nested Elements")
         doc = nullptr;
     }
 }
+
+TEST_CASE("XML Mixed Content")
+{
+    XMLParserConfig config{};
+    XMLParser parser(config);
+
+    {
+        Ref<XMLDocument> doc = parser.ParseString("<p>xml mixed <b>content</b> test</p>");
+        CHECK(doc);
+
+        XMLElement* p = doc->GetChild()->ToElement();
+        CHECK(p);
+        CHECK(Equal(p->GetName(), "p"));
+
+        XMLNode* content = p->GetChild();
+        CHECK(content);
+        XMLText* text = content->ToText();
+        CHECK(text);
+        CHECK(Equal(text->GetText(), "xml mixed "));
+
+        content = content->GetNext();
+        CHECK(content);
+        XMLElement* b = content->ToElement();
+        CHECK(b);
+        CHECK(Equal(b->GetName(), "b"));
+
+        text = b->GetChild()->ToText();
+        CHECK(text);
+        CHECK(Equal(text->GetText(), "content"));
+
+        content = content->GetNext();
+        CHECK(content);
+        text = content->ToText();
+        CHECK(text);
+        CHECK(Equal(text->GetText(), " test"));
+
+        doc = nullptr;
+    }
+}

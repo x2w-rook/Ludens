@@ -206,6 +206,12 @@ public:
         return mType == XMLType::Attribute ? (XMLAttribute*)this : nullptr;
     }
 
+    /// get next sibling node, or nullptr 
+    inline XMLNode* GetNext()
+    {
+        return mNext;
+    }
+
 private:
     void AppendChild(XMLNode* child);
 

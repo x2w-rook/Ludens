@@ -198,6 +198,7 @@ bool XMLParser::ParseElement(XMLDocument& doc)
         LD_DEBUG_ASSERT(!mTagStack.IsEmpty());
         size_t depth = mTagStack.Size() - 1;
 
+        // parse mixed content, an element can contain any mixture of text and child elements
         while (mTagStack.Size() > depth)
             ParseElementContent(doc);
 
@@ -209,6 +210,8 @@ bool XMLParser::ParseElement(XMLDocument& doc)
 
 void XMLParser::ParseElementContent(XMLDocument& doc)
 {
+    int textBeg = mCursor;
+    
     EatWhiteSpace(mXML, &mCursor);
 
     char c = mXML[mCursor];
@@ -221,17 +224,16 @@ void XMLParser::ParseElementContent(XMLDocument& doc)
     {
         LD_DEBUG_ASSERT(mElement && "text node must be a child of some element node");
 
-        int beg = mCursor;
-        int end = beg;
+        int textEnd = textBeg;
 
         while (c && c != '<')
         {
-            c = mXML[++end];
+            c = mXML[++textEnd];
         }
 
-        XMLString text(end - beg, mXML + beg);
+        XMLString text(textEnd - textBeg, mXML + textBeg);
         mElement->AddText(text);
-        mCursor = end;
+        mCursor = textEnd;
     }
 }
 
