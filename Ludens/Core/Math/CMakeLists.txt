@@ -1,11 +1,13 @@
 set(MODULE_SRC
 	"Include/Math.h"
 	"Include/Bits.h"
+	"Include/Hex.h"
 	"Include/Vec2.h"
 	"Include/Vec3.h"
 	"Include/Vec4.h"
 	"Include/Mat4.h"
-	"Include/Rect2D.h")
+	"Include/Rect2D.h"
+)
 
 set(TEST_SRC
 	"Tests/TestBits.h"
@@ -14,7 +16,13 @@ set(TEST_SRC
 	"Tests/TestVec4.h"
 	"Tests/TestMat4.h"
 	"Tests/MathTests.cpp")
-add_executable(LDMathTests "${MODULE_SRC}" "${TEST_SRC}")
+
+add_executable(LDMathTests
+	"${MODULE_SRC}"
+	"${TEST_SRC}"
+)
+
 target_include_directories(LDMathTests PRIVATE
 	"${CMAKE_SOURCE_DIR}/Ludens"
-	"${CMAKE_SOURCE_DIR}/Extra/doctest")
+	"${CMAKE_SOURCE_DIR}/Extra/doctest"
+)
