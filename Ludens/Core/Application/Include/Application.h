@@ -3,6 +3,7 @@
 #include <string>
 #include <cstdint>
 #include "Core/Header/Include/Types.h"
+#include "Core/Header/Include/Singleton.h"
 #include "Core/RenderBase/Include/RTypes.h"
 #include "Core/Application/Include/Event.h"
 #include "Core/Application/Include/ApplicationLayer.h"
@@ -38,17 +39,16 @@ namespace LD {
 	};
 
 
-	class Application
+	class Application : public Singleton<Application>
 	{
+        friend class Singleton<Application>;
 	public:
-		Application();
 		Application(const Application&) = delete;
 		virtual ~Application();
 
 		Application& operator=(const Application&) = delete;
 
 		static bool EventHandler(const Event& event);
-		static Application& Get();
 
 		void Startup(const ApplicationConfig& config);
 		void Cleanup();
@@ -64,10 +64,11 @@ namespace LD {
 		void Run();
 
 	private:
+		Application();
+
 		void OnInputEvent(const Event& event);
 		void OnInputNewFrame();
 
-		static Application* sInstance;
 		bool mHasStartup = false;
 		bool mIsRunning = false;
 		bool mIsMinimized = false;

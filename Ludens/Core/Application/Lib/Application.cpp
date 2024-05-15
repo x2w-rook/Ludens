@@ -14,19 +14,14 @@ namespace LD {
 
 	Application::Application()
 	{
-		LD_DEBUG_ASSERT(sInstance == nullptr && "Application is a singleton class");
-
-		sInstance = this;
 	}
 
 	Application::~Application()
 	{
-		sInstance = nullptr;
 	}
 
 	void Application::Startup(const ApplicationConfig& config)
 	{
-		LD_DEBUG_ASSERT(sInstance == this);
 		LD_DEBUG_ASSERT(config.Layer != nullptr);
 
 		mConfig = config;
@@ -47,8 +42,6 @@ namespace LD {
 		mWindow->Cleanup();
 		delete mWindow;
 		mWindow = nullptr;
-
-		sInstance = nullptr;
 	}
 
 	void* Application::GetWindowHandle() const
@@ -76,7 +69,7 @@ namespace LD {
 
 	bool Application::EventHandler(const Event& event)
 	{
-		Application& app = Application::Get();
+		Application& app = Application::GetSingleton();
 
 		if (event.IsApplicationEvent())
 		{
@@ -110,13 +103,6 @@ namespace LD {
 			return false;
 
 		return app.mLayer->OnEvent(event);
-	}
-
-	Application& Application::Get()
-	{
-		LD_DEBUG_ASSERT(sInstance != nullptr);
-
-		return *sInstance;
 	}
 
 	void Application::Run()

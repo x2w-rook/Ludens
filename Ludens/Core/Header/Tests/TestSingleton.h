@@ -7,13 +7,9 @@ using namespace LD;
 
 class Foo : public Singleton<Foo>
 {
-public:
-    Foo()
-    {
-        sInstanceCount++;
-        x = 0;
-    }
+    friend class Singleton<Foo>;
 
+public:
     ~Foo()
     {
         sInstanceCount--;
@@ -32,6 +28,12 @@ public:
     }
 
 private:
+    Foo()
+    {
+        sInstanceCount++;
+        x = 0;
+    }
+
     int x;
 };
 
