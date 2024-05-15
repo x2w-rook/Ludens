@@ -105,9 +105,9 @@ namespace LD {
 		return app.mLayer->OnEvent(event);
 	}
 
-	void Application::Run()
+	void Application::Run(const ApplicationConfig& config)
 	{
-		LD_DEBUG_ASSERT(mHasStartup);
+        Startup(config);
 
 		// NOTE: currently uses the platform's window system timer
 		//       which may or may not be the OS clock
@@ -137,6 +137,8 @@ namespace LD {
 
 			mWindow->SwapBuffers();
 		}
+
+		Cleanup();
 	}
 
 } // namespace LD

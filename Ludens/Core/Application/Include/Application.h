@@ -50,9 +50,6 @@ namespace LD {
 
 		static bool EventHandler(const Event& event);
 
-		void Startup(const ApplicationConfig& config);
-		void Cleanup();
-
 		inline std::string GetName() const { return mConfig.Window.Name; }
 		inline RBackend GetRendererBackend() const { return mConfig.RendererBackend; }
 		void* GetWindowHandle() const;
@@ -61,11 +58,13 @@ namespace LD {
 		void SetWindowCursorGrabbed();
 
 		// Application entry point
-		void Run();
+        void Run(const ApplicationConfig& config);
 
 	private:
 		Application();
 
+		void Startup(const ApplicationConfig& config);
+		void Cleanup();
 		void OnInputEvent(const Event& event);
 		void OnInputNewFrame();
 
