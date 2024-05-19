@@ -28,14 +28,14 @@ TEST_CASE("XML Header")
 
     {
         auto fuzz = [](XMLParser& parser, const char* xml) {
-            Ref<XMLDocument> doc = parser.ParseString(xml);
+            Ref<XMLDocument> doc = parser.ParseString(xml, strlen(xml));
             CHECK(doc);
 
             XMLElement* header = doc->GetHeader();
             CHECK(header);
             CHECK(Equal(header->GetName(), "xml"));
 
-            XMLAttribute* attr = header->GetFirstAttribute();
+            XMLAttribute* attr = header->GetAttributes();
             CHECK(!attr);
         };
 
@@ -45,14 +45,14 @@ TEST_CASE("XML Header")
 
     {
         auto fuzz = [](XMLParser& parser, const char* xml) {
-            Ref<XMLDocument> doc = parser.ParseString(xml);
+            Ref<XMLDocument> doc = parser.ParseString(xml, strlen(xml));
             CHECK(doc);
 
             XMLElement* header = doc->GetHeader();
             CHECK(header);
             CHECK(Equal(header->GetName(), "xml"));
 
-            XMLAttribute* attr = header->GetFirstAttribute();
+            XMLAttribute* attr = header->GetAttributes();
             CHECK(attr);
             CHECK(Equal(attr->GetName(), "version"));
             CHECK(Equal(attr->GetValue(), "1.0"));
@@ -86,7 +86,7 @@ TEST_CASE("XML Single Element")
     // single element, no content
     {
         auto fuzz = [](XMLParser& parser, const char* xml) {
-            Ref<XMLDocument> doc = parser.ParseString(xml);
+            Ref<XMLDocument> doc = parser.ParseString(xml, strlen(xml));
 
             CHECK(doc);
 
@@ -113,7 +113,7 @@ TEST_CASE("XML Single Element")
     // single element, pure text content
     {
         auto fuzz = [](XMLParser& parser, const char* xml) {
-            Ref<XMLDocument> doc = parser.ParseString(xml);
+            Ref<XMLDocument> doc = parser.ParseString(xml, strlen(xml));
 
             CHECK(doc);
 
@@ -143,7 +143,7 @@ TEST_CASE("XML Single Element")
     // single element, attributes
     {
         auto fuzz = [](XMLParser& parser, const char* xml) {
-            Ref<XMLDocument> doc = parser.ParseString(xml);
+            Ref<XMLDocument> doc = parser.ParseString(xml, strlen(xml));
 
             CHECK(doc);
 
@@ -154,7 +154,7 @@ TEST_CASE("XML Single Element")
             XMLElement* element = node->ToElement();
             CHECK(Equal(element->GetName(), "h1"));
 
-            XMLAttribute* attr = element->GetFirstAttribute();
+            XMLAttribute* attr = element->GetAttributes();
             CHECK(attr);
             CHECK(Equal(attr->GetName(), "name"));
             CHECK(Equal(attr->GetValue(), "value"));
@@ -180,7 +180,7 @@ TEST_CASE("XML Top Level Elements")
     // multiple top level elements
     {
         auto fuzz = [](XMLParser& parser, const char* xml) {
-            Ref<XMLDocument> doc = parser.ParseString(xml);
+            Ref<XMLDocument> doc = parser.ParseString(xml, strlen(xml));
             CHECK(doc);
 
             XMLNode* node = doc->GetChild();
@@ -191,7 +191,7 @@ TEST_CASE("XML Top Level Elements")
             CHECK(Equal(memberdef->GetName(), "memberdef"));
 
             {
-                XMLAttribute* kind = memberdef->GetFirstAttribute();
+                XMLAttribute* kind = memberdef->GetAttributes();
                 CHECK(kind);
                 CHECK(Equal(kind->GetName(), "kind"));
                 CHECK(Equal(kind->GetValue(), "function"));
@@ -211,7 +211,7 @@ TEST_CASE("XML Top Level Elements")
             CHECK(Equal(memberdef->GetName(), "memberdef"));
 
             {
-                XMLAttribute* kind = memberdef->GetFirstAttribute();
+                XMLAttribute* kind = memberdef->GetAttributes();
                 CHECK(kind);
                 CHECK(Equal(kind->GetName(), "kind"));
                 CHECK(Equal(kind->GetValue(), "function"));
@@ -231,7 +231,7 @@ TEST_CASE("XML Top Level Elements")
             CHECK(Equal(memberdef->GetName(), "memberdef"));
 
             {
-                XMLAttribute* kind = memberdef->GetFirstAttribute();
+                XMLAttribute* kind = memberdef->GetAttributes();
                 CHECK(kind);
                 CHECK(Equal(kind->GetName(), "kind"));
                 CHECK(Equal(kind->GetValue(), "function"));
@@ -272,7 +272,8 @@ TEST_CASE("XML Nested Elements")
     XMLParser parser(config);
 
     {
-        Ref<XMLDocument> doc = parser.ParseString("<p><b><i>bold and italic</i></b></p>");
+        const char* xml = "<p><b><i>bold and italic</i></b></p>";
+        Ref<XMLDocument> doc = parser.ParseString(xml, strlen(xml));
         CHECK(doc);
 
         XMLElement* e = doc->GetChild()->ToElement();
@@ -295,15 +296,15 @@ TEST_CASE("XML Nested Elements")
     }
 
     {
-        Ref<XMLDocument> doc = parser.ParseString(
-            "<table rows='3' border-radius='10px'><tr>row 1</tr><tr>row 2</tr><tr>row 3</tr></table>");
+        const char* xml = "<table rows='3' border-radius='10px'><tr>row 1</tr><tr>row 2</tr><tr>row 3</tr></table>";
+        Ref<XMLDocument> doc = parser.ParseString(xml, strlen(xml));
         CHECK(doc);
 
         XMLElement* table = doc->GetChild()->ToElement();
         CHECK(table);
         CHECK(Equal(table->GetName(), "table"));
 
-        XMLAttribute* attr = table->GetFirstAttribute();
+        XMLAttribute* attr = table->GetAttributes();
         CHECK(attr);
         CHECK(Equal(attr->GetName(), "rows"));
         CHECK(Equal(attr->GetValue(), "3"));
@@ -350,7 +351,8 @@ TEST_CASE("XML Mixed Content")
     XMLParser parser(config);
 
     {
-        Ref<XMLDocument> doc = parser.ParseString("<p>xml mixed <b>content</b> test</p>");
+        const char* xml = "<p>xml mixed <b>content</b> test</p>";
+        Ref<XMLDocument> doc = parser.ParseString(xml, strlen(xml));
         CHECK(doc);
 
         XMLElement* p = doc->GetChild()->ToElement();
@@ -378,6 +380,99 @@ TEST_CASE("XML Mixed Content")
         text = content->ToText();
         CHECK(text);
         CHECK(Equal(text->GetText(), " test"));
+
+        doc = nullptr;
+    }
+}
+
+TEST_CASE("Doxygen XML")
+{
+    const char* xml = R"(
+  <compounddef id="class_l_d_1_1_view" kind="class" language="C++" prot="public">
+    <compoundname>LD::View</compoundname>
+    <templateparamlist>
+      <param>
+        <type>typename T</type>
+      </param>
+    </templateparamlist>
+    <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="class_l_d_1_1_view_1a6bfb0da9f675fa2cf64abb577b3b9147" prot="private" static="no" mutable="no">
+        <type>const T *</type>
+        <definition>const T* LD::View&lt; T &gt;::mData</definition>
+        <argsstring></argsstring>
+        <name>mData</name>
+        <qualifiedname>LD::View::mData</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="Ludens/Core/DSA/Include/View.h" line="38" column="9" bodyfile="Ludens/Core/DSA/Include/View.h" bodystart="38" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+  </compounddef>
+)";
+
+    XMLParserConfig config{};
+    config.SkipHeader = true;
+
+    XMLParser parser(config);
+    {
+        Ref<XMLDocument> doc = parser.ParseString(xml, strlen(xml));
+        CHECK(doc);
+
+        XMLElement* compounddef = doc->GetChild()->ToElement();
+        CHECK(compounddef);
+        CHECK(compounddef->GetChild());
+        CHECK(!compounddef->GetNext());
+        CHECK(Equal(compounddef->GetName(), "compounddef"));
+
+        XMLElement* compoundname = compounddef->GetChild()->ToElement();
+        CHECK(compoundname);
+        CHECK(compoundname->GetNext());
+        CHECK(Equal(compoundname->GetName(), "compoundname"));
+
+        XMLElement* templateparamlist = compoundname->GetNext()->ToElement();
+        CHECK(templateparamlist);
+        CHECK(templateparamlist->GetNext());
+        CHECK(templateparamlist->GetChild());
+        CHECK(Equal(templateparamlist->GetName(), "templateparamlist"));
+
+        XMLElement* sectiondef = templateparamlist->GetNext()->ToElement();
+        CHECK(sectiondef);
+        CHECK(sectiondef->GetChild());
+        CHECK(Equal(sectiondef->GetName(), "sectiondef"));
+
+        XMLElement* memberdef = sectiondef->GetChild()->ToElement();
+        CHECK(memberdef);
+        CHECK(memberdef->GetChild());
+        CHECK(!memberdef->GetNext());
+        CHECK(Equal(memberdef->GetName(), "memberdef"));
+
+        XMLElement* type = memberdef->GetChild()->ToElement();
+        CHECK(type);
+        CHECK(type->GetNext());
+        CHECK(type->GetChild());
+        CHECK(Equal(type->GetName(), "type"));
+
+        XMLElement* definition = type->GetNext()->ToElement();
+        CHECK(definition);
+        CHECK(definition->GetNext());
+        CHECK(definition->GetChild());
+        CHECK(Equal(definition->GetName(), "definition"));
+
+        XMLElement* argsstring = definition->GetNext()->ToElement();
+        CHECK(argsstring);
+        CHECK(argsstring->GetNext());
+        CHECK(!argsstring->GetChild());
+        CHECK(Equal(argsstring->GetName(), "argsstring"));
+
+        XMLElement* name = argsstring->GetNext()->ToElement();
+        CHECK(name);
+        CHECK(name->GetNext());
+        CHECK(name->GetChild());
+        CHECK(Equal(name->GetName(), "name"));
 
         doc = nullptr;
     }
