@@ -154,7 +154,7 @@ public:
 
     XMLParser& operator=(const XMLParser&) = delete;
 
-    Ref<XMLDocument> ParseString(const char* xml);
+    Ref<XMLDocument> ParseString(const char* xml, size_t size);
 
 private:
     
@@ -179,6 +179,7 @@ private:
     XMLParserConfig mConfig;
     XMLElement* mElement;
     const char* mXML;
+    size_t mXMLSize;
     int mCursor;
 };
 

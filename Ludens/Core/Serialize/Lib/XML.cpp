@@ -188,11 +188,12 @@ XMLParser::~XMLParser()
 {
 }
 
-Ref<XMLDocument> XMLParser::ParseString(const char* xml)
+Ref<XMLDocument> XMLParser::ParseString(const char* xml, size_t size)
 {
     Ref<XMLDocument> doc = MakeRef<XMLDocument>();
 
     mXML = xml;
+    mXMLSize = size;
     mCursor = 0;
     mElement = nullptr;
 
@@ -244,7 +245,7 @@ void XMLParser::ParseElementContent(XMLDocument& doc)
     {
         ParseTag(doc);
     }
-    else if (isalnum(c))
+    else // append as text
     {
         LD_DEBUG_ASSERT(mElement && "text node must be a child of some element node");
 
@@ -380,10 +381,8 @@ int XMLParser::ParseTag(XMLDocument& doc)
         }
         else
         {
-            // append as sibling
-            XMLNode* parent = mElement->GetParent();
-            LD_DEBUG_ASSERT(parent && parent->GetType() == XMLType::Element);
-            newElement = parent->ToElement()->AddElement(name);
+            // append as child of top element
+            newElement = mElement->AddElement(name);
         }
 
         // self closing tag
