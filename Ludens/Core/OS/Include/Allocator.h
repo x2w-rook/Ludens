@@ -178,6 +178,11 @@ namespace LD {
 			mUsed = 0;
 		}
 
+		size_t FreeBytes() const
+		{
+            return mTotal - mUsed;
+		}
+
 	private:
 
 		void* mBase = nullptr;
