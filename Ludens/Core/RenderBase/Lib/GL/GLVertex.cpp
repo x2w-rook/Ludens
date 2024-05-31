@@ -2,22 +2,22 @@
 #include "Core/Header/Include/Types.h"
 #include "Core/RenderBase/Include/GL/GLVertex.h"
 
-namespace LD {
+namespace LD
+{
 
+GLVertexLayout& GLVertexLayout::AddVertexAttribute(const GLVertexAttribute& attribute)
+{
+    uint32_t attrByteSize;
+    GLint attrComponentCount;
+    GLenum attrComponentType;
 
-	GLVertexLayout& GLVertexLayout::AddVertexAttribute(const GLVertexAttribute& attribute)
-	{
-		uint32_t attrByteSize;
-		GLint attrComponentCount;
-		GLenum attrComponentType;
+    GetGLSLTypeVertexAttribute(attribute.Type, &attrComponentCount, &attrComponentType, &attrByteSize);
 
-		GetGLSLTypeVertexAttribute(attribute.Type, &attrComponentCount, &attrComponentType, &attrByteSize);
-		
-		mOffsets.PushBack(mVertexStride);
-		mVertexStride += attrByteSize;
-		mAttributes.PushBack(attribute);
+    mOffsets.PushBack(mVertexStride);
+    mVertexStride += attrByteSize;
+    mAttributes.PushBack(attribute);
 
-		return *this;
-	}
+    return *this;
+}
 
 } // namespace LD
