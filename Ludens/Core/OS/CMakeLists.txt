@@ -7,6 +7,7 @@ set(MODULE_INCLUDE
 	"Include/Exit.h"
 	"Include/Time.h"
 	"Include/UID.h"
+	"Include/JobSystem.h"
 )
 
 set(MODULE_LIB
@@ -16,6 +17,7 @@ set(MODULE_LIB
 	"Lib/ConditionVariable.cpp"
 	"Lib/Exit.cpp"
 	"Lib/Time.cpp"
+	"Lib/JobSystem.cpp"
 )
 
 set(TEST_SRC
