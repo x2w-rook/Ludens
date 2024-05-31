@@ -73,12 +73,20 @@ public:
         return mName;
     };
 
-    inline XMLAttribute* GetFirstAttribute()
+    inline XMLAttribute* GetAttributes()
     {
         return mFirstAttribute;
     }
 
     void SetName(const XMLString& name);
+
+    inline bool HasName(const char* match)
+    {
+        // TODO: normalize escape characters in name,
+        //       operator== does not consider "&amp" vs "&"
+
+        return mName == match;
+    }
 
     /// append an attribute to this element
     XMLAttribute* AddAttribute(const XMLString& name, const XMLString& value);
@@ -120,6 +128,14 @@ public:
     inline XMLString GetValue()
     {
         return mValue;
+    }
+
+    inline bool HasName(const char* match)
+    {
+        // TODO: normalize escape characters in name,
+        //       operator== does not consider "&amp" vs "&"
+
+        return mName == match;
     }
 
     void SetName(const XMLString& name);
