@@ -20,9 +20,9 @@
 #include "Core/RenderFX/Include/Groups/GBufferGroup.h"
 #include "Core/RenderFX/Include/Groups/RectGroup.h"
 
-#define LD_MACRO_INVALID       -1
-#define LD_MACRO_GROUP_LAYOUT   1
-#define LD_MACRO_SHADER_STAGE   2
+#define LD_MACRO_INVALID -1
+#define LD_MACRO_GROUP_LAYOUT 1
+#define LD_MACRO_SHADER_STAGE 2
 
 namespace LD
 {
@@ -132,14 +132,14 @@ void RShaderCompiler::CompileStage(const RPipelineLayoutData& layout, RShaderTyp
         PatchOpenGL(layout, type, input_glsl);
         preamble = "#define LD_OPENGL\n";
 
-        std::cout << "PATCHED OPENGL BEGIN" << std::endl;
-        std::cout << input_glsl << std::endl;
-        std::cout << "PATCHED OPENGL END" << std::endl;
+        //std::cout << "PATCHED OPENGL BEGIN" << std::endl;
+        //std::cout << input_glsl << std::endl;
+        //std::cout << "PATCHED OPENGL END" << std::endl;
     }
     else if (mTargetBackend == RBackend::Vulkan)
         preamble = "#define LD_VULKAN\n";
 
-    result.Success = GlslangCompile(mTargetBackend, type, input_glsl, preamble, spirv_u32);
+    result.Success = GlslangCompile(mTargetBackend, type, input_glsl, preamble, spirv_u32, result.Error);
 
     result.SPIRV.Resize(spirv_u32.Size() * 4);
     for (size_t i = 0; i < spirv_u32.Size(); i++)
@@ -196,7 +196,7 @@ void RShaderCompiler::GlslangBackend(RBackend backend, glslang::EShClient* pclie
 }
 
 bool RShaderCompiler::GlslangCompile(RBackend backend, RShaderType type, const std::string& glsl,
-                                     const std::string& glslPreamble, Vector<u32>& spirv)
+                                     const std::string& glslPreamble, Vector<u32>& spirv, std::string& error)
 {
     EShLanguage shaderType;
     glslang::EShClient client;
@@ -219,14 +219,26 @@ bool RShaderCompiler::GlslangCompile(RBackend backend, RShaderType type, const s
         bool result = shader.parse(GetDefaultResources(), 100, false, EShMsgDefault);
         const char* log;
 
-        if ((log = shader.getInfoLog()) && strlen(log) > 0)
-            std::cout << "ERROR INFO LOG: " << log << std::endl;
-
-        if ((log = shader.getInfoDebugLog()) && strlen(log) > 0)
-            std::cout << "ERROR INFO DEBUG LOG: " << log << std::endl;
-
         if (!result)
+        {
+            if ((log = shader.getInfoLog()) && strlen(log) > 0)
+            {
+                std::string line("glslang::TShader::getInfoLog(): ");
+                line += log;
+                std::cout << line << std::endl;
+                error += line;
+            }
+
+            if ((log = shader.getInfoDebugLog()) && strlen(log) > 0)
+            {
+                std::string line("glslang::TShader::getInfoDebugLog(): ");
+                line += log;
+                std::cout << line << std::endl;
+                error += line;
+            }
+
             return false;
+        }
     }
 
     glslang::TProgram program{};
@@ -292,10 +304,10 @@ void RShaderCompiler::PatchOpenGL(const RPipelineLayoutData& layout, RShaderType
     // even though ludens source GLSL is using the Vulkan dialect, we will still reconstruct
     // OpenGL GLSL later, so we respect the LD_OPENGL directives in the source GLSL
     std::string preamble = "#define LD_OPENGL\n";
+    std::string patchError;
 
     Vector<u32> spirv;
-    GlslangCompile(RBackend::Vulkan, type, glsl, preamble, spirv);
-    std::cout << "spirv size: " << spirv.ByteSize() << std::endl;
+    GlslangCompile(RBackend::Vulkan, type, glsl, preamble, spirv, patchError);
 
     // TODO: validate shader reflection result with the pipeline layout, find any conflicts
     try
@@ -364,7 +376,7 @@ int RShaderCompiler::ParseLudensMacro(const std::string& line, RPipelineLayoutDa
         str += 2;
 
         LD_DEBUG_ASSERT(0 <= groupIdx && groupIdx < 4);
-        
+
         if (layout.GroupLayouts.Size() < groupIdx + 1)
             layout.GroupLayouts.Resize(groupIdx + 1);
 
@@ -379,7 +391,6 @@ int RShaderCompiler::ParseLudensMacro(const std::string& line, RPipelineLayoutDa
         str += strlen(bindingStr) + 1;
         bindingIdx = *str - '0';
         str += 2;
-
 
         if (layoutData.Size() < bindingIdx + 1)
             layoutData.Resize(bindingIdx + 1);

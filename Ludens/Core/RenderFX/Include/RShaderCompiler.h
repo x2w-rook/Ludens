@@ -60,7 +60,7 @@ private:
     void GlslangShaderType(RShaderType type, EShLanguage* language);
     void GlslangBackend(RBackend backend, glslang::EShClient* client, glslang::EShTargetClientVersion* version);
     bool GlslangCompile(RBackend backend, RShaderType type, const std::string& glsl, const std::string& glslPreamble,
-                        Vector<u32>& spirv);
+                        Vector<u32>& spirv, std::string& error);
     void PatchOpenGL(const RPipelineLayoutData& layout, RShaderType type, std::string& glsl);
 
     int ParseLudensMacro(const std::string& line, RPipelineLayoutData& layout, RShaderType& type);
