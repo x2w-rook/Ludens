@@ -1,43 +1,30 @@
 #pragma once
 
-#include "Core/OS/Include/UID.h"
+#include "Core/RenderBase/Include/RTypes.h"
 #include "Core/RenderBase/Include/RShader.h"
 #include "Core/RenderBase/Include/RResult.h"
 
-namespace LD {
+namespace LD
+{
 
-	struct RBufferInfo
-	{
-		RBufferType Type;
-		RMemoryUsage MemoryUsage;
-		const void* Data = nullptr;
-		u32 Size = 0;
-	};
+struct RBufferInfo
+{
+    RBufferType Type;
+    RMemoryUsage MemoryUsage;
+    const void* Data = nullptr;
+    u32 Size = 0;
+};
 
-	struct RBufferBase;
-	struct RBufferGL;
+struct RBufferBase;
+struct RBufferGL;
 
-	// render buffer handle and interface
-	class RBuffer
-	{
-		friend struct RBufferBase;
-		friend struct RBufferGL;
-	public:
-		using TBase = RBufferBase;
+// render buffer handle and interface
+class RBuffer : public RHandle<RBufferBase>
+{
+    friend struct RBufferGL;
 
-		RResult SetData(u32 offset, u32 size, const void* data);
-
-		inline bool IsValid() const { return mID != 0 && mBuffer != nullptr; }
-		inline UID GetID() const { return mID; }
-
-		inline bool operator==(const RBuffer& other) const { return mID == other.mID; }
-		inline bool operator!=(const RBuffer& other) const { return mID != other.mID; }
-
-		inline operator RBufferBase*() const { return mBuffer; }
-
-	private:
-		UID mID = 0;
-		RBufferBase* mBuffer = nullptr;
-	};
+public:
+    RResult SetData(u32 offset, u32 size, const void* data);
+};
 
 } // namespace LD

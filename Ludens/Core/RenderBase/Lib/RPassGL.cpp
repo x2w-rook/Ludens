@@ -1,28 +1,29 @@
 #include "Core/RenderBase/Lib/RPassGL.h"
 
-namespace LD {
+namespace LD
+{
 
-	RPassGL::RPassGL()
-	{
-	}
+RPassGL::RPassGL()
+{
+}
 
-	RPassGL::~RPassGL()
-	{
-		LD_DEBUG_ASSERT(ID == 0);
-	}
+RPassGL::~RPassGL()
+{
+    LD_DEBUG_ASSERT(ID == 0);
+}
 
-	void RPassGL::Startup(RPass& passH, const RPassInfo& info, RDeviceGL& device)
-	{
-		RPassBase::Startup(passH, info, (RDeviceBase*)&device);
+void RPassGL::Startup(RPass& passH, const RPassInfo& info, RDeviceGL& device)
+{
+    RPassBase::Startup(passH, info, (RDeviceBase*)&device);
 
-		// TODO:
-	}
+    // TODO:
+}
 
-	void RPassGL::Cleanup(RPass& passH)
-	{
-		RPassBase::Cleanup(passH);
+void RPassGL::Cleanup(RPass& passH)
+{
+    RPassBase::Cleanup(passH);
 
-		// TODO:
-	}
+    // TODO:
+}
 
 } // namespace LD

@@ -2,32 +2,32 @@
 #include "Core/RenderBase/Include/RResult.h"
 #include "Core/RenderBase/Lib/RBase.h"
 
-namespace LD {
-	
-	RResult RFrameBuffer::GetColorAttachment(int idx, RTexture* colorAttachment)
-	{
-		RResult result = mFrameBuffer->GetColorAttachment(idx, colorAttachment);
-		mFrameBuffer->Device->Callback(result);
-		return result;
-	}
+namespace LD
+{
 
-	RResult RFrameBuffer::GetDepthStencilAttachment(RTexture* depthStencilAttachment)
-	{
-		RResult result = mFrameBuffer->GetDepthStencilAttachment(depthStencilAttachment);
-		mFrameBuffer->Device->Callback(result);
-		return result;
-	}
+RResult RFrameBuffer::GetColorAttachment(int idx, RTexture* colorAttachment)
+{
+    RResult result = mBase->GetColorAttachment(idx, colorAttachment);
+    mBase->Device->Callback(result);
+    return result;
+}
 
-	RResult RFrameBuffer::Invalidate(const RFrameBufferInfo& info)
-	{
-		// NOTE: invalidation should not modify handle ID, since it might be cached somewhere by user code.
-		UID oldID = (UID)mFrameBuffer;
-		RResult result = mFrameBuffer->Invalidate(info);
-		LD_DEBUG_ASSERT((UID)mFrameBuffer == oldID);
+RResult RFrameBuffer::GetDepthStencilAttachment(RTexture* depthStencilAttachment)
+{
+    RResult result = mBase->GetDepthStencilAttachment(depthStencilAttachment);
+    mBase->Device->Callback(result);
+    return result;
+}
 
-		mFrameBuffer->Device->Callback(result);
-		return result;
-	}
+RResult RFrameBuffer::Invalidate(const RFrameBufferInfo& info)
+{
+    // NOTE: invalidation should not modify handle ID, since it might be cached somewhere by user code.
+    UID oldID = (UID)mBase;
+    RResult result = mBase->Invalidate(info);
+    LD_DEBUG_ASSERT((UID)mBase == oldID);
+
+    mBase->Device->Callback(result);
+    return result;
+}
 
 } // namespace LD
-

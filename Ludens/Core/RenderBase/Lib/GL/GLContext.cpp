@@ -10,186 +10,256 @@
 #include "Core/RenderBase/Include/GL/GLFrameBuffer.h"
 #include "Core/Header/Include/Error.h"
 
+namespace LD
+{
 
-namespace LD {
+bool GLContext::sHasGladInit = false;
+GLContextLimits GLContext::sLimits;
 
-	bool GLContext::sHasGladInit = false;
-	GLContextLimits GLContext::sLimits;
+GLContext::GLContext()
+{
+}
 
-	GLContext::GLContext()
-	{
-	}
+GLContext::~GLContext()
+{
+}
 
-	GLContext::~GLContext()
-	{
-	}
+void GLContext::Startup()
+{
+    // lazy initialization in first GLContext setup
+    if (!sHasGladInit)
+    {
+        if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+        {
+            std::cout << "gladLoadGLLoader failed" << std::endl;
+            return;
+        }
 
-	void GLContext::Startup()
-	{
-		// lazy initialization in first GLContext setup
-		if (!sHasGladInit)
-		{
-			if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-			{
-				std::cout << "gladLoadGLLoader failed" << std::endl;
-				return;
-			}
+        QueryLimits();
+        sHasGladInit = true;
+    }
 
-			QueryLimits();
-			sHasGladInit = true;
-		}
+    LD_DEBUG_ASSERT(sHasGladInit);
 
-		LD_DEBUG_ASSERT(sHasGladInit);
+    GLint major, minor;
+    glGetIntegerv(GL_MAJOR_VERSION, &major);
+    glGetIntegerv(GL_MINOR_VERSION, &minor);
+    mVersion = (GLuint)(major * 100 + minor * 10);
 
-		GLint major, minor;
-		glGetIntegerv(GL_MAJOR_VERSION, &major);
-		glGetIntegerv(GL_MINOR_VERSION, &minor);
-		mVersion = (GLuint)(major * 100 + minor * 10);
+    GLint numExtensions = 0;
+    glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
+    for (GLint i = 0; i < numExtensions; ++i)
+    {
+        const char* extensionName = (const char*)glGetStringi(GL_EXTENSIONS, i);
+        mExtensions.insert(extensionName);
+    }
 
-		glActiveTexture(GL_TEXTURE0);
-		mBoundTextureUnit = 0;
-	}
+    // TODO: relax this requirement, currently RShaderGL implementation
+    //       consumes pre-compiled SPIRV shaders only.
+    LD_DEBUG_ASSERT(HasExtension("GL_ARB_gl_spirv"));
 
-	void GLContext::Cleanup()
-	{
-	}
+    UnbindFrameBuffer();
+    glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH, GL_FRAMEBUFFER_ATTACHMENT_DEPTH_SIZE,
+                                          &mDefaultFrameBufferDepthBits);
+    glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_STENCIL, GL_FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE,
+                                          &mDefaultFrameBufferStencilBits);
+    glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH, GL_FRAMEBUFFER_ATTACHMENT_COMPONENT_TYPE,
+                                          &mDefaultFrameBufferDepthType);
+    glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_STENCIL, GL_FRAMEBUFFER_ATTACHMENT_COMPONENT_TYPE,
+                                          &mDefaultFrameBufferStencilType);
 
-	void GLContext::BindVAO(GLVertexArray* vao)
-	{
-		if (vao == nullptr)
-		{
-			mBoundVAO = nullptr;
-			return;
-		}
+    glActiveTexture(GL_TEXTURE0);
+    mBoundTextureUnit = 0;
+}
 
-		if (mBoundVAO != nullptr && (UID)*mBoundVAO == (UID)*vao)
-		{
-			LD_DEBUG_ASSERT([&]() { GLint actual; glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &actual); return actual == (GLuint)*vao; }());
-			return;
-		}
+void GLContext::Cleanup()
+{
+}
 
-		glBindVertexArray((GLuint)*vao);
-		mBoundVAO = vao;
-	}
+bool GLContext::HasExtension(const char* name)
+{
+    return mExtensions.find(name) != mExtensions.end();
+}
 
-	void GLContext::BindVBO(GLVertexBuffer& vbo)
-	{
-		if (mBoundVBO == (UID)vbo)
-		{
-			LD_DEBUG_ASSERT([&]() { GLint actual; glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &actual); return actual == (GLuint)vbo; }());
-			return;
-		}
+void GLContext::BindVAO(GLVertexArray* vao)
+{
+    if (vao == nullptr)
+    {
+        mBoundVAO = nullptr;
+        return;
+    }
 
-		glBindBuffer(GL_ARRAY_BUFFER, (GLuint)vbo);
-		mBoundVBO = (UID)vbo;
-	}
+    if (mBoundVAO != nullptr && (UID)*mBoundVAO == (UID)*vao)
+    {
+        LD_DEBUG_ASSERT(
+            [&]()
+            {
+                GLint actual;
+                glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &actual);
+                return actual == (GLuint)*vao;
+            }());
+        return;
+    }
 
-	void GLContext::BindIBO(GLIndexBuffer& ibo)
-	{
-		LD_DEBUG_ASSERT(mBoundVAO != nullptr && "binding IBO without a previously bound VAO");
+    glBindVertexArray((GLuint)*vao);
+    mBoundVAO = vao;
+}
 
-		mBoundVAO->BindIBO(ibo);
-	}
+void GLContext::BindVBO(GLVertexBuffer& vbo)
+{
+    if (mBoundVBO == (UID)vbo)
+    {
+        LD_DEBUG_ASSERT(
+            [&]()
+            {
+                GLint actual;
+                glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &actual);
+                return actual == (GLuint)vbo;
+            }());
+        return;
+    }
 
-	void GLContext::BindUBO(GLUniformBuffer& ubo)
-	{
-		if (mBoundUBO == (UID)ubo)
-		{
-			LD_DEBUG_ASSERT([&]() { GLint actual; glGetIntegerv(GL_UNIFORM_BUFFER_BINDING, &actual); return actual == (GLuint)ubo; }());
-			return;
-		}
+    glBindBuffer(GL_ARRAY_BUFFER, (GLuint)vbo);
+    mBoundVBO = (UID)vbo;
+}
 
-		glBindBuffer(GL_UNIFORM_BUFFER, (GLuint)ubo);
-		mBoundUBO = (UID)ubo;
-	}
+void GLContext::BindIBO(GLIndexBuffer& ibo)
+{
+    LD_DEBUG_ASSERT(mBoundVAO != nullptr && "binding IBO without a previously bound VAO");
 
-	void GLContext::BindTextureUnit(int unit)
-	{
-		if (mBoundTextureUnit == unit)
-		{
-			LD_DEBUG_ASSERT([&]() { GLint actual; glGetIntegerv(GL_ACTIVE_TEXTURE, &actual); return actual == (GL_TEXTURE0 + unit); }());
-			return;
-		}
+    mBoundVAO->BindIBO(ibo);
+}
 
-		glActiveTexture(GL_TEXTURE0 + unit);
-		mBoundTextureUnit = unit;
-	}
+void GLContext::BindUBO(GLUniformBuffer& ubo)
+{
+    if (mBoundUBO == (UID)ubo)
+    {
+        LD_DEBUG_ASSERT(
+            [&]()
+            {
+                GLint actual;
+                glGetIntegerv(GL_UNIFORM_BUFFER_BINDING, &actual);
+                return actual == (GLuint)ubo;
+            }());
+        return;
+    }
 
-	void GLContext::BindTexture2D(GLTexture2D& texture)
-	{
-		// NOTE: OpenGL texture units supports bindings to all targets, here we don't cache which texture unit we bind to,
-		//       only the last texture bound for each texture target.
-		glBindTexture(GL_TEXTURE_2D, (GLuint)texture);
-		mBoundTexture2D = (UID)texture;
-	}
+    glBindBuffer(GL_UNIFORM_BUFFER, (GLuint)ubo);
+    mBoundUBO = (UID)ubo;
+}
 
-	void GLContext::BindTexture2DArray(GLTexture2DArray& texture)
-	{
-		glBindTexture(GL_TEXTURE_2D_ARRAY, (GLuint)texture);
-		mBoundTexture2DArray = (UID)texture;
-	}
+void GLContext::BindTextureUnit(int unit)
+{
+    if (mBoundTextureUnit == unit)
+    {
+        LD_DEBUG_ASSERT(
+            [&]()
+            {
+                GLint actual;
+                glGetIntegerv(GL_ACTIVE_TEXTURE, &actual);
+                return actual == (GL_TEXTURE0 + unit);
+            }());
+        return;
+    }
 
-	void GLContext::BindProgram(GLProgram& shader)
-	{
-		if (mBoundProgram == (UID)shader)
-		{
-			LD_DEBUG_ASSERT([&]() { GLint actual; glGetIntegerv(GL_CURRENT_PROGRAM, &actual); return actual == (GLuint)shader; }());
-			return;
-		}
-		glUseProgram((GLuint)shader);
-		mBoundProgram = (UID)shader;
-	}
+    glActiveTexture(GL_TEXTURE0 + unit);
+    mBoundTextureUnit = unit;
+}
 
-	void GLContext::BindFrameBuffer(GLFrameBuffer& frameBuffer)
-	{
-		if (mBoundFrameBuffer == (UID)frameBuffer)
-		{
-			LD_DEBUG_ASSERT([&]() { GLint actual; glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &actual); return actual == (GLuint)frameBuffer; }());
-			LD_DEBUG_ASSERT([&]() { GLint actual; glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &actual); return actual == (GLuint)frameBuffer; }());
-			return;
-		}
+void GLContext::BindTexture2D(GLTexture2D& texture)
+{
+    // NOTE: OpenGL texture units supports bindings to all targets, here we don't cache which texture unit we bind to,
+    //       only the last texture bound for each texture target.
+    glBindTexture(GL_TEXTURE_2D, (GLuint)texture);
+    mBoundTexture2D = (UID)texture;
+}
 
-		// NOTE: currently only binds to GL_FRAMEBUFFER target, so GL_DRAW_FRAMEBUFFER and GL_READ_FRAMEBUFFER should always be the same.
-		glBindFramebuffer(GL_FRAMEBUFFER, (GLuint)frameBuffer);
-		mBoundFrameBuffer = (UID)frameBuffer;
-	}
+void GLContext::BindTexture2DArray(GLTexture2DArray& texture)
+{
+    glBindTexture(GL_TEXTURE_2D_ARRAY, (GLuint)texture);
+    mBoundTexture2DArray = (UID)texture;
+}
 
-	void GLContext::UnbindProgram()
-	{
-		glUseProgram(0);
-		mBoundProgram = 0;
-	}
+void GLContext::BindProgram(GLProgram& shader)
+{
+    if (mBoundProgram == (UID)shader)
+    {
+        LD_DEBUG_ASSERT(
+            [&]()
+            {
+                GLint actual;
+                glGetIntegerv(GL_CURRENT_PROGRAM, &actual);
+                return actual == (GLuint)shader;
+            }());
+        return;
+    }
+    glUseProgram((GLuint)shader);
+    mBoundProgram = (UID)shader;
+}
 
-	void GLContext::UnbindFrameBuffer()
-	{
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		mBoundFrameBuffer = 0;
-	}
+void GLContext::BindFrameBuffer(GLFrameBuffer& frameBuffer)
+{
+    if (mBoundFrameBuffer == (UID)frameBuffer)
+    {
+        LD_DEBUG_ASSERT(
+            [&]()
+            {
+                GLint actual;
+                glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &actual);
+                return actual == (GLuint)frameBuffer;
+            }());
+        LD_DEBUG_ASSERT(
+            [&]()
+            {
+                GLint actual;
+                glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &actual);
+                return actual == (GLuint)frameBuffer;
+            }());
+        return;
+    }
 
-	void GLContext::QueryLimits()
-	{
-		glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &sLimits.MaxTextureImageUnits);
-		glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &sLimits.MaxCombinedTextureImageUnits);
-		glGetIntegerv(GL_MAX_ELEMENT_INDEX, &sLimits.MaxElementIndex);
-		glGetIntegerv(GL_MAX_DRAW_BUFFERS, &sLimits.MaxDrawBuffers);
-		glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, &sLimits.MaxColorAttachments);
-		glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &sLimits.MaxUniformBlockSize);
-		glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &sLimits.MaxUniformBufferBindings);
-	}
+    // NOTE: currently only binds to GL_FRAMEBUFFER target, so GL_DRAW_FRAMEBUFFER and GL_READ_FRAMEBUFFER should always
+    // be the same.
+    glBindFramebuffer(GL_FRAMEBUFFER, (GLuint)frameBuffer);
+    mBoundFrameBuffer = (UID)frameBuffer;
+}
 
-	std::string GLContextLimits::ToString() const
-	{
-		std::stringstream ss;
+void GLContext::UnbindProgram()
+{
+    glUseProgram(0);
+    mBoundProgram = 0;
+}
 
-		ss << "GL_MAX_TEXTURE_IMAGE_UNITS:\t" << MaxTextureImageUnits << '\n';
-		ss << "GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS:\t" << MaxCombinedTextureImageUnits << '\n';
-		ss << "GL_MAX_ELEMENT_INDEX:\t" << MaxTextureImageUnits << '\n';
-		ss << "GL_MAX_DRAW_BUFFERS:\t" << MaxDrawBuffers << '\n';
-		ss << "GL_MAX_COLOR_ATTACHMENTS:\t" << MaxColorAttachments << '\n';
-		ss << "GL_MAX_UNIFORM_BLOCK_SIZE:\t" << MaxUniformBlockSize << '\n';
-		ss << "GL_MAX_UNIFORM_BUFFER_BINDINGS:\t" << MaxUniformBufferBindings << '\n';
+void GLContext::UnbindFrameBuffer()
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    mBoundFrameBuffer = 0;
+}
 
-		return ss.str();
-	}
+void GLContext::QueryLimits()
+{
+    glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &sLimits.MaxTextureImageUnits);
+    glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &sLimits.MaxCombinedTextureImageUnits);
+    glGetIntegerv(GL_MAX_ELEMENT_INDEX, &sLimits.MaxElementIndex);
+    glGetIntegerv(GL_MAX_DRAW_BUFFERS, &sLimits.MaxDrawBuffers);
+    glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, &sLimits.MaxColorAttachments);
+    glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &sLimits.MaxUniformBlockSize);
+    glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &sLimits.MaxUniformBufferBindings);
+}
+
+std::string GLContextLimits::ToString() const
+{
+    std::stringstream ss;
+
+    ss << "GL_MAX_TEXTURE_IMAGE_UNITS:\t" << MaxTextureImageUnits << '\n';
+    ss << "GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS:\t" << MaxCombinedTextureImageUnits << '\n';
+    ss << "GL_MAX_ELEMENT_INDEX:\t" << MaxTextureImageUnits << '\n';
+    ss << "GL_MAX_DRAW_BUFFERS:\t" << MaxDrawBuffers << '\n';
+    ss << "GL_MAX_COLOR_ATTACHMENTS:\t" << MaxColorAttachments << '\n';
+    ss << "GL_MAX_UNIFORM_BLOCK_SIZE:\t" << MaxUniformBlockSize << '\n';
+    ss << "GL_MAX_UNIFORM_BUFFER_BINDINGS:\t" << MaxUniformBufferBindings << '\n';
+
+    return ss.str();
+}
 
 } // namespace LD

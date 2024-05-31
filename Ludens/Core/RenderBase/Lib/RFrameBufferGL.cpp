@@ -6,91 +6,90 @@
 #include "Core/RenderBase/Lib/RDeviceGL.h"
 #include "Core/RenderBase/Lib/RDeriveGL.h"
 
+namespace LD
+{
 
-namespace LD {
+RFrameBufferGL::RFrameBufferGL()
+{
+}
 
+RFrameBufferGL::~RFrameBufferGL()
+{
+    LD_DEBUG_ASSERT(ID == 0);
+}
 
-	RFrameBufferGL::RFrameBufferGL()
-	{
-	}
+void RFrameBufferGL::Startup(RFrameBuffer& frameBufferH, const RFrameBufferInfo& info, RDeviceGL& device)
+{
+    if (IsDefaultFrameBuffer)
+    {
+        frameBufferH.SetHandle(CUID<RFrameBufferBase>::Get(), this);
+        return;
+    }
 
-	RFrameBufferGL::~RFrameBufferGL()
-	{
-		LD_DEBUG_ASSERT(ID == 0);
-	}
+    RFrameBufferBase::Startup(frameBufferH, info, (RDeviceBase*)&device);
 
-	void RFrameBufferGL::Startup(RFrameBuffer& frameBufferH, const RFrameBufferInfo& info, RDeviceGL& device)
-	{
-		if (IsDefaultFrameBuffer)
-		{
-			frameBufferH.mID = CUID<RFrameBufferBase>::Get();
-			frameBufferH.mFrameBuffer = this;
-			return;
-		}
+    StartupGLAttachments();
+}
 
-		RFrameBufferBase::Startup(frameBufferH, info, (RDeviceBase*)&device);
+void RFrameBufferGL::Cleanup(RFrameBuffer& frameBufferH)
+{
+    if (IsDefaultFrameBuffer)
+    {
+        frameBufferH.ResetHandle();
+        return;
+    }
 
-		StartupGLAttachments();
-	}
+    RFrameBufferBase::Cleanup(frameBufferH);
 
-	void RFrameBufferGL::Cleanup(RFrameBuffer& frameBufferH)
-	{
-		if (IsDefaultFrameBuffer)
-		{
-			frameBufferH.mID = 0;
-			frameBufferH.mFrameBuffer = nullptr;
-			return;
-		}
+    CleanupGLAttachments();
+}
 
-		RFrameBufferBase::Cleanup(frameBufferH);
+void RFrameBufferGL::StartupGLAttachments()
+{
+    RDeviceGL* deviceGL = dynamic_cast<RDeviceGL*>(Device);
 
-		CleanupGLAttachments();
-	}
+    Vector<GLTexture2D*> glColorAttachments(ColorAttachments.Size());
+    for (size_t i = 0; i < glColorAttachments.Size(); i++)
+    {
+        RTextureGL& glTexture = Derive<RTextureGL>(ColorAttachments[i]);
+        glColorAttachments[i] = &glTexture.Texture2D;
+    }
 
-	void RFrameBufferGL::StartupGLAttachments()
-	{
-		RDeviceGL* deviceGL = dynamic_cast<RDeviceGL*>(Device);
+    GLTexture2D* glDepthStencilAttachment = nullptr;
+    if (DepthStencilAttachment.HasValue())
+    {
+        RTextureGL& glTexture = Derive<RTextureGL>(DepthStencilAttachment.Value());
+        glDepthStencilAttachment = &glTexture.Texture2D;
+    }
 
-		Vector<GLTexture2D*> glColorAttachments(ColorAttachments.Size());
-		for (size_t i = 0; i < glColorAttachments.Size(); i++)
-		{
-			RTextureGL& glTexture = Derive<RTextureGL>(ColorAttachments[i]);
-			glColorAttachments[i] = &glTexture.Texture2D;
-		}
+    GLFrameBufferInfo glInfo{};
+    glInfo.Width = Width;
+    glInfo.Height = Height;
+    glInfo.ColorAttachmentCount = glColorAttachments.Size();
+    glInfo.ColorAttachments = glColorAttachments.Data();
+    glInfo.DepthStencilAttachment = glDepthStencilAttachment;
+    FBO.Startup(deviceGL->Context, glInfo);
+}
 
-		GLTexture2D* glDepthStencilAttachment = nullptr;
-		if (DepthStencilAttachment.HasValue())
-		{
-			RTextureGL& glTexture = Derive<RTextureGL>(DepthStencilAttachment.Value());
-			glDepthStencilAttachment = &glTexture.Texture2D;
-		}
+void RFrameBufferGL::CleanupGLAttachments()
+{
+    FBO.Cleanup();
+}
 
-		GLFrameBufferInfo glInfo{};
-		glInfo.Width = Width;
-		glInfo.Height = Height;
-		glInfo.ColorAttachmentCount = glColorAttachments.Size();
-		glInfo.ColorAttachments = glColorAttachments.Data();
-		glInfo.DepthStencilAttachment = glDepthStencilAttachment;
-		FBO.Startup(deviceGL->Context, glInfo);
-	}
+RResult RFrameBufferGL::Invalidate(const RFrameBufferInfo& info)
+{
+    // NOTE: Calling Cleanup and Startup with the new info is feasible, but doing so will regenerate a UID for
+    // RFrameBuffer handle.
+    //       Here we are trying to preserve the original UID of the RFrameBuffer handle, only the OpenGL objects are
+    //       recreated.
 
-	void RFrameBufferGL::CleanupGLAttachments()
-	{
-		FBO.Cleanup();
-	}
+    CleanupGLAttachments();
 
-	RResult RFrameBufferGL::Invalidate(const RFrameBufferInfo& info)
-	{
-		// NOTE: Calling Cleanup and Startup with the new info is feasible, but doing so will regenerate a UID for RFrameBuffer handle.
-		//       Here we are trying to preserve the original UID of the RFrameBuffer handle, only the OpenGL objects are recreated.
+    ReadInfo(info);
 
-		CleanupGLAttachments();
+    StartupGLAttachments();
 
-		ReadInfo(info);
-
-		StartupGLAttachments();
-
-		return {};
-	}
+    return {};
+}
 
 } // namespace LD

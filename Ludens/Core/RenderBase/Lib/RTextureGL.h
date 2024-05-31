@@ -6,27 +6,28 @@
 #include "Core/RenderBase/Include/RTexture.h"
 #include "Core/RenderBase/Lib/RBase.h"
 
-namespace LD {
+namespace LD
+{
 
-	struct RDeviceGL;
+struct RDeviceGL;
 
-	struct RTextureGL : RTextureBase
-	{
-		RTextureGL();
-		RTextureGL(const RTextureGL&) = delete;
-		~RTextureGL();
+struct RTextureGL : RTextureBase
+{
+    RTextureGL();
+    RTextureGL(const RTextureGL&) = delete;
+    ~RTextureGL();
 
-		RTextureGL& operator=(const RTextureGL&) = delete;
+    RTextureGL& operator=(const RTextureGL&) = delete;
 
-		void Startup(RTexture& textureH, const RTextureInfo& info, RDeviceGL& device);
-		void Cleanup(RTexture& textureH);
-		void Bind(int unit);
+    void Startup(RTexture& textureH, const RTextureInfo& info, RDeviceGL& device);
+    void Cleanup(RTexture& textureH);
+    void Bind(int unit);
 
-		GLenum Target;
-		union
-		{
-			GLTexture2D Texture2D;
-		};
-	};
+    GLenum Target;
+    union
+    {
+        GLTexture2D Texture2D;
+    };
+};
 
 } // namespace LD

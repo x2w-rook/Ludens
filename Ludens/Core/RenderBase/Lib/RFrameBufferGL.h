@@ -4,30 +4,31 @@
 #include "Core/RenderBase/Include/GL/GLFrameBuffer.h"
 #include "Core/RenderBase/Lib/RBase.h"
 
-namespace LD {
+namespace LD
+{
 
-	struct RDeviceGL;
+struct RDeviceGL;
 
-	struct RFrameBufferGL : RFrameBufferBase
-	{
-		friend struct RDeviceGL;
+struct RFrameBufferGL : RFrameBufferBase
+{
+    friend struct RDeviceGL;
 
-		RFrameBufferGL();
-		RFrameBufferGL(const RFrameBufferGL&) = delete;
-		~RFrameBufferGL();
+    RFrameBufferGL();
+    RFrameBufferGL(const RFrameBufferGL&) = delete;
+    ~RFrameBufferGL();
 
-		RFrameBufferGL& operator=(const RFrameBufferGL&) = delete;
+    RFrameBufferGL& operator=(const RFrameBufferGL&) = delete;
 
-		void Startup(RFrameBuffer& frameBufferH, const RFrameBufferInfo& info, RDeviceGL& device);
-		void Cleanup(RFrameBuffer& frameBufferH);
+    void Startup(RFrameBuffer& frameBufferH, const RFrameBufferInfo& info, RDeviceGL& device);
+    void Cleanup(RFrameBuffer& frameBufferH);
 
-		void StartupGLAttachments();
-		void CleanupGLAttachments();
+    void StartupGLAttachments();
+    void CleanupGLAttachments();
 
-		virtual RResult Invalidate(const RFrameBufferInfo& info) override;
+    virtual RResult Invalidate(const RFrameBufferInfo& info) override;
 
-		bool IsDefaultFrameBuffer = false;
-		GLFrameBuffer FBO;
-	};
+    bool IsDefaultFrameBuffer = false;
+    GLFrameBuffer FBO;
+};
 
 } // namespace LD

@@ -4,99 +4,128 @@
 #include <glad/glad.h>
 #include "Core/OS/Include/UID.h"
 
+namespace LD
+{
 
-namespace LD {
+class GLContext;
 
-	class GLContext;
+struct GLVertexBufferInfo
+{
+    GLenum Usage;
+    u32 Size = 0;
+    const void* Data = nullptr;
+};
 
-	struct GLVertexBufferInfo
-	{
-		GLenum Usage;
-		u32 Size = 0;
-		const void* Data = nullptr;
-	};
+class GLVertexBuffer
+{
+public:
+    GLVertexBuffer();
+    GLVertexBuffer(const GLVertexBuffer&) = delete;
+    ~GLVertexBuffer();
 
-	class GLVertexBuffer
-	{
-	public:
-		GLVertexBuffer();
-		GLVertexBuffer(const GLVertexBuffer&) = delete;
-		~GLVertexBuffer();
+    GLVertexBuffer& operator=(const GLVertexBuffer&) = delete;
 
-		GLVertexBuffer& operator=(const GLVertexBuffer&) = delete;
+    void Startup(GLContext& context, const GLVertexBufferInfo& info);
+    void Cleanup();
+    void Bind();
+    void SetData(u32 offset, u32 size, const void* data);
 
-		void Startup(GLContext& context, const GLVertexBufferInfo& info);
-		void Cleanup();
-		void Bind();
-		void SetData(u32 offset, u32 size, const void* data);
+    inline UID GetHandle() const
+    {
+        return (UID)mHandle;
+    }
 
-		inline UID GetHandle() const { return (UID)mHandle; }
-		inline explicit operator UID() const { return (UID)mHandle; }
-		inline explicit operator GLuint() const { return mVBO; }
+    inline explicit operator UID() const
+    {
+        return (UID)mHandle;
+    }
 
-	private:
-		CUID<GLVertexBuffer> mHandle;
-		GLContext* mContext = nullptr;
-		GLuint mVBO;
-		u32 mSize = 0;
-	};
+    inline explicit operator GLuint() const
+    {
+        return mVBO;
+    }
 
-	using GLIndexBufferInfo = GLVertexBufferInfo;
+private:
+    CUID<GLVertexBuffer> mHandle;
+    GLContext* mContext = nullptr;
+    GLuint mVBO;
+    u32 mSize = 0;
+};
 
-	class GLIndexBuffer
-	{
-	public:
-		GLIndexBuffer();
-		GLIndexBuffer(const GLIndexBuffer&) = delete;
-		~GLIndexBuffer();
+using GLIndexBufferInfo = GLVertexBufferInfo;
 
-		GLIndexBuffer& operator=(const GLIndexBuffer&) = delete;
+class GLIndexBuffer
+{
+public:
+    GLIndexBuffer();
+    GLIndexBuffer(const GLIndexBuffer&) = delete;
+    ~GLIndexBuffer();
 
-		void Startup(GLContext& context, const GLIndexBufferInfo& spec);
-		void Cleanup();
-		void Bind();
-		
-		inline UID GetHandle() const { return (UID)mHandle; }
-		inline explicit operator UID() const { return (UID)mHandle; }
-		inline explicit operator GLuint() const { return mIBO; }
+    GLIndexBuffer& operator=(const GLIndexBuffer&) = delete;
 
-	private:
-		CUID<GLIndexBuffer> mHandle;
-		GLContext* mContext = nullptr;
-		GLuint mIBO;
-	};
+    void Startup(GLContext& context, const GLIndexBufferInfo& spec);
+    void Cleanup();
+    void Bind();
 
-	struct GLUniformBufferInfo
-	{
-		GLenum Usage = GL_STATIC_DRAW;
-		u32 Size;
-		const void* Data = nullptr;
-	};
+    inline UID GetHandle() const
+    {
+        return (UID)mHandle;
+    }
+    inline explicit operator UID() const
+    {
+        return (UID)mHandle;
+    }
+    inline explicit operator GLuint() const
+    {
+        return mIBO;
+    }
 
-	class GLUniformBuffer
-	{
-	public:
-		GLUniformBuffer();
-		GLUniformBuffer(const GLUniformBuffer&) = delete;
-		~GLUniformBuffer();
+private:
+    CUID<GLIndexBuffer> mHandle;
+    GLContext* mContext = nullptr;
+    GLuint mIBO;
+};
 
-		GLUniformBuffer& operator=(const GLUniformBuffer&) = delete;
+struct GLUniformBufferInfo
+{
+    GLenum Usage = GL_STATIC_DRAW;
+    u32 Size;
+    const void* Data = nullptr;
+};
 
-		void Startup(GLContext& context, const GLUniformBufferInfo& info);
-		void Cleanup();
-		void Bind();
-		void BindBase(int binding);
-		void SetData(u32 offset, u32 size, const void* data);
+class GLUniformBuffer
+{
+public:
+    GLUniformBuffer();
+    GLUniformBuffer(const GLUniformBuffer&) = delete;
+    ~GLUniformBuffer();
 
-		inline UID GetHandle() const { return (UID)mHandle; }
-		inline explicit operator UID() const { return (UID)mHandle; }
-		inline explicit operator GLuint() const { return mUBO; }
+    GLUniformBuffer& operator=(const GLUniformBuffer&) = delete;
 
-	private:
-		CUID<GLUniformBuffer> mHandle;
-		GLContext* mContext = nullptr;
-		GLuint mUBO;
-		u32 mSize = 0;
-	};
+    void Startup(GLContext& context, const GLUniformBufferInfo& info);
+    void Cleanup();
+    void Bind();
+    void BindBase(int binding);
+    void SetData(u32 offset, u32 size, const void* data);
+
+    inline UID GetHandle() const
+    {
+        return (UID)mHandle;
+    }
+    inline explicit operator UID() const
+    {
+        return (UID)mHandle;
+    }
+    inline explicit operator GLuint() const
+    {
+        return mUBO;
+    }
+
+private:
+    CUID<GLUniformBuffer> mHandle;
+    GLContext* mContext = nullptr;
+    GLuint mUBO;
+    u32 mSize = 0;
+};
 
 } // namespace LD

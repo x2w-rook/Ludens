@@ -7,31 +7,32 @@
 #include "Core/RenderBase/Include/RResult.h"
 #include "Core/RenderBase/Lib/RBase.h"
 
-namespace LD {
+namespace LD
+{
 
-	struct RDeviceGL;
+struct RDeviceGL;
 
-	struct RBufferGL : RBufferBase
-	{
-		RBufferGL();
-		RBufferGL(const RBufferGL&) = delete;
-		~RBufferGL();
+struct RBufferGL : RBufferBase
+{
+    RBufferGL();
+    RBufferGL(const RBufferGL&) = delete;
+    ~RBufferGL();
 
-		RBufferGL& operator=(const RBufferGL&) = delete;
+    RBufferGL& operator=(const RBufferGL&) = delete;
 
-		void Startup(RBuffer& handle, const RBufferInfo& spec, RDeviceGL& device);
-		void Cleanup(RBuffer& handle);
-		void Bind();
-		virtual RResult SetData(u32 offset, u32 size, const void* data) override;
+    void Startup(RBuffer& handle, const RBufferInfo& spec, RDeviceGL& device);
+    void Cleanup(RBuffer& handle);
+    void Bind();
+    virtual RResult SetData(u32 offset, u32 size, const void* data) override;
 
-		GLenum Target;
+    GLenum Target;
 
-		union
-		{
-			GLVertexBuffer VBO;
-			GLIndexBuffer IBO;
-			GLUniformBuffer UBO;
-		};
-	};
+    union
+    {
+        GLVertexBuffer VBO;
+        GLIndexBuffer IBO;
+        GLUniformBuffer UBO;
+    };
+};
 
 } // namespace LD

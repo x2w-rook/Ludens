@@ -5,27 +5,34 @@
 #include "Core/RenderBase/Lib/RBase.h"
 #include "Core/RenderBase/Include/GL/GLProgram.h"
 
-namespace LD {
+namespace LD
+{
 
-	struct RDeviceGL;
+struct RDeviceGL;
 
-	struct RShaderGL : RShaderBase
-	{
-		RShaderGL();
-		RShaderGL(const RShaderGL&) = delete;
-		RShaderGL(RShaderGL&&) = default;
-		~RShaderGL();
+struct RShaderGL : RShaderBase
+{
+    RShaderGL();
+    RShaderGL(const RShaderGL&) = delete;
+    RShaderGL(RShaderGL&&) = default;
+    ~RShaderGL();
 
-		RShaderGL& operator=(const RShaderGL&) = delete;
-		RShaderGL& operator=(RShaderGL&&) noexcept = default;
+    RShaderGL& operator=(const RShaderGL&) = delete;
+    RShaderGL& operator=(RShaderGL&&) noexcept = default;
 
-		inline bool operator==(const RShaderGL& other) const { return ID == other.ID; }
-		inline bool operator!=(const RShaderGL& other) const { return ID != other.ID; }
+    inline bool operator==(const RShaderGL& other) const
+    {
+        return ID == other.ID;
+    }
+    inline bool operator!=(const RShaderGL& other) const
+    {
+        return ID != other.ID;
+    }
 
-		void Startup(RShader& shaderH, const RShaderInfo& spec, RDeviceGL& device);
-		void Cleanup(RShader& shaderH);
+    void Startup(RShader& shaderH, const RShaderInfo& spec, RDeviceGL& device);
+    void Cleanup(RShader& shaderH);
 
-		std::string Source;
-	};
+    std::string Source;
+};
 
 } // namespace LD

@@ -6,125 +6,121 @@
 #include "Core/RenderBase/Include/RTypes.h"
 #include "Core/RenderBase/Include/RResult.h"
 
-namespace LD {
+namespace LD
+{
 
+class RDevice;
+class RTexture;
+class RBuffer;
+class RShader;
+class RBindingGroupLayout;
+class RBindingGroup;
+class RPass;
+class RFrameBuffer;
+class RPipeline;
+struct RDeviceBase;
+struct RTextureInfo;
+struct RBufferInfo;
+struct RShaderInfo;
+struct RBindingGroupLayoutInfo;
+struct RBindingGroupInfo;
+struct RPassInfo;
+struct RPassBeginInfo;
+struct RFrameBufferInfo;
+struct RPipelineInfo;
+enum class RTextureFormat;
 
-	class RDevice;
-	class RTexture;
-	class RBuffer;
-	class RShader;
-	class RBindingGroupLayout;
-	class RBindingGroup;
-	class RPass;
-	class RFrameBuffer;
-	class RPipeline;
-	struct RDeviceBase;
-	struct RTextureInfo;
-	struct RBufferInfo;
-	struct RShaderInfo;
-	struct RBindingGroupLayoutInfo;
-	struct RBindingGroupInfo;
-	struct RPassInfo;
-	struct RPassBeginInfo;
-	struct RFrameBufferInfo;
-	struct RPipelineInfo;
-	enum class RTextureFormat;
+using RResultCallback = void (*)(const RResult&);
 
-	using RResultCallback = void (*)(const RResult&);
+struct RDeviceInfo
+{
+    RBackend Backend;
+    RResultCallback Callback = nullptr;
+};
 
-	struct RDeviceInfo
-	{
-		RBackend Backend;
-		RResultCallback Callback = nullptr;
-	};
+RResult CreateRenderDevice(RDevice& device, const RDeviceInfo& info);
+RResult DeleteRenderDevice(RDevice& device);
 
-	RResult CreateRenderDevice(RDevice& device, const RDeviceInfo& info);
-	RResult DeleteRenderDevice(RDevice& device);
+struct RDrawStats
+{
+    u32 DrawVertexCalls;
+    u32 DrawIndexedCalls;
 
-	struct RDrawStats
-	{
-		u32 DrawVertexCalls;
-		u32 DrawIndexedCalls;
+    // Every draw call increments this metric by (Instance Count) * (Vertex / Index Count).
+    // Note that per-instance vertices are *NOT* included.
+    u32 TotalVertices;
 
-		// Every draw call increments this metric by (Instance Count) * (Vertex / Index Count).
-		// Note that per-instance vertices are *NOT* included.
-		u32 TotalVertices;
+    inline u32 DrawCalls() const
+    {
+        return DrawVertexCalls + DrawIndexedCalls;
+    }
+};
 
-		inline u32 DrawCalls() const
-		{
-			return DrawVertexCalls + DrawIndexedCalls;
-		}
-	};
+// render device handle and interface
+class RDevice : public RHandle<RDeviceBase>
+{
+    friend struct RDeviceGL;
+    friend struct RDeviceVK;
 
-	// render device handle and interface
-	class RDevice
-	{
-		friend struct RDeviceBase;
-		friend struct RDeviceGL;
-		friend struct RDeviceVK;
-	public:
-		using TBase = RDeviceBase;
+public:
 
-		RResult CreateTexture(RTexture& texture, const RTextureInfo& info);
-		RResult DeleteTexture(RTexture& texture);
+    RResult CreateTexture(RTexture& texture, const RTextureInfo& info);
+    RResult DeleteTexture(RTexture& texture);
 
-		RResult CreateBuffer(RBuffer& buffer, const RBufferInfo& info);
-		RResult DeleteBuffer(RBuffer& buffer);
+    RResult CreateBuffer(RBuffer& buffer, const RBufferInfo& info);
+    RResult DeleteBuffer(RBuffer& buffer);
 
-		RResult CreateShader(RShader& shader, const RShaderInfo& info);
-		RResult DeleteShader(RShader& shader);
+    RResult CreateShader(RShader& shader, const RShaderInfo& info);
+    RResult DeleteShader(RShader& shader);
 
-		RResult CreateBindingGroupLayout(RBindingGroupLayout& layout, const RBindingGroupLayoutInfo& info);
-		RResult DeleteBindingGroupLayout(RBindingGroupLayout& layout);
-		
-		RResult CreateBindingGroup(RBindingGroup& group, const RBindingGroupInfo& info);
-		RResult DeleteBindingGroup(RBindingGroup& group);
+    RResult CreateBindingGroupLayout(RBindingGroupLayout& layout, const RBindingGroupLayoutInfo& info);
+    RResult DeleteBindingGroupLayout(RBindingGroupLayout& layout);
 
-		RResult CreateRenderPass(RPass& passH, const RPassInfo& info);
-		RResult DeleteRenderPass(RPass& passH);
+    RResult CreateBindingGroup(RBindingGroup& group, const RBindingGroupInfo& info);
+    RResult DeleteBindingGroup(RBindingGroup& group);
 
-		RResult CreateFrameBuffer(RFrameBuffer& frameBufferH, const RFrameBufferInfo& info);
-		RResult DeleteFrameBuffer(RFrameBuffer& frameBufferH);
+    RResult CreateRenderPass(RPass& passH, const RPassInfo& info);
+    RResult DeleteRenderPass(RPass& passH);
 
-		RResult CreatePipeline(RPipeline& pipeline, const RPipelineInfo& info);
-		RResult DeletePipeline(RPipeline& pipeline);
+    RResult CreateFrameBuffer(RFrameBuffer& frameBufferH, const RFrameBufferInfo& info);
+    RResult DeleteFrameBuffer(RFrameBuffer& frameBufferH);
 
-		RResult GetSwapChainTextureFormat(RTextureFormat& format);
-		RResult GetSwapChainRenderPass(RPass& renderPass);
-		RResult GetSwapChainFrameBuffer(RFrameBuffer& frameBuffer);
+    RResult CreatePipeline(RPipeline& pipeline, const RPipelineInfo& info);
+    RResult DeletePipeline(RPipeline& pipeline);
 
-		// NOTE: Temporary API for single render device in a single thread.
-		//       Will refactor later once we introduce job systems and render graphs for multi-threading.
+    RResult GetSwapChainTextureFormat(RTextureFormat& format);
+    RResult GetSwapChainRenderPass(RPass& renderPass);
+    RResult GetSwapChainFrameBuffer(RFrameBuffer& frameBuffer);
 
-		RResult BeginFrame();
-		RResult EndFrame();
-		RResult BeginRenderPass(const RPassBeginInfo& info);
-		RResult EndRenderPass();
+    // NOTE: Temporary API for single render device in a single thread.
+    //       Will refactor later once we introduce job systems and render graphs for multi-threading.
 
-		RResult SetPipeline(RPipeline& pipeline);
-		RResult SetBindingGroup(u32 slot, RBindingGroup& group);
-		RResult SetVertexBuffer(u32 slot, RBuffer& buffer);
-		RResult SetIndexBuffer(RBuffer& buffer, RIndexType indexType);
-		
-		// TODO: Multiple drawstats overlapping on one device.
-		RResult BeginDrawStats(RDrawStats* stats);
-		RResult EndDrawStats();
+    RResult BeginFrame();
+    RResult EndFrame();
+    RResult BeginRenderPass(const RPassBeginInfo& info);
+    RResult EndRenderPass();
 
-		RResult DrawVertex(const RDrawVertexInfo& info);
-		RResult DrawIndexed(const RDrawIndexedInfo& info);
+    RResult SetPipeline(RPipeline& pipeline);
+    RResult SetBindingGroup(u32 slot, RBindingGroup& group);
+    RResult SetVertexBuffer(u32 slot, RBuffer& buffer);
+    RResult SetIndexBuffer(RBuffer& buffer, RIndexType indexType);
 
-		inline operator bool() const { return mID != 0 && mDevice != nullptr; }
-		inline RBackend GetBackend() const { return mBackend; }
-		inline UID GetID() const { return mID; }
-		inline void Reset() { mID = 0; mDevice = nullptr; }
+    // TODO: Multiple drawstats overlapping on one device.
+    RResult BeginDrawStats(RDrawStats* stats);
+    RResult EndDrawStats();
 
-		inline bool operator==(const RDevice& other) const { return mID == other.mID; }
-		inline bool operator!=(const RDevice& other) const { return mID != other.mID; }
+    RResult DrawVertex(const RDrawVertexInfo& info);
+    RResult DrawIndexed(const RDrawIndexedInfo& info);
 
-	private:
-		UID mID = 0;
-		RDeviceBase* mDevice = nullptr;
-		RBackend mBackend;
-	};
+    void WaitIdle();
+
+    inline RBackend GetBackend() const
+    {
+        return mBackend;
+    }
+
+private:
+    RBackend mBackend;
+};
 
 } // namespace LD
