@@ -23,6 +23,11 @@ struct Hex
     {
     }
 
+    TVec3<float> RGB() const
+    {
+        return { r, g, b };
+    }
+
     operator TVec4<float>() const
     {
         return TVec4<float>{ r, g, b, a };

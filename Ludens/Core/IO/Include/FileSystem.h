@@ -5,71 +5,83 @@
 #include "Core/Header/Include/Types.h"
 #include "Core/OS/Include/Memory.h"
 
-namespace LD {
+namespace LD
+{
 
-	class Path
-	{
-	public:
-		Path() = default;
-		Path(const std::filesystem::path&);
-		Path(const std::string& str);
-		Path(const char* str);
+class Path
+{
+public:
+    Path() = default;
+    Path(const std::filesystem::path&);
+    Path(const std::string& str);
+    Path(const char* str);
 
-		inline std::string ToString() const
-		{
-			return mPath.string();
-		}
+    inline std::string ToString() const
+    {
+        return mPath.string();
+    }
 
-		explicit operator const std::filesystem::path&() const
-		{
-			return mPath;
-		}
+    inline Path Stem() const
+    {
+        return { mPath.stem() };
+    }
 
-	private:
-		std::filesystem::path mPath;
-	};
+    explicit operator const std::filesystem::path&() const
+    {
+        return mPath;
+    }
 
-	enum class FileMode
-	{
-		None = 0,
-		Read,
-		Write
-	};
+private:
+    std::filesystem::path mPath;
+};
 
-	class File
-	{
-	public:
-		File();
-		File(const File&) = delete;
-		~File();
+enum class FileMode
+{
+    None = 0,
+    Read,
+    Write
+};
 
-		File& operator=(const File&) = delete;
+class File
+{
+public:
+    File();
+    File(const File&) = delete;
+    ~File();
 
-		static bool Exists(const Path& path);
-		
-		bool Open(const Path& path, FileMode mode = FileMode::Read);
-		void Close();
-		void Write(const u8* data, size_t size);
-		void ReadString(std::string& string);
+    File& operator=(const File&) = delete;
 
-		inline const u8* Data() const { return mData; }
-		inline size_t Size() const { return mSize; }
+    static bool Exists(const Path& path);
 
-	private:
-		size_t mSize = 0;
-		u8* mData = nullptr;
-		FileMode mMode = FileMode::None;
-		Path mWritePath;
-	};
+    bool Open(const Path& path, FileMode mode = FileMode::Read);
+    void Close();
+    void Write(const u8* data, size_t size);
+    void ReadString(std::string& string);
 
-	class FileSystem
-	{
-	public:
-		FileSystem();
+    inline const u8* Data() const
+    {
+        return mData;
+    }
 
-		Path GetWorkingDirectory();
-		bool CreateDirectories(const Path& path);
-	private:
-	};
+    inline size_t Size() const
+    {
+        return mSize;
+    }
+
+private:
+    size_t mSize = 0;
+    u8* mData = nullptr;
+    FileMode mMode = FileMode::None;
+    Path mWritePath;
+};
+
+class FileSystem
+{
+public:
+    FileSystem();
+
+    Path GetWorkingDirectory();
+    bool CreateDirectories(const Path& path);
+};
 
 } // namespace LD

@@ -255,7 +255,12 @@ public:
         Resize(0);
     }
 
-    SmallVector& operator=(const SmallVector& other) = delete;
+    SmallVector& operator=(const SmallVector& other)
+    {
+        Resize(other.Size());
+        std::copy(other.Begin(), other.End(), Begin());
+        return *this;
+    }
 
     virtual void Resize(size_t size) override
     {
