@@ -6,3 +6,4 @@
 #include "Core/Math/Tests/TestVec3.h"
 #include "Core/Math/Tests/TestVec4.h"
 #include "Core/Math/Tests/TestMat4.h"
+#include "Core/Math/Tests/TestQuat.h"

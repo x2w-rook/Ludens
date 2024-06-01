@@ -6,6 +6,7 @@ set(MODULE_SRC
 	"Include/Vec3.h"
 	"Include/Vec4.h"
 	"Include/Mat4.h"
+	"Include/Quat.h"
 	"Include/Rect2D.h"
 )
 
@@ -15,6 +16,7 @@ set(TEST_SRC
 	"Tests/TestVec3.h"
 	"Tests/TestVec4.h"
 	"Tests/TestMat4.h"
+	"Tests/TestQuat.h"
 	"Tests/MathTests.cpp")
 
 add_executable(LDMathTests

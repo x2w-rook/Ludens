@@ -39,6 +39,15 @@
 # define LD_MATH_ATAN(EXPR)   std::atan(EXPR)
 #endif
 
+#ifndef LD_MATH_ABS
+# include <cmath>
+#define LD_MATH_ABS(EXPR) std::abs(EXPR)
+#endif
+
+#ifndef LD_MATH_TOLERANCE
+# define LD_MATH_TOLERANCE 1e-5
+#endif
+
 namespace LD {
 
 	template <typename T>

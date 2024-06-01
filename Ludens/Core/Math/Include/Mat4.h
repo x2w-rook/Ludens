@@ -64,7 +64,7 @@ namespace LD {
 		const T rad(degrees * LD_MATH_PI / static_cast<T>(180.0f));
 		const T c(LD_MATH_COS(rad));
 		const T s(LD_MATH_SIN(rad));
-		const TVec3<T> a(axis.Normalized());
+		const TVec3<T> a(axis.NormalizedOrZero());
 		const TVec3<T> temp(a * (static_cast<T>(1.0f) - c));
 		
 		TMat4<T> rotation = TMat4<T>::Identity;
