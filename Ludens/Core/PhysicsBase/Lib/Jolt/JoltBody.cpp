@@ -22,8 +22,8 @@ void JoltBodyLock::Release()
 {
     LD_DEBUG_ASSERT(mSystem && mLockInterface);
 
-    mLockInterface = nullptr;
     ReleaseImpl();
+    mLockInterface = nullptr;
 }
 
 JoltBodyReader::JoltBodyReader(const JoltPhysicsSystem& system) : JoltBodyLock(&system)

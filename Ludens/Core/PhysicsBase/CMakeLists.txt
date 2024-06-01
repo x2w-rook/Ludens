@@ -5,6 +5,7 @@ set(MODULE_INCLUDE
 	"Include/Jolt/JoltPhysicsSystem.h"
 	"Include/Jolt/JoltBody.h"
 	"Include/Jolt/JoltShape.h"
+	"Include/PTypes.h"
 )
 
 set(MODULE_LIB
@@ -13,6 +14,7 @@ set(MODULE_LIB
 	"Lib/Jolt/JoltPhysicsSystem.cpp"
 	"Lib/Jolt/JoltBody.cpp"
 	"Lib/Jolt/JoltShape.cpp"
+	"Lib/PTypes.cpp"
 )
 
 set(MODULE_INCLUDE_DIR
