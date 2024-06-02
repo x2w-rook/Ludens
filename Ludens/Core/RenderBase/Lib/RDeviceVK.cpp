@@ -60,6 +60,9 @@ void RDeviceVK::Startup(RDevice& deviceH, const RDeviceInfo& info)
     VkFormat vkSwapChainFormat = vkSwapChain.GetFormat();
     VkFormat vkDepthStencilFormat = Context.GetDepthStencilFormat();
 
+    // see RDeviceVK::OnObserverNotify
+    vkSwapChain.AddObserver(this);
+
     // create depth stencil image
     {
         RTextureFormat depthStencilFormat = DeriveRTextureFormat(vkDepthStencilFormat);
@@ -571,11 +574,51 @@ RResult RDeviceVK::DrawIndexed(const RDrawIndexedInfo& info)
     return {};
 }
 
+RResult RDeviceVK::ResizeViewport(int width, int height)
+{
+    VKSwapChain& vkSwapChain = Context.GetSwapChain();
+
+    VKSwapChainConfig config = vkSwapChain.GetConfig();
+    config.SwapExtent.width = (uint32_t)width;
+    config.SwapExtent.height = (uint32_t)height;
+
+    vkSwapChain.Invalidate(config);
+
+    return {};
+}
+
 void RDeviceVK::WaitIdle()
 {
     VKDevice& vkDevice = Context.GetDevice();
 
     vkDeviceWaitIdle(vkDevice.GetHandle());
+}
+
+void RDeviceVK::OnObserverNotify(Observable<VKSwapChainInvalidation>* swapchain,
+                                 const VKSwapChainInvalidation& newConfig)
+{
+    VKSwapChain& vkSwapChain = *static_cast<VKSwapChain*>(swapchain);
+    VkExtent2D vkSwapChainExtent = newConfig.SwapExtent;
+
+    // recreate resources
+    const Vector<Ref<VKImageView>>& imageViews = vkSwapChain.GetImageViews();
+    SwapChainImages.Resize(imageViews.Size());
+    FrameBuffers.Resize(imageViews.Size());
+
+    for (size_t i = 0; i < FrameBuffers.Size(); i++)
+    {
+        DeleteTexture(SwapChainImages[i]);
+        CreateTexture(SwapChainImages[i], imageViews[i]);
+
+        RFrameBufferInfo frameBufferI{};
+        frameBufferI.Width = vkSwapChainExtent.width;
+        frameBufferI.Height = vkSwapChainExtent.height;
+        frameBufferI.RenderPass = SwapChainRenderPass;
+        frameBufferI.ColorAttachments = { 1, &SwapChainImages[i] };
+        frameBufferI.DepthStencilAttachment.Reset();
+        DeleteFrameBuffer(FrameBuffers[i]);
+        CreateFrameBuffer(FrameBuffers[i], frameBufferI);
+    }
 }
 
 } // namespace LD

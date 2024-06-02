@@ -49,13 +49,22 @@ namespace LD {
 		return static_cast<void*>(mWindow->GetHandle());
 	}
 
-	void Application::GetWindowSize(u32* width, u32* height) const
+	void Application::GetWindowSize(int* width, int* height) const
 	{
 		if (width)
 			*width = mWindow->GetWidth();
 		if (height)
 			*height = mWindow->GetHeight();
 	}
+
+	void Application::GetWindowPixelSize(int* width, int* height) const
+	{
+        if (width)
+            *width = mWindow->GetPixelWidth();
+        if (height)
+            *height = mWindow->GetPixelHeight();
+	}
+
 
 	void Application::SetWindowCursorNormal()
 	{
@@ -84,6 +93,13 @@ namespace LD {
 			{
 				auto e = static_cast<const ApplicationWindowResizeEvent&>(event);
 				app.mIsMinimized = (e.Width == 0 || e.Height == 0);
+				
+				// immediately flush the minimization event
+				if (app.mIsMinimized)
+				{
+                    EventDispatch(ApplicationMinimizedEvent{}, &Application::EventHandler);
+				}
+
 				break;
 			}
 			default:

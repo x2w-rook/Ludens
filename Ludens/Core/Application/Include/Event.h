@@ -16,6 +16,7 @@ namespace LD {
 		ApplicationQuit,
 		ApplicationWindowResize,
 		ApplicationFrameBufferResize,
+		ApplicationMinimized,
 		KeyPressed,
 		KeyReleased,
 		MouseMotion,
@@ -62,8 +63,8 @@ namespace LD {
 		ApplicationWindowResizeEvent()
 			: Event(EventType::ApplicationWindowResize, EVENT_FLAGS_APPLICATION_BIT) {};
 
-		u32 Width;    // window width in screen coordinates
-		u32 Height;   // window height in screen coordinates
+		int Width;    // window width in screen coordinates
+		int Height;   // window height in screen coordinates
 	};
 
 	struct ApplicationFrameBufferResizeEvent : Event
@@ -71,8 +72,14 @@ namespace LD {
 		ApplicationFrameBufferResizeEvent()
 			: Event(EventType::ApplicationFrameBufferResize, EVENT_FLAGS_APPLICATION_BIT) {};
 
-		u32 Width;    // window framebuffer width in pixels
-		u32 Height;   // window framebuffer height in pixels
+		int PixelWidth;    // window framebuffer width in pixels
+		int PixelHeight;   // window framebuffer height in pixels
+	};
+
+	struct ApplicationMinimizedEvent : Event
+	{
+        ApplicationMinimizedEvent()
+			: Event(EventType::ApplicationMinimized, EVENT_FLAGS_APPLICATION_BIT){};
 	};
 
 	struct KeyPressedEvent : Event

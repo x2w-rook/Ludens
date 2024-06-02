@@ -112,6 +112,12 @@ public:
     RResult DrawVertex(const RDrawVertexInfo& info);
     RResult DrawIndexed(const RDrawIndexedInfo& info);
 
+    /// @brief resize the screen viewport
+    /// @param width pixel width of the viewport
+    /// @param height pixel height of the viewport
+    /// @return resize result
+    RResult ResizeViewport(int width, int height);
+
     void WaitIdle();
 
     inline RBackend GetBackend() const

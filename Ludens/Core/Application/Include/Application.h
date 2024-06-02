@@ -53,7 +53,8 @@ namespace LD {
 		inline std::string GetName() const { return mConfig.Window.Name; }
 		inline RBackend GetRendererBackend() const { return mConfig.RendererBackend; }
 		void* GetWindowHandle() const;
-		void GetWindowSize(u32* width, u32* height) const;
+		void GetWindowSize(int* width, int* height) const;
+		void GetWindowPixelSize(int* width, int* height) const;
 		void SetWindowCursorNormal();
 		void SetWindowCursorGrabbed();
 

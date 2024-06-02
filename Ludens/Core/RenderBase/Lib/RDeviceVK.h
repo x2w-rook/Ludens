@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Core/Header/Include/Observer.h"
 #include "Core/DSA/Include/Array.h"
 #include "Core/RenderBase/Include/VK/VKContext.h"
 #include "Core/RenderBase/Include/VK/VKCommand.h"
@@ -19,7 +20,7 @@
 namespace LD
 {
 
-struct RDeviceVK : RDeviceBase
+struct RDeviceVK : RDeviceBase, public Observer<VKSwapChainInvalidation>
 {
     RDeviceVK();
     RDeviceVK(const RDeviceVK&) = delete;
@@ -77,7 +78,12 @@ struct RDeviceVK : RDeviceBase
     virtual RResult DrawVertex(const RDrawVertexInfo& info) override;
     virtual RResult DrawIndexed(const RDrawIndexedInfo& info) override;
 
+    virtual RResult ResizeViewport(int width, int height) override;
+
     virtual void WaitIdle() override;
+
+    virtual void OnObserverNotify(Observable<VKSwapChainInvalidation>* swapchain,
+                                  const VKSwapChainInvalidation& newConfig) override;
 
     // TODO: this assumes a single device on a single thread, needs refactoring later for multi-threading
     VKContext Context;

@@ -1,6 +1,7 @@
 set(MODULE_INCLUDE
 	"Include/Platform.h"
 	"Include/Singleton.h"
+	"Include/Observer.h"
 	"Include/Error.h"
 	"Include/Types.h"
 )
@@ -8,6 +9,7 @@ set(MODULE_INCLUDE
 set(TEST_SRC
 	"Tests/HeaderTests.cpp"
 	"Tests/TestSingleton.h"
+	"Tests/TestObserver.h"
 )
 
 add_executable(LDHeaderTests

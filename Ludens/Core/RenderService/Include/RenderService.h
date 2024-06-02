@@ -8,6 +8,7 @@ namespace LD
 {
 
 class UIContext;
+class Model;
 
 /// renderer resource id
 using RRID = UID;
@@ -33,6 +34,12 @@ public:
     void DeleteDirectionalLight(RRID id);
 
     void DrawMesh(RRID mesh, const Mat4& transform);
+
+private:
+    void OnViewportResize(int width, int height);
+
+    int mViewportWidth;
+    int mViewportHeight;
 };
 
 } // namespace LD

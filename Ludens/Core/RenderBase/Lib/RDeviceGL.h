@@ -73,6 +73,8 @@ struct RDeviceGL : RDeviceBase
     virtual RResult DrawVertex(const RDrawVertexInfo& info) override;
     virtual RResult DrawIndexed(const RDrawIndexedInfo& info) override;
 
+    virtual RResult ResizeViewport(int width, int height) override;
+
     /// create a handle referencing the default frame buffer created along OpenGL context
     RResult CreateDefaultFrameBuffer(RFrameBuffer& frameBufferH);
 

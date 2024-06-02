@@ -118,7 +118,7 @@ void VKSwapChain::PresentImage(VkSemaphore waitSemaphore, u32 imageIndex)
     VK_ASSERT(vkQueuePresentKHR(mPresentQueue, &presentInfo));
 }
 
-void VKSwapChain::Invalidate(const VKSwapChainConfig& spec)
+void VKSwapChain::Invalidate(const VKSwapChainConfig& config)
 {
     const VKContext* pContext = mContext;
     const VKDevice& device = mContext->GetDevice();
@@ -126,7 +126,11 @@ void VKSwapChain::Invalidate(const VKSwapChainConfig& spec)
     vkDeviceWaitIdle(device.GetHandle());
 
     Cleanup();
-    Startup(*pContext, spec);
+    Startup(*pContext, config);
+
+    // the FrameBuffers containing SwapChain image as attachments
+    // will have to be recreated
+    NotifyObservers(config);
 }
 
 void VKSwapChain::StartupImageViews()

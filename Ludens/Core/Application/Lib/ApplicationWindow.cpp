@@ -27,9 +27,6 @@ namespace LD {
 		else
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		
-		// TODO: swapchain and framebuffer invalidation on both backends
-		glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-
 		mHandle = glfwCreateWindow((int)mWidth, (int)mHeight, mName.c_str(), nullptr, nullptr);
 		LD_DEBUG_ASSERT(mHandle != nullptr);
 
@@ -117,20 +114,24 @@ namespace LD {
 	{
 		glfwSetWindowSizeCallback(mHandle, [](GLFWwindow* window, int width, int height) {
 			ApplicationWindow* appWindow = (ApplicationWindow*)glfwGetWindowUserPointer(window);
-			appWindow->mWidth = (u32)width;
-			appWindow->mHeight = (u32)height;
+			appWindow->mWidth = width;
+			appWindow->mHeight = height;
 
 			ApplicationWindowResizeEvent event;
-			event.Width = (u32)width;
-			event.Height = (u32)height;
+			event.Width = width;
+			event.Height = height;
 			EventDispatch(event, &Application::EventHandler);
 		});
 
 		// The frame buffer size is measured in pixels, which may or may not equal the window size in screen coordinates.
 		glfwSetFramebufferSizeCallback(mHandle, [](GLFWwindow* window, int width, int height) {
+            ApplicationWindow* appWindow = (ApplicationWindow*)glfwGetWindowUserPointer(window);
+			appWindow->mPixelWidth = width;
+            appWindow->mPixelHeight = height;
+
 			ApplicationFrameBufferResizeEvent event;
-			event.Width = (u32)width;
-			event.Height = (u32)height;
+			event.PixelWidth = width;
+			event.PixelHeight = height;
 			EventDispatch(event, &Application::EventHandler);
 		});
 

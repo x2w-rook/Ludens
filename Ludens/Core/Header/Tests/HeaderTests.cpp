@@ -6,6 +6,7 @@
 #include "Core/Header/Include/Types.h"
 #include "Core/Header/Include/Error.h"
 #include "Core/Header/Tests/TestSingleton.h"
+#include "Core/Header/Tests/TestObserver.h"
 
 // Sanity Check
 LD_STATIC_ASSERT(sizeof(LD::u8) == 1);

@@ -94,6 +94,8 @@ struct RDeviceBase
     virtual RResult DrawVertex(const RDrawVertexInfo& info) = 0;
     virtual RResult DrawIndexed(const RDrawIndexedInfo& info) = 0;
 
+    virtual RResult ResizeViewport(int width, int height) = 0;
+
     virtual void WaitIdle() {}
 
     CUID<RDeviceBase> ID;

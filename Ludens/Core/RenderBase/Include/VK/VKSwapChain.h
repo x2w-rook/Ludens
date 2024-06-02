@@ -3,6 +3,7 @@
 #include <functional>
 #include <vulkan/vulkan_core.h>
 #include "Core/Header/Include/Types.h"
+#include "Core/Header/Include/Observer.h"
 #include "Core/OS/Include/Memory.h"
 #include "Core/DSA/Include/Vector.h"
 #include "Core/RenderBase/Include/VK/VKImage.h"
@@ -20,13 +21,12 @@ struct VKSwapChainConfig
     VkPresentModeKHR PresentMode;
     VkExtent2D SwapExtent;
     u32 MinImageCount;
-
-    // if not null, create a framebuffer for each image in swapchain
-    Ref<VKImageView> DepthImageView = nullptr;
-    Ref<VKRenderPass> RenderPass = nullptr;
 };
 
-class VKSwapChain
+/// notify observers whenever the swapchain is recreated with a new config
+using VKSwapChainInvalidation = VKSwapChainConfig;
+
+class VKSwapChain : public Observable<VKSwapChainInvalidation>
 {
 public:
     VKSwapChain();

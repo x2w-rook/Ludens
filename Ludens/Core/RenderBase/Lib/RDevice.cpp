@@ -630,6 +630,14 @@ RResult RDevice::DrawIndexed(const RDrawIndexedInfo& info)
     return result;
 }
 
+RResult RDevice::ResizeViewport(int width, int height)
+{
+    RResult result = mBase->ResizeViewport(width, height);
+
+    mBase->Callback(result);
+    return result;
+}
+
 void RDevice::WaitIdle()
 {
     mBase->WaitIdle();

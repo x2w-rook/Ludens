@@ -27,8 +27,10 @@ namespace LD {
 		void GetCursorPosition(float& screenX, float& screenY);
 		void* GetHandle();
 		inline std::string GetName() const { return mName; }
-		inline u32 GetWidth() const { return mWidth; }
-		inline u32 GetHeight() const { return mHeight; }
+		inline int GetWidth() const { return mWidth; }
+		inline int GetHeight() const { return mHeight; }
+        inline int GetPixelWidth() const { return mPixelWidth; }
+		inline int GetPixelHeight() const { return mPixelHeight; }
 		inline float GetAspectRatio() const { return (float)mWidth / (float)mHeight; }
 		
 		void PollEvents();
@@ -44,8 +46,10 @@ namespace LD {
 
 		const Application* mApp = nullptr;
 		std::string mName;
-		u32 mWidth = 0;
-		u32 mHeight = 0;
+		int mWidth = 0;
+		int mHeight = 0;
+        int mPixelWidth = 0;
+        int mPixelHeight = 0;
 		GLFWwindow* mHandle = nullptr;
 		bool mHasStartup = false;
 	};

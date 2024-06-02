@@ -60,7 +60,7 @@ static void RenderServiceCallback(const RResult& result)
 
 void RenderService::Startup(RBackend backend)
 {
-    u32 width, height;
+    int width, height;
     auto& app = Application::GetSingleton();
     app.GetWindowSize(&width, &height);
 
@@ -111,6 +111,17 @@ void RenderService::Cleanup()
 
 void RenderService::BeginFrame()
 {
+    // adapt to application framebuffer size
+    int width, height;
+
+    auto& app = Application::GetSingleton();
+    app.GetWindowPixelSize(&width, &height);
+
+    if (width != mViewportWidth || height != mViewportHeight)
+    {
+        OnViewportResize(width, height);
+    }
+
     sDrawLists.Clear();
 
     // upload frame static data
@@ -126,10 +137,6 @@ void RenderService::BeginFrame()
 void RenderService::EndFrame()
 {
     sHasBeginFrame = false;
-
-    u32 width, height;
-    auto& app = Application::GetSingleton();
-    app.GetWindowSize(&width, &height);
 
     // GBuffer Pass
     {
@@ -157,7 +164,7 @@ void RenderService::EndFrame()
             viewportData.ViewMat = list.ViewMat;
             viewportData.ProjMat = list.ProjMat;
             viewportData.ViewProjMat = list.ProjMat * list.ViewMat;
-            viewportData.Size = { (float)width, (float)height };
+            viewportData.Size = { (float)mViewportWidth, (float)mViewportHeight };
             viewportData.ViewPos = list.ViewPos;
             ubo.SetData(0, sizeof(viewportData), &viewportData);
 
@@ -307,6 +314,22 @@ void RenderService::DrawMesh(RRID id, const Mat4& transform)
     LD_DEBUG_ASSERT(sMeshes.find(id) != sMeshes.end());
 
     sDrawLists.Back().Meshes.PushBack({ id, transform });
+}
+
+void RenderService::OnViewportResize(int width, int height)
+{
+    mViewportWidth = width;
+    mViewportHeight = height;
+
+    // recreate swapchain
+    sDevice.ResizeViewport(width, height);
+
+    // recreate framebuffers using viewport size
+    sGBuffer.Cleanup();
+    sFrameBuffers.CreateGBuffer(sGBuffer, width, height);
+
+    sGBufferGroup.Cleanup();
+    sGBufferGroup.Startup(sDevice, sBindingGroups.GetGBufferBGL(), sGBuffer);
 }
 
 } // namespace LD

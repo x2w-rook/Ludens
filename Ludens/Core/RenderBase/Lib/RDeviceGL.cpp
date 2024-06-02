@@ -537,6 +537,13 @@ RResult RDeviceGL::DrawIndexed(const RDrawIndexedInfo& info)
     return {};
 }
 
+RResult RDeviceGL::ResizeViewport(int width, int height)
+{
+    glViewport(0, 0, width, height);
+
+    return {};
+}
+
 RResult RDeviceGL::CreateDefaultFrameBuffer(RFrameBuffer& frameBufferH)
 {
     RFrameBufferGL* frameBuffer = (RFrameBufferGL*)FrameBufferAllocator.Alloc(sizeof(RFrameBufferGL));
