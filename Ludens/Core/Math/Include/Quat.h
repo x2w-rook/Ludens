@@ -4,6 +4,7 @@
 #include "Core/Math/Include/Math.h"
 #include "Core/Math/Include/Vec3.h"
 #include "Core/Math/Include/Vec4.h"
+#include "Core/Math/Include/Mat4.h"
 
 namespace LD
 {
@@ -34,6 +35,17 @@ struct TQuat : public TVec4<T>
             rad = (T)2 * LD_MATH_ACOS(q.w);
             axis = TVec3{ q.x, q.y, q.z }.NormalizedOrZero();
         }
+    }
+
+    void GetMat4(TMat4<T>& mat) const
+    {
+        LD_DEBUG_ASSERT(IsNormalized());
+
+        TVec3<T> axis;
+        TRadians<T> rad;
+        GetAxisRadians(axis, rad);
+        
+        mat = TMat4<T>::Rotate(axis, rad.ToDegrees());
     }
 
     static TQuat FromAxisRadians(const TVec3<T>& axis, const TRadians<T>& rads)
