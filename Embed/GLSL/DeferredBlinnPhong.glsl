@@ -31,7 +31,7 @@ layout (group = 0, binding = 0, std140) uniform LightingUBO
 {
 	vec4 DirLight;
 	vec4 DirLightColor;
-	PointLightUBO PointLights[128];
+	PointLightUBO PointLights[128]; // TODO: upstream from macros
 } uLightingUBO;
 
 layout (group = 1, binding = 0, std140) uniform ViewportUBO
@@ -45,7 +45,6 @@ layout (group = 1, binding = 0, std140) uniform ViewportUBO
 	int PointLightCount;
 } uViewportUBO;
 
-// TODO: Deferred BGL
 layout (group = 2, binding = 0) uniform sampler2D uPosition;
 layout (group = 2, binding = 1) uniform sampler2D uNormal;
 layout (group = 2, binding = 2) uniform sampler2D uAlbedo;
@@ -65,6 +64,7 @@ void main()
 	float specular = albedoSpec.a;
 	vec3 color;
 
+	// TODO: push constant debug switch instead of using directional light W component?
 	int rawTexture = int(uLightingUBO.DirLight.w);
 	if (rawTexture == 1)
 		color = position;

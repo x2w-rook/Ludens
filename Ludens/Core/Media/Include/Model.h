@@ -22,6 +22,7 @@ struct Material
     Optional<Path> AmbientTexture;
     Optional<Path> AlbedoTexture;
     Optional<Path> SpecularTexture;
+    Optional<Path> NormalTexture;
 
     static Material GetDefault()
     {
@@ -34,6 +35,7 @@ struct Material
         mtl.AlbedoTexture.Reset();
         mtl.AmbientTexture.Reset();
         mtl.SpecularTexture.Reset();
+        mtl.NormalTexture.Reset();
 
         return mtl;
     }

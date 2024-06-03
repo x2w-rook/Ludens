@@ -69,11 +69,13 @@ layout (group = 1, binding = 0, std140) uniform Material
 	float UseAlbedoTexture;
 	vec3 Specular;
 	float UseSpecularTexture;
+	vec4 UseNormalTexture;
 } uMaterial;
 
 layout (group = 1, binding = 1) uniform sampler2D uAmbient;
 layout (group = 1, binding = 2) uniform sampler2D uAlbedo;
 layout (group = 1, binding = 3) uniform sampler2D uSpecular;
+layout (group = 1, binding = 4) uniform sampler2D uNormals;
 
 float avg(vec3 v)
 {
@@ -84,6 +86,7 @@ void main()
 {
 	float specular = avg(uMaterial.Specular);
 	vec4 albedoSpec = vec4(uMaterial.Albedo, specular);
+	vec4 normal = vec4(normalize(vNormal), 1.0);
 
 	if (uMaterial.UseAlbedoTexture > 0.0)
 	{
@@ -95,7 +98,12 @@ void main()
 		albedoSpec.a = avg(texture(uSpecular, vTexUV).rgb);
 	}
 
+	if (uMaterial.UseNormalTexture.x > 0.0)
+	{
+		normal = texture(uNormals, vTexUV); // TODO: this is only tangent space
+	}
+
 	fPos = vec4(vPos, 1.0);
-	fNormal = vec4(normalize(vNormal), 1.0);
+	fNormal = normal;
 	fAlbedoSpec = albedoSpec;
 }

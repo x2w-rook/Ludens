@@ -49,10 +49,15 @@ void MaterialGroup::Startup(const MaterialGroupInfo& info)
     textureI = info.SpecularTextureInfo.ValueOr(defaultI);
     mDevice.CreateTexture(mSpecularTexture, textureI);
     mHandle.BindTexture(3, mSpecularTexture);
+
+    textureI = info.NormalTextureInfo.ValueOr(defaultI);
+    mDevice.CreateTexture(mNormalTexture, textureI);
+    mHandle.BindTexture(4, mNormalTexture);
 }
 
 void MaterialGroup::Cleanup()
 {
+    mDevice.DeleteTexture(mNormalTexture);
     mDevice.DeleteTexture(mSpecularTexture);
     mDevice.DeleteTexture(mAlbedoTexture);
     mDevice.DeleteTexture(mAmbientTexture);
@@ -73,8 +78,9 @@ RBindingGroupLayoutData MaterialGroup::GetLayoutData() const
 
     RBindingInfo binding2 = binding1;
     RBindingInfo binding3 = binding1;
+    RBindingInfo binding4 = binding1;
 
-    return { binding0, binding1, binding2, binding3 };
+    return { binding0, binding1, binding2, binding3, binding4 };
 }
 
 RBindingGroupLayout MaterialGroup::CreateLayout(RDevice device)
@@ -83,11 +89,12 @@ RBindingGroupLayout MaterialGroup::CreateLayout(RDevice device)
 
     RBindingGroupLayout materialBGL;
 
-    Array<RBindingInfo, 4> bindings{
+    Array<RBindingInfo, 5> bindings{
         { RBindingType::UniformBuffer },
         { RBindingType::Texture }, // ambient
         { RBindingType::Texture }, // albedo
         { RBindingType::Texture }, // specular
+        { RBindingType::Texture }, // normals
     };
 
     RBindingGroupLayoutInfo materialBGLI;

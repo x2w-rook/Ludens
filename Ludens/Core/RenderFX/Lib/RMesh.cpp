@@ -40,10 +40,12 @@ void RMesh::Startup(const RMeshInfo& info)
         matBGI.UBO.UseAmbientTexture = 0;
         matBGI.UBO.UseAlbedoTexture = 0;
         matBGI.UBO.UseSpecularTexture = 0;
+        matBGI.UBO.UseNormalTexture = Vec4::Zero;
 
         u8* albedoData = nullptr;
         u8* ambientData = nullptr;
         u8* specularData = nullptr;
+        u8* normalData = nullptr;
 
         if (mat.AmbientTexture.HasValue())
         {
@@ -93,6 +95,22 @@ void RMesh::Startup(const RMeshInfo& info)
             matBGI.UBO.UseSpecularTexture = 1.0f;
         }
 
+        if (mat.NormalTexture.HasValue())
+        {
+            int width, height, channels;
+            LoadImage(&normalData, mat.NormalTexture.Value().ToString().c_str(), &width, &height, &channels);
+            RTextureInfo info{};
+            info.Type = RTextureType::Texture2D;
+            info.Format = RTextureFormat::RGBA8;
+            info.Width = (u32)width;
+            info.Height = (u32)height;
+            info.Data = normalData;
+            info.Size = width * height * 4;
+
+            matBGI.NormalTextureInfo = info;
+            matBGI.UBO.UseNormalTexture = { 1.0f, 1.0f, 1.0f, 1.0f };
+        }
+
         matBG.Startup(matBGI);
 
         if (ambientData)
@@ -101,6 +119,8 @@ void RMesh::Startup(const RMeshInfo& info)
             FreeImage(albedoData);
         if (specularData)
             FreeImage(specularData);
+        if (normalData)
+            FreeImage(normalData);
 
         // batch all geometry that uses the current material
         Vector<RMeshVertex> batchVertices;

@@ -24,8 +24,8 @@ struct TinyObjContext
 
 static void TinyObjParseModel(TinyObjContext& obj);
 static void TinyObjParseShape(TinyObjContext& obj, int obj_shape_idx);
-static void TinyObjParseMtl(TinyObjContext& obj, int obj_shape_idx, int obj_mat_id);
-static void TinyObjFallbackMtl(TinyObjContext& obj, int obj_shape_idx);
+static int TinyObjParseMtl(TinyObjContext& obj, int obj_shape_idx, int obj_mat_id);
+static int TinyObjFallbackMtl(TinyObjContext& obj, int obj_shape_idx);
 
 ModelLoader::ModelLoader()
 {
@@ -104,14 +104,23 @@ static void TinyObjParseShape(TinyObjContext& obj, int obj_shape_idx)
     ld_mesh.Indices.Clear();
     ld_mesh.Vertices.Clear();
 
+    // sanity check
+    LD_DEBUG_ASSERT(obj_shape.mesh.indices.size() % 3 == 0);
     LD_DEBUG_ASSERT(obj_shape.mesh.material_ids.size() > 0);
     int obj_mat_id = obj_shape.mesh.material_ids[0];
     for (int id : obj_shape.mesh.material_ids)
         LD_DEBUG_ASSERT(id == obj_mat_id);
 
-    TinyObjParseMtl(obj, obj_shape_idx, obj_mat_id);
+    // resolve Material for this Mesh
+    int ld_mat_id = TinyObjParseMtl(obj, obj_shape_idx, obj_mat_id);
+    Material& ld_mat = obj.Target->Materials[ld_mat_id].first;
 
-    for (size_t idx = 0; idx < obj_shape.mesh.indices.size(); idx++)
+    int pointN = 0;
+    Vec3 point[3];
+    MeshVertex* pointAddr[3];
+    Vec3 edge01, edge02;
+
+    for (size_t idx = 0; idx < obj_shape.mesh.indices.size(); idx++, pointN = (pointN + 1) % 3)
     {
         tinyobj::index_t index = obj_shape.mesh.indices[idx];
 
@@ -125,6 +134,8 @@ static void TinyObjParseShape(TinyObjContext& obj, int obj_shape_idx)
             obj.Attrib.vertices[3 * index.vertex_index + 2],
         };
 
+        point[pointN] = vertex.Position;
+
         if (index.normal_index >= 0)
         {
             vertex.Normal = {
@@ -132,6 +143,18 @@ static void TinyObjParseShape(TinyObjContext& obj, int obj_shape_idx)
                 obj.Attrib.normals[3 * index.normal_index + 1],
                 obj.Attrib.normals[3 * index.normal_index + 2],
             };
+        }
+        else if (pointN == 2)
+        {
+            // generate face normals for each face manually
+            edge01 = point[1] - point[0];
+            edge02 = point[2] - point[0];
+            pointAddr[2] = &vertex;
+
+            // write back to 3 vertices of this face
+            pointAddr[2]->Normal = Vec3::Cross(edge01, edge02);
+            pointAddr[1]->Normal = pointAddr[2]->Normal;
+            pointAddr[0]->Normal = pointAddr[2]->Normal;
         }
 
         if (index.texcoord_index >= 0)
@@ -149,45 +172,44 @@ static void TinyObjParseShape(TinyObjContext& obj, int obj_shape_idx)
         }
 
         ld_mesh.Indices.PushBack(obj.UniqueVertices[vertex]);
+
+        pointAddr[pointN] = &ld_mesh.Vertices[ld_mesh.Indices.Back()];
     }
 }
 
-// convert each tinyobj::material_t to Model::Material
-static void TinyObjParseMtl(TinyObjContext& obj, int obj_shape_idx, int obj_mat_id)
+// convert each tinyobj::material_t to Model::Material,
+// returns an index into LD::Model::Materials
+static int TinyObjParseMtl(TinyObjContext& obj, int obj_shape_idx, int obj_mat_id)
 {
     auto& mesh = obj.Target->Meshes[obj_shape_idx];
-    int& materialRef = mesh.second;
+    int& ld_mat_ref = mesh.second;
     Mesh& ld_mesh = mesh.first;
-    int ld_mat_idx;
 
     // the mesh does not reference any material, use the fallback material
     if (obj_mat_id < 0)
     {
-        TinyObjFallbackMtl(obj, obj_shape_idx);
-        return;
+        return TinyObjFallbackMtl(obj, obj_shape_idx);
     }
 
     if (obj.MaterialRefMap.find(obj_mat_id) != obj.MaterialRefMap.end())
     {
-        ld_mat_idx = obj.MaterialRefMap[obj_mat_id];
-        materialRef = ld_mat_idx;
-        obj.Target->Materials[ld_mat_idx].second.PushBack(obj_shape_idx);
-        return;
+        ld_mat_ref = obj.MaterialRefMap[obj_mat_id];
+        obj.Target->Materials[ld_mat_ref].second.PushBack(obj_shape_idx);
+        return ld_mat_ref;
     }
 
     // import new material
     tinyobj::material_t& obj_mat = obj.Materials[obj_mat_id];
     auto& ld_mats = obj.Target->Materials;
-    ld_mat_idx = ld_mats.Size();
-    
+    ld_mat_ref = ld_mats.Size();
+
     ld_mats.PushBack({});
     Material& ld_mat = ld_mats.Back().first;
     Vector<int>& meshRefs = ld_mats.Back().second;
-    
+
     meshRefs = { (int)obj_shape_idx };
 
-    materialRef = ld_mat_idx;
-    obj.MaterialRefMap[obj_mat_id] = ld_mat_idx;
+    obj.MaterialRefMap[obj_mat_id] = ld_mat_ref;
 
     ld_mat.Ambient = { obj_mat.ambient[0], obj_mat.ambient[1], obj_mat.ambient[2] };
     ld_mat.Albedo = { obj_mat.diffuse[0], obj_mat.diffuse[1], obj_mat.diffuse[2] };
@@ -195,6 +217,7 @@ static void TinyObjParseMtl(TinyObjContext& obj, int obj_shape_idx, int obj_mat_
     ld_mat.AmbientTexture.Reset();
     ld_mat.AlbedoTexture.Reset();
     ld_mat.SpecularTexture.Reset();
+    ld_mat.NormalTexture.Reset();
 
     if (!obj_mat.ambient_texname.empty())
         ld_mat.AmbientTexture = Path{ obj.DirectoryPath + obj_mat.ambient_texname };
@@ -204,12 +227,21 @@ static void TinyObjParseMtl(TinyObjContext& obj, int obj_shape_idx, int obj_mat_
 
     if (!obj_mat.specular_texname.empty())
         ld_mat.SpecularTexture = Path{ obj.DirectoryPath + obj_mat.specular_texname };
+
+    // some models still reference their normal texture as bump textures
+    if (!obj_mat.bump_texname.empty())
+        ld_mat.NormalTexture = Path{ obj.DirectoryPath + obj_mat.bump_texname };
+
+    if (!obj_mat.normal_texname.empty())
+        ld_mat.NormalTexture = Path{ obj.DirectoryPath + obj_mat.normal_texname };
+
+    return ld_mat_ref;
 }
 
-void TinyObjFallbackMtl(TinyObjContext& obj, int obj_shape_idx)
+int TinyObjFallbackMtl(TinyObjContext& obj, int obj_shape_idx)
 {
     auto& mesh = obj.Target->Meshes[obj_shape_idx];
-    int& materialRef = mesh.second;
+    int& ld_mat_ref = mesh.second;
     Mesh& ld_mesh = mesh.first;
 
     if (obj.FallbackMaterialIdx < 0)
@@ -224,9 +256,11 @@ void TinyObjFallbackMtl(TinyObjContext& obj, int obj_shape_idx)
         meshRefs.Clear();
     }
 
-    materialRef = obj.FallbackMaterialIdx;
-    Vector<int>& meshRefs = obj.Target->Materials[materialRef].second;
+    ld_mat_ref = obj.FallbackMaterialIdx;
+    Vector<int>& meshRefs = obj.Target->Materials[ld_mat_ref].second;
     meshRefs.PushBack(obj_shape_idx);
+
+    return ld_mat_ref;
 }
 
 } // namespace LD

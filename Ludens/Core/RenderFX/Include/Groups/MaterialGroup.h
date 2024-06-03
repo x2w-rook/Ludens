@@ -17,9 +17,10 @@ struct MaterialUBO
     float UseAlbedoTexture;
     alignas(16) Vec3 Specular;
     float UseSpecularTexture;
+    alignas(16) Vec4 UseNormalTexture;
 };
 
-LD_STATIC_ASSERT(sizeof(MaterialUBO) == 48);
+LD_STATIC_ASSERT(sizeof(MaterialUBO) % 16 == 0);
 
 struct MaterialGroupInfo
 {
@@ -40,6 +41,9 @@ struct MaterialGroupInfo
 
     /// info to construct specular texture
     Optional<RTextureInfo> SpecularTextureInfo;
+
+    /// info to construct normal texture
+    Optional<RTextureInfo> NormalTextureInfo;
 };
 
 /// non-programmable, plain-old-data material
@@ -76,6 +80,11 @@ public:
     {
         return mSpecularTexture;
     }
+    
+    inline RTexture GetNormalTexture() const
+    {
+        return mNormalTexture;
+    }
 
 private:
     RDevice mDevice;
@@ -83,6 +92,7 @@ private:
     RTexture mAmbientTexture;  // binding 1
     RTexture mAlbedoTexture;   // binding 2
     RTexture mSpecularTexture; // binding 3
+    RTexture mNormalTexture;   // binding 4
 };
 
 } // namespace LD
