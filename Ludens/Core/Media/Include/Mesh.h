@@ -11,6 +11,7 @@ struct MeshVertex
 {
     Vec3 Position;
     Vec3 Normal;
+    Vec3 Tangent;
     Vec2 TexUV;
 
     bool operator==(const MeshVertex& other) const

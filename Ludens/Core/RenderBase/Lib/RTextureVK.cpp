@@ -30,9 +30,8 @@ void RTextureVK::Startup(RTexture& textureH, Ref<VKImageView> view, RDeviceVK& d
     // create sampler
     {
         const VkPhysicalDeviceLimits& deviceLimits = vkDevice.GetPhysicalDevice().GetLimits();
-        VkSamplerCreateInfo samplerCI =
-            VKInfo::SamplerCreate(VK_FILTER_LINEAR, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
-                                  deviceLimits.maxSamplerAnisotropy);
+        VkSamplerCreateInfo samplerCI = VKInfo::SamplerCreate(
+            VK_FILTER_LINEAR, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT, deviceLimits.maxSamplerAnisotropy);
 
         Sampler.Startup(vkDevice, samplerCI);
     }
@@ -102,9 +101,8 @@ void RTextureVK::Startup(RTexture& textureH, const RTextureInfo& info, RDeviceVK
     // create sampler
     {
         const VkPhysicalDeviceLimits& deviceLimits = vkDevice.GetPhysicalDevice().GetLimits();
-        VkSamplerCreateInfo samplerCI =
-            VKInfo::SamplerCreate(VK_FILTER_LINEAR, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
-                                  deviceLimits.maxSamplerAnisotropy);
+        VkSamplerCreateInfo samplerCI = VKInfo::SamplerCreate(
+            VK_FILTER_LINEAR, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT, deviceLimits.maxSamplerAnisotropy);
 
         Sampler.Startup(vkDevice, samplerCI);
     }

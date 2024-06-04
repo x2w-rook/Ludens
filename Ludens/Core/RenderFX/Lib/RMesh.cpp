@@ -123,7 +123,7 @@ void RMesh::Startup(const RMeshInfo& info)
             FreeImage(normalData);
 
         // batch all geometry that uses the current material
-        Vector<RMeshVertex> batchVertices;
+        Vector<MeshVertex> batchVertices;
         Vector<u32> batchIndices;
         batch.IndexCount = 0;
         batch.VertexCount = 0;
@@ -141,9 +141,7 @@ void RMesh::Startup(const RMeshInfo& info)
 
             for (size_t vertexIdx = 0; vertexIdx < mesh.Vertices.Size(); vertexIdx++)
             {
-                batchVertices[vertexBase + vertexIdx].Position = mesh.Vertices[vertexIdx].Position;
-                batchVertices[vertexBase + vertexIdx].Normal = mesh.Vertices[vertexIdx].Normal;
-                batchVertices[vertexBase + vertexIdx].TexUV = mesh.Vertices[vertexIdx].TexUV;
+                batchVertices[vertexBase + vertexIdx] = mesh.Vertices[vertexIdx];
             }
 
             indexBase = batchIndices.Size();

@@ -6,12 +6,15 @@
 #version 450 core
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormal;
-layout (location = 2) in vec2 aTexUV;
-layout (location = 3) in vec4 aModel[3];
+layout (location = 2) in vec3 aTangent;
+layout (location = 3) in vec2 aTexUV;
+layout (location = 4) in vec4 aModel[3];
 
 layout (location = 0) out vec3 vPos;
 layout (location = 1) out vec3 vNormal;
 layout (location = 2) out vec2 vTexUV;
+layout (location = 3) out mat3 vTBN;
+
 
 layout (group = 0, binding = 0, std140) uniform Viewport
 {
@@ -23,20 +26,22 @@ layout (group = 0, binding = 0, std140) uniform Viewport
 
 void main()
 {
-	mat4 model; 
-	model[0] = vec4(aModel[0].x, aModel[1].x, aModel[2].x, 0.0);
-	model[1] = vec4(aModel[0].y, aModel[1].y, aModel[2].y, 0.0);
-	model[2] = vec4(aModel[0].z, aModel[1].z, aModel[2].z, 0.0);
-	model[3] = vec4(aModel[0].w, aModel[1].w, aModel[2].w, 1.0);
+	mat4 modelMat; 
+	modelMat[0] = vec4(aModel[0].x, aModel[1].x, aModel[2].x, 0.0);
+	modelMat[1] = vec4(aModel[0].y, aModel[1].y, aModel[2].y, 0.0);
+	modelMat[2] = vec4(aModel[0].z, aModel[1].z, aModel[2].z, 0.0);
+	modelMat[3] = vec4(aModel[0].w, aModel[1].w, aModel[2].w, 1.0);
 
-	// NOTE: we are not using a normal matrix to get world normals,
-	//       the model matrix MUST use uniform scale, or the world normals
-	//       will no longer be perpendicular to the surface.
-	
+	mat3 normalMat = transpose(inverse(mat3(modelMat)));
 
-	vPos = (model * vec4(aPos, 1.0)).xyz;  // world pos
-	vNormal = mat3(model) * aNormal;       // world normal
+	vPos = (modelMat * vec4(aPos, 1.0)).xyz;   // world position
+	vNormal = normalize(normalMat * aNormal);  // world normal
 	vTexUV = aTexUV;
+
+	vec3 T = normalize(normalMat * aTangent);
+	vec3 N = vNormal;
+	vec3 B = cross(N, T);
+	vTBN = mat3(T, B, N);
 
 	gl_Position = uViewport.ViewProj * vec4(vPos, 1.0);
 }
@@ -48,6 +53,7 @@ void main()
 layout (location = 0) in vec3 vPos;
 layout (location = 1) in vec3 vNormal;
 layout (location = 2) in vec2 vTexUV;
+layout (location = 3) in mat3 vTBN;
 
 layout (location = 0) out vec4 fPos;
 layout (location = 1) out vec4 fNormal;
@@ -86,7 +92,7 @@ void main()
 {
 	float specular = avg(uMaterial.Specular);
 	vec4 albedoSpec = vec4(uMaterial.Albedo, specular);
-	vec4 normal = vec4(normalize(vNormal), 1.0);
+	vec3 normal = normalize(vNormal);
 
 	if (uMaterial.UseAlbedoTexture > 0.0)
 	{
@@ -100,10 +106,13 @@ void main()
 
 	if (uMaterial.UseNormalTexture.x > 0.0)
 	{
-		normal = texture(uNormals, vTexUV); // TODO: this is only tangent space
+		// normal mapping from tangent space to world space
+		normal = texture(uNormals, vTexUV).rgb;
+		normal = normalize(normal * 2.0 - 1.0);   
+		normal = normalize(vTBN * normal);
 	}
 
 	fPos = vec4(vPos, 1.0);
-	fNormal = normal;
+	fNormal = vec4(normal, 1.0);
 	fAlbedoSpec = albedoSpec;
 }

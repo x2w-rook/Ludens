@@ -30,19 +30,20 @@ void GBufferPipeline::Startup(const GBufferPipelineInfo& info)
     RBackend backend = mDevice.GetBackend();
 
     Array<RVertexBufferSlot, 2> gbufferVertexSlots;
-    Array<RVertexAttribute, 3> gbufferVertexAttr{
+    Array<RVertexAttribute, 4> gbufferVertexAttr{
         { 0, RDataType::Vec3, false }, // position
         { 1, RDataType::Vec3, false }, // normals
-        { 2, RDataType::Vec2, false }, // UVs
+        { 2, RDataType::Vec3, false }, // tangents
+        { 3, RDataType::Vec2, false }, // UVs
     };
     gbufferVertexSlots[0].PollRate = RAttributePollRate::PerVertex;
     gbufferVertexSlots[0].Attributes = gbufferVertexAttr.GetView();
 
     // per-instance model matrix 4x3
     Array<RVertexAttribute, 3> gbufferInstanceAttr{
-        { 3, RDataType::Vec4, false }, // row 1
-        { 4, RDataType::Vec4, false }, // row 2
-        { 5, RDataType::Vec4, false }, // row 3
+        { 4, RDataType::Vec4, false }, // row 1
+        { 5, RDataType::Vec4, false }, // row 2
+        { 6, RDataType::Vec4, false }, // row 3
     };
     gbufferVertexSlots[1].PollRate = RAttributePollRate::PerInstance;
     gbufferVertexSlots[1].Attributes = gbufferInstanceAttr.GetView();

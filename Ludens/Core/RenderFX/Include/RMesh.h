@@ -8,13 +8,6 @@
 namespace LD
 {
 
-struct RMeshVertex
-{
-    Vec3 Position;
-    Vec3 Normal;
-    Vec2 TexUV;
-};
-
 struct RMeshInfo
 {
     RDevice Device; // owner of this static mesh

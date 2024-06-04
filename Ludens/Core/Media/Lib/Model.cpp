@@ -18,7 +18,6 @@ struct TinyObjContext
     std::vector<tinyobj::shape_t> Shapes;
     std::vector<tinyobj::material_t> Materials;
     std::unordered_map<int, int> MaterialRefMap;
-    std::unordered_map<MeshVertex, MeshIndex> UniqueVertices{};
     int FallbackMaterialIdx;
 };
 
@@ -56,10 +55,16 @@ void ModelLoader::LoadModel(const Path& path, Model& model)
     timer.Stop();
     double loadTime = timer.GetMilliSeconds();
 
+    size_t vertices = 0;
+    for (auto& mesh : model.Meshes)
+    {
+        vertices += mesh.first.Vertices.Size();
+    }
+
     printf("=== ModelLoader::LoadModel ===\n");
     printf("path: %s\n", obj.FilePath.c_str());
     printf("meshes: %d\n", (int)model.Meshes.Size());
-    printf("vertices: %d\n", (int)obj.UniqueVertices.size());
+    printf("vertices: %d\n", (int)vertices);
     printf("materials: %d\n", (int)model.Materials.Size());
     printf("load time:  %.3f ms\n", loadTime);
 }
@@ -116,15 +121,15 @@ static void TinyObjParseShape(TinyObjContext& obj, int obj_shape_idx)
     Material& ld_mat = obj.Target->Materials[ld_mat_id].first;
 
     int pointN = 0;
-    Vec3 point[3];
-    MeshVertex* pointAddr[3];
-    Vec3 edge01, edge02;
+    MeshVertex point[3];
+    Vec3 edge1, edge2;
+    Vec2 dUV1, dUV2;
 
     for (size_t idx = 0; idx < obj_shape.mesh.indices.size(); idx++, pointN = (pointN + 1) % 3)
     {
         tinyobj::index_t index = obj_shape.mesh.indices[idx];
 
-        MeshVertex vertex;
+        MeshVertex& vertex = point[pointN];
         vertex.Normal = Vec3::Zero;
         vertex.TexUV = Vec2::Zero;
 
@@ -134,8 +139,6 @@ static void TinyObjParseShape(TinyObjContext& obj, int obj_shape_idx)
             obj.Attrib.vertices[3 * index.vertex_index + 2],
         };
 
-        point[pointN] = vertex.Position;
-
         if (index.normal_index >= 0)
         {
             vertex.Normal = {
@@ -143,18 +146,6 @@ static void TinyObjParseShape(TinyObjContext& obj, int obj_shape_idx)
                 obj.Attrib.normals[3 * index.normal_index + 1],
                 obj.Attrib.normals[3 * index.normal_index + 2],
             };
-        }
-        else if (pointN == 2)
-        {
-            // generate face normals for each face manually
-            edge01 = point[1] - point[0];
-            edge02 = point[2] - point[0];
-            pointAddr[2] = &vertex;
-
-            // write back to 3 vertices of this face
-            pointAddr[2]->Normal = Vec3::Cross(edge01, edge02);
-            pointAddr[1]->Normal = pointAddr[2]->Normal;
-            pointAddr[0]->Normal = pointAddr[2]->Normal;
         }
 
         if (index.texcoord_index >= 0)
@@ -165,15 +156,39 @@ static void TinyObjParseShape(TinyObjContext& obj, int obj_shape_idx)
             };
         }
 
-        if (obj.UniqueVertices.count(vertex) == 0)
+        if (pointN < 2)
+            continue;
+
+
+        edge1 = point[1].Position - point[0].Position;
+        edge2 = point[2].Position - point[0].Position;
+        dUV1 = point[1].TexUV - point[0].TexUV;
+        dUV2 = point[2].TexUV - point[0].TexUV;
+        float f = 1.0f / (dUV1.x * dUV2.y - dUV2.x * dUV1.y);
+
+        // generate tangents, assuming TexUV and Position valid
+        Vec3& tangent = point[2].Tangent;
+        tangent.x = f * (dUV2.y * edge1.x - dUV1.y * edge2.x);
+        tangent.y = f * (dUV2.y * edge1.y - dUV1.y * edge2.y);
+        tangent.z = f * (dUV2.y * edge1.z - dUV1.y * edge2.z);
+        tangent = tangent.Normalized();
+        point[1].Tangent = point[2].Tangent;
+        point[0].Tangent = point[2].Tangent;
+
+        if (index.normal_index < 0)
         {
-            obj.UniqueVertices[vertex] = (MeshIndex)(ld_mesh.Vertices.Size());
-            ld_mesh.Vertices.PushBack(vertex);
+            // generate face normals for each face manually
+            point[2].Normal = Vec3::Cross(edge1, edge2).Normalized();
+            point[1].Normal = point[2].Normal;
+            point[0].Normal = point[2].Normal;
         }
 
-        ld_mesh.Indices.PushBack(obj.UniqueVertices[vertex]);
-
-        pointAddr[pointN] = &ld_mesh.Vertices[ld_mesh.Indices.Back()];
+        for (int i = 0; i < 3; i++)
+        {
+            MeshIndex meshIndex = (MeshIndex)(ld_mesh.Vertices.Size());
+            ld_mesh.Vertices.PushBack(point[i]);
+            ld_mesh.Indices.PushBack(meshIndex);
+        }
     }
 }
 
