@@ -16,8 +16,6 @@ void VKImageView::Startup(const VKDevice& device, const VkImageViewCreateInfo& i
 
     VK_ASSERT(vkCreateImageView(mDevice, &info, nullptr, &mView));
 
-    std::cout << "VKImageView setup" << std::endl;
-
     mHasStartup = true;
 }
 
@@ -26,8 +24,6 @@ void VKImageView::Cleanup()
     mHasStartup = false;
 
     vkDestroyImageView(mDevice, mView, nullptr);
-
-    std::cout << "VKImageView cleanup" << std::endl;
 }
 
 void VKImage::Startup(VKDevice& device, const VKImageInfo& info)

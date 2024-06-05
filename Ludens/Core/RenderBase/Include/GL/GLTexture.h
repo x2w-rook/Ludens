@@ -15,6 +15,10 @@ struct GLTexture2DInfo
     GLenum InternalFormat;
     GLenum DataFormat;
     GLenum DataType = GL_UNSIGNED_BYTE;
+    GLenum MinFilter = GL_LINEAR;
+    GLenum MagFilter = GL_LINEAR;
+    GLenum AddressModeS = GL_REPEAT;
+    GLenum AddressModeT = GL_REPEAT;
     u16 Width;
     u16 Height;
 };

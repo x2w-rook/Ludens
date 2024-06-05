@@ -41,4 +41,34 @@ void DeriveGLTextureFormat(const RTextureFormat& format, GLenum* internalFormat,
         *dataType = glFormat.DataType;
 }
 
+void DeriveGLSamplerFilter(const RSamplerFilter& inFilter, GLenum& outFilter)
+{
+    switch (inFilter)
+    {
+    case RSamplerFilter::Linear:
+        outFilter = GL_LINEAR;
+        break;
+    case RSamplerFilter::Nearest:
+        outFilter = GL_NEAREST;
+        break;
+    default:
+        LD_DEBUG_UNREACHABLE;
+    }
+}
+
+void DeriveGLSamplerAddressMode(const RSamplerAddressMode& inAddrMode, GLenum& outAddrMode)
+{
+    switch (inAddrMode)
+    {
+    case RSamplerAddressMode::Repeat:
+        outAddrMode = GL_REPEAT;
+        break;
+    case RSamplerAddressMode::ClampToEdge:
+        outAddrMode = GL_CLAMP_TO_EDGE;
+        break;
+    default:
+        LD_DEBUG_UNREACHABLE;
+    }
+}
+
 } // namespace LD

@@ -58,6 +58,9 @@ void RMesh::Startup(const RMeshInfo& info)
             info.Height = (u32)height;
             info.Data = ambientData;
             info.Size = width * height * 4;
+            info.Sampler.MagFilter = RSamplerFilter::Linear;
+            info.Sampler.MinFilter = RSamplerFilter::Linear;
+            info.Sampler.AddressMode = RSamplerAddressMode::Repeat;
 
             matBGI.AmbientTextureInfo = info;
             matBGI.UBO.UseAmbientTexture = 1.0f;
@@ -74,6 +77,9 @@ void RMesh::Startup(const RMeshInfo& info)
             info.Height = (u32)height;
             info.Data = albedoData;
             info.Size = width * height * 4;
+            info.Sampler.MagFilter = RSamplerFilter::Linear;
+            info.Sampler.MinFilter = RSamplerFilter::Linear;
+            info.Sampler.AddressMode = RSamplerAddressMode::Repeat;
 
             matBGI.AlbedoTextureInfo = info;
             matBGI.UBO.UseAlbedoTexture = 1.0f;
@@ -90,6 +96,9 @@ void RMesh::Startup(const RMeshInfo& info)
             info.Height = (u32)height;
             info.Data = specularData;
             info.Size = width * height * 4;
+            info.Sampler.MagFilter = RSamplerFilter::Linear;
+            info.Sampler.MinFilter = RSamplerFilter::Linear;
+            info.Sampler.AddressMode = RSamplerAddressMode::Repeat;
 
             matBGI.SpecularTextureInfo = info;
             matBGI.UBO.UseSpecularTexture = 1.0f;
@@ -106,6 +115,9 @@ void RMesh::Startup(const RMeshInfo& info)
             info.Height = (u32)height;
             info.Data = normalData;
             info.Size = width * height * 4;
+            info.Sampler.MagFilter = RSamplerFilter::Linear;
+            info.Sampler.MinFilter = RSamplerFilter::Linear;
+            info.Sampler.AddressMode = RSamplerAddressMode::Repeat;
 
             matBGI.NormalTextureInfo = info;
             matBGI.UBO.UseNormalTexture = { 1.0f, 1.0f, 1.0f, 1.0f };

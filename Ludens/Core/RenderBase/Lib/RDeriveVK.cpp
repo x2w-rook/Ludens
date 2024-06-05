@@ -123,6 +123,36 @@ static VkAttachmentStoreOp DeriveVKAttachmentStoreOp(RStoreOp storeOp)
     return vkStoreOp;
 }
 
+void DeriveVKSamplerAddressMode(const RSamplerAddressMode& inAddrMode, VkSamplerAddressMode& outAddrMode)
+{
+    switch (inAddrMode)
+    {
+    case RSamplerAddressMode::Repeat:
+        outAddrMode = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        break;
+    case RSamplerAddressMode::ClampToEdge:
+        outAddrMode = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+        break;
+    default:
+        LD_DEBUG_UNREACHABLE;
+    }
+}
+
+void DeriveVKSamplerFilter(const RSamplerFilter& inFilter, VkFilter& outFilter)
+{
+    switch (inFilter)
+    {
+    case RSamplerFilter::Linear:
+        outFilter = VK_FILTER_LINEAR;
+        break;
+    case RSamplerFilter::Nearest:
+        outFilter = VK_FILTER_NEAREST;
+        break;
+    default:
+        LD_DEBUG_UNREACHABLE;
+    }
+}
+
 void DeriveVKAttachmentDescription(const RPassAttachment& inAttachment, VkAttachmentDescription& outAttachment)
 {
     // TODO: care about the stencil components

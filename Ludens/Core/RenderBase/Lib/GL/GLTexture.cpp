@@ -25,12 +25,10 @@ void GLTexture2D::Startup(GLContext& context, const GLTexture2DInfo& info)
     glCreateTextures(GL_TEXTURE_2D, 1, &mTexture);
     Bind(0);
 
-    // TODO: these are technically sampler parameters, not texture parameters.
-    //       For now we are using hard coded default values.
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, info.AddressModeS);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, info.AddressModeT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, info.MinFilter);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, info.MagFilter);
 
     glTexImage2D(GL_TEXTURE_2D, 0, mInternalFormat, (GLsizei)info.Width, (GLsizei)info.Height, 0, mDataFormat,
                  mDataType, info.Data);

@@ -88,6 +88,8 @@ inline VkBlendFactor DeriveVKBlendFactor(RBlendFactor factor)
     LD_DEBUG_UNREACHABLE;
 }
 
+void DeriveVKSamplerAddressMode(const RSamplerAddressMode& inAddrMode, VkSamplerAddressMode& outAddrMode);
+void DeriveVKSamplerFilter(const RSamplerFilter& inFilter, VkFilter& outFilter);
 void DeriveVKAttachmentDescription(const RPassAttachment& inAttachment, VkAttachmentDescription& outAttachment);
 void DeriveVKVertexLayout(const RVertexLayout& inLayout, VKVertexLayout& outLayout);
 VkFormat DeriveVKImageFormat(RTextureFormat format);

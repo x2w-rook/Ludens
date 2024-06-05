@@ -74,6 +74,9 @@ RResult RBindingGroupVK::BindTexture(u32 binding, RTexture& textureH, int arrayI
     VKSampler& vkSampler = Derive<RTextureVK>(textureH).Sampler;
     Ref<VKImageView>& vkImageView = Derive<RTextureVK>(textureH).ImageView;
 
+    LD_DEBUG_ASSERT(vkSampler.GetHandle() != VK_NULL_HANDLE);
+    LD_DEBUG_ASSERT(vkImageView && vkImageView->GetHandle() != VK_NULL_HANDLE);
+
     // NOTE: direct call to vkUpdateDescriptorSets with single write,
     //       resources must not be currently accessed by GPU
     DescriptorSet.Write(vkContext.GetDevice(), vkSampler, *vkImageView, binding, arrayIndex);

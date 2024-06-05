@@ -125,5 +125,7 @@ inline GLenum DeriveGLBlendFactor(RBlendFactor factor)
 }
 
 void DeriveGLTextureFormat(const RTextureFormat& format, GLenum* internalFormat, GLenum* dataFormat, GLenum* type);
+void DeriveGLSamplerFilter(const RSamplerFilter& inFilter, GLenum& outFilter);
+void DeriveGLSamplerAddressMode(const RSamplerAddressMode& inAddrMode, GLenum& outAddrMode);
 
 } // namespace LD

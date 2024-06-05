@@ -26,10 +26,19 @@ void RTextureGL::Startup(RTexture& textureH, const RTextureInfo& info, RDeviceGL
 
     if (Target == GL_TEXTURE_2D)
     {
+        GLenum minFilter, magFilter, addrMode;
+        DeriveGLSamplerAddressMode(info.Sampler.AddressMode, addrMode);
+        DeriveGLSamplerFilter(info.Sampler.MinFilter, minFilter);
+        DeriveGLSamplerFilter(info.Sampler.MagFilter, magFilter);
+
         GLTexture2DInfo glInfo{};
         glInfo.Width = info.Width;
         glInfo.Height = info.Height;
         glInfo.Data = info.Data;
+        glInfo.MinFilter = minFilter;
+        glInfo.MagFilter = magFilter;
+        glInfo.AddressModeS = addrMode;
+        glInfo.AddressModeT = addrMode;
         DeriveGLTextureFormat(info.Format, &glInfo.InternalFormat, &glInfo.DataFormat, &glInfo.DataType);
         Texture2D.Startup(device.Context, glInfo);
     }

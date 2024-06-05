@@ -26,15 +26,6 @@ void RTextureVK::Startup(RTexture& textureH, Ref<VKImageView> view, RDeviceVK& d
 
     LD_DEBUG_ASSERT(view != nullptr);
     ImageView = view;
-
-    // create sampler
-    {
-        const VkPhysicalDeviceLimits& deviceLimits = vkDevice.GetPhysicalDevice().GetLimits();
-        VkSamplerCreateInfo samplerCI = VKInfo::SamplerCreate(
-            VK_FILTER_LINEAR, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT, deviceLimits.maxSamplerAnisotropy);
-
-        Sampler.Startup(vkDevice, samplerCI);
-    }
 }
 
 void RTextureVK::Startup(RTexture& textureH, const RTextureInfo& info, RDeviceVK& device)
@@ -101,8 +92,14 @@ void RTextureVK::Startup(RTexture& textureH, const RTextureInfo& info, RDeviceVK
     // create sampler
     {
         const VkPhysicalDeviceLimits& deviceLimits = vkDevice.GetPhysicalDevice().GetLimits();
-        VkSamplerCreateInfo samplerCI = VKInfo::SamplerCreate(
-            VK_FILTER_LINEAR, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT, deviceLimits.maxSamplerAnisotropy);
+
+        VkSamplerAddressMode addressMode;
+        VkFilter minFilter, magFilter;
+        DeriveVKSamplerFilter(info.Sampler.MinFilter, minFilter);
+        DeriveVKSamplerFilter(info.Sampler.MagFilter, magFilter);
+        DeriveVKSamplerAddressMode(info.Sampler.AddressMode, addressMode);
+        VkSamplerCreateInfo samplerCI =
+            VKInfo::SamplerCreate(magFilter, minFilter, addressMode, deviceLimits.maxSamplerAnisotropy);
 
         Sampler.Startup(vkDevice, samplerCI);
     }
@@ -112,7 +109,10 @@ void RTextureVK::Cleanup(RTexture& textureH)
 {
     RTextureBase::Cleanup(textureH);
 
-    Sampler.Cleanup();
+    if (Sampler.GetHandle() != VK_NULL_HANDLE)
+    {
+        Sampler.Cleanup();
+    }
 
     if (!UseExternalImage)
     {

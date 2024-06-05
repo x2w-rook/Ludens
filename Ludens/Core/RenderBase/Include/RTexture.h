@@ -41,6 +41,20 @@ enum class RTextureType
     Texture2D = 0,
 };
 
+enum class RSamplerFilter
+{
+    Linear = 0,
+    Nearest,
+};
+
+enum class RSamplerAddressMode
+{
+    Repeat = 0,
+    ClampToEdge,
+};
+
+/// info for texture creation. for backwards compatibility with OpenGL,
+/// a texture resource is bundled with a sampler that is also described here.
 struct RTextureInfo
 {
     RTextureType Type;
@@ -50,6 +64,18 @@ struct RTextureInfo
     u32 Height;
     const void* Data; // pixel data
     size_t Size = 0;  // pixel data byte size
+
+    struct
+    {
+        /// texture minification filter
+        RSamplerFilter MinFilter = RSamplerFilter::Linear;
+
+        /// texture magnification filter
+        RSamplerFilter MagFilter = RSamplerFilter::Linear;
+
+        /// texture address mode for UV coordinates
+        RSamplerAddressMode AddressMode = RSamplerAddressMode::Repeat;
+    } Sampler;
 };
 
 struct RTextureBase;
