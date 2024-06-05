@@ -10,7 +10,7 @@ namespace LD
 bool LoadImage(u8** pixels, const char* path, int* width, int* height, int* channels)
 {
     // TODO: parameterize
-    stbi_set_flip_vertically_on_load(true);
+    stbi_set_flip_vertically_on_load(false);
 
     stbi_uc* result = stbi_load(path, width, height, channels, STBI_rgb_alpha);
     LD_DEBUG_ASSERT(result);
