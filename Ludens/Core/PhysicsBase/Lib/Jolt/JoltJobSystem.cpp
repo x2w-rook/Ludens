@@ -97,7 +97,7 @@ void JoltJobSystem::JoltJob::Queue()
     LD::Job job;
     job.Type = LD::JobType::Physics;
     job.Data = this;
-    job.Entry = &JoltJobSystem::JoltJob::ExecuteJolt;
+    job.Main = &JoltJobSystem::JoltJob::ExecuteJolt;
 
     js.Submit(job);
 }

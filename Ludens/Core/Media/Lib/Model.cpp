@@ -278,4 +278,28 @@ int TinyObjFallbackMtl(TinyObjContext& obj, int obj_shape_idx)
     return ld_mat_ref;
 }
 
+LoadModelJob::LoadModelJob(const Path& path, Model* model) : mPath(path), mModel(model), mLoadTimeMS(-1.0)
+{
+    LD_DEBUG_ASSERT(mModel);
+
+    Job LoadModelJob;
+    LoadModelJob.Data = this;
+    LoadModelJob.Main = &LoadModelJob::JobMain;
+    LoadModelJob.Type = JobType::LoadModel;
+
+    JobSystem::GetSingleton().Submit(LoadModelJob);
+}
+
+void LoadModelJob::JobMain(void* data)
+{
+    LoadModelJob& job = *static_cast<LoadModelJob*>(data);
+
+    job.mHasCompleted = false;
+    {
+        ScopeTimer timer(&job.mLoadTimeMS);
+        job.mLoader.LoadModel(job.mPath, *job.mModel);
+    }
+    job.mHasCompleted = true;
+}
+
 } // namespace LD

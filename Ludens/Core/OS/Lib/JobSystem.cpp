@@ -18,7 +18,7 @@ public:
         bool success = false;
         mMutex.Lock();
 
-        LD_DEBUG_ASSERT(job.Entry);
+        LD_DEBUG_ASSERT(job.Main);
 
         size_t next = (mHead + 1) % JOB_QUEUE_CAPACITY;
         if (next != mTail)
@@ -117,8 +117,8 @@ int JobSystem::JobThreadEntry(int id, void* userdata)
         thread->Mutex.Unlock();
 
         // execute the job
-        LD_DEBUG_ASSERT(thread->CurrentJob.Entry);
-        thread->CurrentJob.Entry(thread->CurrentJob.Data);
+        LD_DEBUG_ASSERT(thread->CurrentJob.Main);
+        thread->CurrentJob.Main(thread->CurrentJob.Data);
         
         thread->Mutex.Lock();
         thread->IsWorking = false;
@@ -166,11 +166,11 @@ int JobSystem::GetWorkerThreadCount()
 
 void JobSystem::Submit(const Job& job)
 {
-    LD_DEBUG_ASSERT(job.Entry);
+    LD_DEBUG_ASSERT(job.Main);
 
     if (mWorkerThreadCount == 0)
     {
-        job.Entry(job.Data);
+        job.Main(job.Data);
         return;
     }
 
@@ -182,7 +182,6 @@ void JobSystem::Submit(const Job& job)
     }
 }
 
-// TODO: this only waits until jobs are acquired, not completed
 void JobSystem::WaitType(JobType type)
 {
     if (mWorkerThreadCount == 0)
@@ -217,7 +216,6 @@ void JobSystem::WaitType(JobType type)
     }
 }
 
-// TODO: this only waits until all current jobs are acquired, not completed
 void JobSystem::WaitAll()
 {
     if (mWorkerThreadCount == 0)

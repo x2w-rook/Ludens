@@ -7,6 +7,7 @@
 #include "Core/Math/Include/Vec3.h"
 #include "Core/DSA/Include/Vector.h"
 #include "Core/DSA/Include/Optional.h"
+#include "Core/OS/Include/JobSystem.h"
 #include "Core/IO/Include/FileSystem.h"
 #include "Core/Media/Include/Mesh.h"
 
@@ -66,6 +67,33 @@ public:
     void LoadModel(const Path& path, Model& model);
 
 private:
+};
+
+class LoadModelJob
+{
+public:
+    LoadModelJob() = delete;
+    LoadModelJob(const LoadModelJob&) = delete;
+    LoadModelJob(const Path& path, Model* model);
+    ~LoadModelJob() = default;
+
+    LoadModelJob& operator=(const LoadModelJob&) = delete;
+
+    /// get loading time on the worker thread in milliseconds
+    double GetLoadTime()
+    {
+        LD_DEBUG_ASSERT(mHasCompleted);
+        return mLoadTimeMS;
+    }
+
+private:
+    static void JobMain(void* data);
+
+    bool mHasCompleted = false;
+    double mLoadTimeMS;
+    Path mPath;
+    Model* mModel;
+    ModelLoader mLoader;
 };
 
 } // namespace LD

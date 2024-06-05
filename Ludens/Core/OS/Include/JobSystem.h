@@ -14,7 +14,8 @@ enum class JobType
 {
     Misc = 0,
     Physics = 1,
-    NUM_TYPES = 2,
+    LoadModel = 2,
+    NUM_TYPES = 3,
 };
 
 struct Job
@@ -22,7 +23,7 @@ struct Job
     JobType Type = JobType::Misc;
 
     /// the actual work to be done
-    void (*Entry)(void*);
+    void (*Main)(void*);
 
     /// payload data
     void* Data;
