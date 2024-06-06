@@ -206,13 +206,14 @@ bool RShaderCompiler::GlslangCompile(RBackend backend, RShaderType type, const s
     GlslangBackend(backend, &client, &clientVersion);
 
     std::string preamble = glslPreamble + "#define group set\n";
+    preamble.push_back('\0');
 
     glslang::TShader shader(shaderType);
     {
         const char* glslSource = glsl.c_str();
         shader.setStrings(&glslSource, 1);
         shader.setEntryPoint("main");
-        shader.setPreamble(preamble.c_str());
+        shader.setPreamble(preamble.data());
         shader.setEnvTarget(glslang::EShTargetSpv, glslang::EShTargetSpv_1_0);
         shader.setEnvClient(client, clientVersion);
 
