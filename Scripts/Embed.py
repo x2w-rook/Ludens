@@ -23,6 +23,12 @@ class Embed:
 			print(e)
 			sys.exit()
 
+# itertools.batched requires python 3.12
+def batched(iterable, size):
+	N = len(iterable)
+	for idx in range(0, N, size):
+	    yield iterable[idx : min(idx + size, N)]
+
 def gen_cpp(header, embeds):
 	src = str(header)
 	src += "#pragma warning(push)\n"
@@ -34,7 +40,7 @@ def gen_cpp(header, embeds):
 		data = embed.load_data()
 		src += "static const char %s[] = {\n" % (embed.symbol)
 		
-		for batch in itertools.batched(data, 128):
+		for batch in batched(data, 128):
 			for byte in batch:
 				src += "0x%02x," % (byte)
 			src += "\n"
