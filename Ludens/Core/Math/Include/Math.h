@@ -48,6 +48,14 @@
 # define LD_MATH_TOLERANCE 1e-5
 #endif
 
+#ifndef LD_MATH_EQUAL(LHS, RHS)
+# define LD_MATH_EQUAL(LHS, RHS)  (LD_MATH_ABS((LHS) - (RHS)) < LD_MATH_TOLERANCE)
+#endif
+
+#ifndef LD_MATH_EQUAL_ZERO(EXPR)
+# define LD_MATH_EQUAL_ZERO(EXPR) (LD_MATH_ABS(EXPR) < LD_MATH_TOLERANCE)
+#endif
+
 namespace LD {
 
 	template <typename T>
