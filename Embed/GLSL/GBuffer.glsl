@@ -8,7 +8,8 @@ layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormal;
 layout (location = 2) in vec3 aTangent;
 layout (location = 3) in vec2 aTexUV;
-layout (location = 4) in vec4 aModel[3];
+layout (location = 4) in vec4 aModelMat[3];
+layout (location = 7) in vec4 aNormalMat[3];
 
 layout (location = 0) out vec3 vPos;
 layout (location = 1) out vec3 vNormal;
@@ -27,12 +28,12 @@ layout (group = 0, binding = 0, std140) uniform Viewport
 void main()
 {
 	mat4 modelMat; 
-	modelMat[0] = vec4(aModel[0].x, aModel[1].x, aModel[2].x, 0.0);
-	modelMat[1] = vec4(aModel[0].y, aModel[1].y, aModel[2].y, 0.0);
-	modelMat[2] = vec4(aModel[0].z, aModel[1].z, aModel[2].z, 0.0);
-	modelMat[3] = vec4(aModel[0].w, aModel[1].w, aModel[2].w, 1.0);
+	modelMat[0] = vec4(aModelMat[0].x, aModelMat[1].x, aModelMat[2].x, 0.0);
+	modelMat[1] = vec4(aModelMat[0].y, aModelMat[1].y, aModelMat[2].y, 0.0);
+	modelMat[2] = vec4(aModelMat[0].z, aModelMat[1].z, aModelMat[2].z, 0.0);
+	modelMat[3] = vec4(aModelMat[0].w, aModelMat[1].w, aModelMat[2].w, 1.0);
 
-	mat3 normalMat = transpose(inverse(mat3(modelMat)));
+	mat3 normalMat = mat3(aNormalMat[0].xyz, aNormalMat[1].xyz, aNormalMat[2].xyz);
 
 	vPos = (modelMat * vec4(aPos, 1.0)).xyz;   // world position
 	vNormal = normalize(normalMat * aNormal);  // world normal

@@ -1,5 +1,6 @@
 #include <unordered_map>
 #include <utility>
+#include "Core/Math/Include/Mat3.h"
 #include "Core/DSA/Include/Array.h"
 #include "Core/Application/Include/Application.h"
 #include "Core/RenderBase/Include/RPipeline.h"
@@ -171,15 +172,21 @@ void RenderService::EndFrame()
             for (auto& mesh : list.Meshes)
             {
                 RRID id = mesh.first;
-                const Mat4& transform = mesh.second;
+                const Mat4& modelMat = mesh.second;
+                const Mat3 normalMat = Mat3::Transpose(Mat3::Inverse(Mat3(modelMat)));
                 MeshResource& res = sMeshes[id];
 
-                Array<Vec4, 3> mat4x3;
-                mat4x3[0] = { transform[0][0], transform[1][0], transform[2][0], transform[3][0] };
-                mat4x3[1] = { transform[0][1], transform[1][1], transform[2][1], transform[3][1] };
-                mat4x3[2] = { transform[0][2], transform[1][2], transform[2][2], transform[3][2] };
+                Array<Vec4, 6> instanceData;
+                // 4x4 model matrix top 3 rows
+                instanceData[0] = { modelMat[0][0], modelMat[1][0], modelMat[2][0], modelMat[3][0] };
+                instanceData[1] = { modelMat[0][1], modelMat[1][1], modelMat[2][1], modelMat[3][1] };
+                instanceData[2] = { modelMat[0][2], modelMat[1][2], modelMat[2][2], modelMat[3][2] };
+                // 3x3 normal matrix columns
+                instanceData[3] = { normalMat[0], 0.0f };
+                instanceData[4] = { normalMat[1], 0.0f };
+                instanceData[5] = { normalMat[2], 0.0f };
 
-                res.InstanceTransforms.SetData(0, mat4x3.ByteSize(), mat4x3.Data());
+                res.InstanceTransforms.SetData(0, instanceData.ByteSize(), instanceData.Data());
 
                 res.Mesh.Draw(
                     [&](RMesh::Batch& batch)
@@ -271,11 +278,11 @@ void RenderService::CreateMesh(RRID& id, const Model* model)
     meshI.Data = model;
     res.Mesh.Startup(meshI);
 
-    // store transform of one instance (4x3)
+    // store model matrix and normal matrix of one instance
     RBufferInfo bufferI;
     bufferI.MemoryUsage = RMemoryUsage::FrameDynamic;
     bufferI.Type = RBufferType::VertexBuffer;
-    bufferI.Size = sizeof(Vec4) * 3;
+    bufferI.Size = sizeof(Vec4) * 6;
     bufferI.Data = nullptr;
     sDevice.CreateBuffer(res.InstanceTransforms, bufferI);
 }

@@ -39,11 +39,14 @@ void GBufferPipeline::Startup(const GBufferPipelineInfo& info)
     gbufferVertexSlots[0].PollRate = RAttributePollRate::PerVertex;
     gbufferVertexSlots[0].Attributes = gbufferVertexAttr.GetView();
 
-    // per-instance model matrix 4x3
-    Array<RVertexAttribute, 3> gbufferInstanceAttr{
-        { 4, RDataType::Vec4, false }, // row 1
-        { 5, RDataType::Vec4, false }, // row 2
-        { 6, RDataType::Vec4, false }, // row 3
+    // per-instance model matrix and normal matrix
+    Array<RVertexAttribute, 6> gbufferInstanceAttr{
+        { 4, RDataType::Vec4, false }, // 4x4 model matrix row 1
+        { 5, RDataType::Vec4, false }, // 4x4 model matrix row 2
+        { 6, RDataType::Vec4, false }, // 4x4 model matrix row 3
+        { 7, RDataType::Vec4, false }, // 3x3 normal matrix column 1, w component reserved
+        { 8, RDataType::Vec4, false }, // 3x3 normal matrix column 2, w component reserved
+        { 9, RDataType::Vec4, false }, // 3x3 normal matrix column 3, w component reserved
     };
     gbufferVertexSlots[1].PollRate = RAttributePollRate::PerInstance;
     gbufferVertexSlots[1].Attributes = gbufferInstanceAttr.GetView();
