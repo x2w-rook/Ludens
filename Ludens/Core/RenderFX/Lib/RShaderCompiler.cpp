@@ -17,7 +17,6 @@
 #include "Core/RenderFX/Include/Groups/FrameStaticGroup.h"
 #include "Core/RenderFX/Include/Groups/ViewportGroup.h"
 #include "Core/RenderFX/Include/Groups/MaterialGroup.h"
-#include "Core/RenderFX/Include/Groups/GBufferGroup.h"
 #include "Core/RenderFX/Include/Groups/RectGroup.h"
 
 #define LD_MACRO_INVALID -1
@@ -449,8 +448,6 @@ int RShaderCompiler::ParseLudensMacroGroupPrefab(std::string str, RBindingGroupL
         layoutData = MaterialGroup{}.GetLayoutData();
     else if (str == "Rect")
         layoutData = RectGroup{}.GetLayoutData();
-    else if (str == "GBuffer")
-        layoutData = GBufferGroup{}.GetLayoutData();
     else
     {
         std::cout << "unknown prefab binding group [" << str << "]" << std::endl;

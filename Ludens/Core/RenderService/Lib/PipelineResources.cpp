@@ -74,10 +74,9 @@ DeferredBlinnPhongPipeline& PipelineResources::GetDeferredBlinnPhongPipeline()
 {
     if (!mDeferredBlinnPhong)
     {
-        Array<RBindingGroupLayout, 3> groupLayout;
+        Array<RBindingGroupLayout, 2> groupLayout;
         groupLayout[0] = mGroupRes->GetFrameStaticBGL();
         groupLayout[1] = mGroupRes->GetViewportBGL();
-        groupLayout[2] = mGroupRes->GetGBufferBGL();
 
         DeferredBlinnPhongPipelineInfo pipelineI;
         pipelineI.Device = mDevice;

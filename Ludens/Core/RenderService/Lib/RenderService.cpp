@@ -7,7 +7,6 @@
 #include "Core/RenderBase/Include/RShader.h"
 #include "Core/RenderFX/Include/RMesh.h"
 #include "Core/RenderFX/Include/Groups/ViewportGroup.h"
-#include "Core/RenderFX/Include/Groups/GBufferGroup.h"
 #include "Core/RenderService/Lib/RenderPassResources.h"
 #include "Core/RenderService/Lib/FrameBufferResources.h"
 #include "Core/RenderService/Lib/BindingGroupResources.h"
@@ -44,7 +43,6 @@ static GBuffer sGBuffer;
 static RRID sDirectionalLight;
 static FrameStaticLightingUBO sLightingUBO;
 static ViewportGroup sViewportGroup;
-static GBufferGroup sGBufferGroup;
 static std::unordered_map<RRID, MeshResource> sMeshes;
 static RBuffer sQuadVBO;
 static Vector<DrawList> sDrawLists;
@@ -79,7 +77,6 @@ void RenderService::Startup(RBackend backend)
     {
         sFrameBuffers.CreateGBuffer(sGBuffer, width, height);
         sViewportGroup.Startup(sDevice, sBindingGroups.GetViewportBGL());
-        sGBufferGroup.Startup(sDevice, sBindingGroups.GetGBufferBGL(), sGBuffer);
 
         RBufferInfo info;
         info.Type = RBufferType::VertexBuffer;
@@ -96,7 +93,6 @@ void RenderService::Cleanup()
 
     {
         sDevice.DeleteBuffer(sQuadVBO);
-        sGBufferGroup.Cleanup();
         sViewportGroup.Cleanup();
         sGBuffer.Cleanup();
     }
@@ -208,6 +204,9 @@ void RenderService::EndFrame()
         sDevice.EndRenderPass();
     }
 
+    // prepare to use gbuffer results
+    sViewportGroup.BindGBuffer(sGBuffer);
+
     // Swapchain Pass
     {
         RFrameBuffer swapChainFB;
@@ -230,7 +229,6 @@ void RenderService::EndFrame()
             sDevice.SetPipeline((RPipeline)sPipelines.GetDeferredBlinnPhongPipeline());
             sDevice.SetBindingGroup(0, (RBindingGroup)sBindingGroups.GetFrameStaticGroup());
             sDevice.SetBindingGroup(1, (RBindingGroup)sViewportGroup);
-            sDevice.SetBindingGroup(2, (RBindingGroup)sGBufferGroup);
             sDevice.SetVertexBuffer(0, sQuadVBO);
 
             RDrawVertexInfo drawInfo{};
@@ -334,9 +332,6 @@ void RenderService::OnViewportResize(int width, int height)
     // recreate framebuffers using viewport size
     sGBuffer.Cleanup();
     sFrameBuffers.CreateGBuffer(sGBuffer, width, height);
-
-    sGBufferGroup.Cleanup();
-    sGBufferGroup.Startup(sDevice, sBindingGroups.GetGBufferBGL(), sGBuffer);
 }
 
 } // namespace LD

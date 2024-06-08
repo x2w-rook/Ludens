@@ -1,6 +1,5 @@
 #ludens group 0 FrameStatic
 #ludens group 1 Viewport
-#ludens group 2 GBuffer
 
 #ludens vertex
 
@@ -45,9 +44,9 @@ layout (group = 1, binding = 0, std140) uniform ViewportUBO
 	int PointLightCount;
 } uViewportUBO;
 
-layout (group = 2, binding = 0) uniform sampler2D uPosition;
-layout (group = 2, binding = 1) uniform sampler2D uNormal;
-layout (group = 2, binding = 2) uniform sampler2D uAlbedo;
+layout (group = 1, binding = 1) uniform sampler2D uGBufferPosition;
+layout (group = 1, binding = 2) uniform sampler2D uGBufferNormal;
+layout (group = 1, binding = 3) uniform sampler2D uGBufferAlbedo;
 
 void main()
 {
@@ -57,9 +56,9 @@ void main()
 	uv.y = 1.0 - uv.y;
 #endif
 
-	vec4 albedoSpec = texture(uAlbedo, uv);
-	vec3 position = texture(uPosition, uv).rgb;
-	vec3 normal = texture(uNormal, uv).rgb;
+	vec4 albedoSpec = texture(uGBufferAlbedo, uv);
+	vec3 position = texture(uGBufferPosition, uv).rgb;
+	vec3 normal = texture(uGBufferNormal, uv).rgb;
 	vec3 albedo = albedoSpec.rgb;
 	float specular = albedoSpec.a;
 	vec3 color;

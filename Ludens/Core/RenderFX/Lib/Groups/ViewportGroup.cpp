@@ -1,5 +1,6 @@
 #include "Core/DSA/Include/Array.h"
 #include "Core/RenderFX/Include/Groups/ViewportGroup.h"
+#include "Core/RenderFX/Include/FrameBuffers/GBuffer.h"
 
 namespace LD {
 
@@ -34,13 +35,28 @@ void ViewportGroup::Cleanup()
     mDevice.ResetHandle();
 }
 
+void ViewportGroup::BindGBuffer(const GBuffer& gbuffer)
+{
+    mHandle.BindTexture(1, gbuffer.GetPosition());
+    mHandle.BindTexture(2, gbuffer.GetNormals());
+    mHandle.BindTexture(3, gbuffer.GetAlbedo());
+}
+
 RBindingGroupLayoutData ViewportGroup::GetLayoutData() const
 {
     RBindingInfo binding0;
     binding0.Count = 1;
     binding0.Type = RBindingType::UniformBuffer;
 
-    return { binding0 };
+    RBindingInfo texture;
+    texture.Count = 1;
+    texture.Type = RBindingType::Texture;
+
+    // viewport UBO
+    // gbuffer position
+    // gbuffer normals
+    // gbuffer albedo
+    return { binding0, texture, texture, texture };
 }
 
 RBindingGroupLayout ViewportGroup::CreateLayout(RDevice device)
@@ -49,8 +65,11 @@ RBindingGroupLayout ViewportGroup::CreateLayout(RDevice device)
 
     RBindingGroupLayout viewportBGL;
 
-    Array<RBindingInfo, 1> bindings{
+    Array<RBindingInfo, 4> bindings{
         { RBindingType::UniformBuffer },
+        { RBindingType::Texture },
+        { RBindingType::Texture },
+        { RBindingType::Texture },
     };
 
     RBindingGroupLayoutInfo viewportBGLI;

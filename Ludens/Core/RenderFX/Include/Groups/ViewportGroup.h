@@ -8,6 +8,8 @@
 namespace LD
 {
 
+class GBuffer;
+
 /// binding 0, viewport information
 struct ViewportUBO
 {
@@ -41,6 +43,9 @@ public:
 
     /// cleanup the viewport binding group, the input BGL during Startup() is not deleted
     void Cleanup();
+
+    /// bind the gbuffer textures to this viewport
+    void BindGBuffer(const GBuffer& gbuffer);
 
     virtual RBindingGroupLayoutData GetLayoutData() const override;
 

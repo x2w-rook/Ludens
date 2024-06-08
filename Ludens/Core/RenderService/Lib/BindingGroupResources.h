@@ -36,18 +36,12 @@ public:
         return mRectBGL;
     }
 
-    inline RBindingGroupLayout GetGBufferBGL()
-    {
-        return mGBufferBGL;
-    }
-
 private:
     FrameStaticGroup mFrameStaticGroup;
     RBindingGroupLayout mFrameStaticBGL;
     RBindingGroupLayout mViewportBGL;
     RBindingGroupLayout mMaterialBGL;
     RBindingGroupLayout mRectBGL;
-    RBindingGroupLayout mGBufferBGL;
 };
 
 } // namespace LD
