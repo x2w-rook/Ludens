@@ -34,6 +34,7 @@ namespace LD {
 
 		glfwMakeContextCurrent(mHandle);
 		glfwSwapInterval(config.EnableVsync ? 1 : 0);
+		glfwGetFramebufferSize(mHandle, &mPixelWidth, &mPixelHeight);
 
 		InstallCallbacks();
 
