@@ -42,6 +42,11 @@ void ViewportGroup::BindGBuffer(const GBuffer& gbuffer)
     mHandle.BindTexture(3, gbuffer.GetAlbedo());
 }
 
+void ViewportGroup::BindSSAOTexture(RTexture ssao)
+{
+    mHandle.BindTexture(4, ssao);
+}
+
 RBindingGroupLayoutData ViewportGroup::GetLayoutData() const
 {
     RBindingInfo binding0;
@@ -56,7 +61,8 @@ RBindingGroupLayoutData ViewportGroup::GetLayoutData() const
     // gbuffer position
     // gbuffer normals
     // gbuffer albedo
-    return { binding0, texture, texture, texture };
+    // ssao texture
+    return { binding0, texture, texture, texture, texture };
 }
 
 RBindingGroupLayout ViewportGroup::CreateLayout(RDevice device)
@@ -65,8 +71,9 @@ RBindingGroupLayout ViewportGroup::CreateLayout(RDevice device)
 
     RBindingGroupLayout viewportBGL;
 
-    Array<RBindingInfo, 4> bindings{
+    Array<RBindingInfo, 5> bindings{
         { RBindingType::UniformBuffer },
+        { RBindingType::Texture },
         { RBindingType::Texture },
         { RBindingType::Texture },
         { RBindingType::Texture },

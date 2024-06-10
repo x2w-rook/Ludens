@@ -47,6 +47,7 @@ layout (group = 1, binding = 0, std140) uniform ViewportUBO
 layout (group = 1, binding = 1) uniform sampler2D uGBufferPosition;
 layout (group = 1, binding = 2) uniform sampler2D uGBufferNormal;
 layout (group = 1, binding = 3) uniform sampler2D uGBufferAlbedo;
+layout (group = 1, binding = 4) uniform sampler2D uSSAOTexture;
 
 void main()
 {
@@ -61,6 +62,7 @@ void main()
 	vec3 normal = texture(uGBufferNormal, uv).rgb;
 	vec3 albedo = albedoSpec.rgb;
 	float specular = albedoSpec.a;
+	float occlusion = texture(uSSAOTexture, uv).r;
 	vec3 color;
 
 	// TODO: push constant debug switch instead of using directional light W component?
@@ -71,19 +73,20 @@ void main()
 		color = normal;
 	else if (rawTexture == 3)
 		color = albedo;
+	else if (rawTexture == 4)
+		color = vec3(occlusion);
 	else
 	{
 		// single directional light
 		vec3 lightPos;
 		vec3 lightColor = uLightingUBO.DirLightColor.rgb;
-		vec3 lightDir = normalize(-uLightingUBO.DirLight.xyz);
-		vec3 viewPos = uViewportUBO.ViewPos.xyz;
+		vec3 lightDir = normalize((uViewportUBO.ViewMat * vec4(-uLightingUBO.DirLight.xyz, 0.0)).xyz);
+		vec3 viewPos = (uViewportUBO.ViewMat * vec4(uViewportUBO.ViewPos.xyz, 1.0)).xyz;;
 		vec3 viewDir = normalize(viewPos - position);
 		vec3 halfwayDir = normalize(lightDir + viewDir);
 		
 		// diffuse
-		color = albedo * 0.1;
-
+		color = albedo * 0.2 * occlusion;
 		color += max(dot(normal, lightDir), 0.0) * albedo * lightColor;
 		color += pow(max(dot(normal, halfwayDir), 0.0), 16.0) * specular * lightColor;
 
@@ -91,7 +94,7 @@ void main()
 		for (int i = 0; i < uViewportUBO.PointLightCount; i++)
 		{
 			int idx = uViewportUBO.PointLightStart + i;
-			lightPos = uLightingUBO.PointLights[idx].PosRadius.xyz;
+			lightPos = (uViewportUBO.ViewMat * vec4(uLightingUBO.PointLights[idx].PosRadius.xyz, 1.0)).xyz;
 			lightColor = uLightingUBO.PointLights[idx].Color.rgb;
 			lightDir = normalize(lightPos - position);
 			halfwayDir = normalize(lightDir + viewDir);

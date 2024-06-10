@@ -40,6 +40,7 @@ static BindingGroupResources sBindingGroups;
 static PipelineResources sPipelines;
 static TextureResources sTextures;
 static GBuffer sGBuffer;
+static SSAOBuffer sSSAOBuffer;
 static RRID sDirectionalLight;
 static FrameStaticLightingUBO sLightingUBO;
 static ViewportGroup sViewportGroup;
@@ -76,7 +77,10 @@ void RenderService::Startup(RBackend backend)
 
     {
         sFrameBuffers.CreateGBuffer(sGBuffer, width, height);
+        sFrameBuffers.CreateSSAOBuffer(sSSAOBuffer, width, height, (RPass)sPasses.GetSSAOPass());
         sViewportGroup.Startup(sDevice, sBindingGroups.GetViewportBGL());
+        sViewportGroup.BindGBuffer(sGBuffer);
+        sViewportGroup.BindSSAOTexture(sSSAOBuffer.GetTexture());
 
         RBufferInfo info;
         info.Type = RBufferType::VertexBuffer;
@@ -95,6 +99,7 @@ void RenderService::Cleanup()
         sDevice.DeleteBuffer(sQuadVBO);
         sViewportGroup.Cleanup();
         sGBuffer.Cleanup();
+        sSSAOBuffer.Cleanup();
     }
 
     sTextures.Cleanup();
@@ -169,7 +174,7 @@ void RenderService::EndFrame()
             {
                 RRID id = mesh.first;
                 const Mat4& modelMat = mesh.second;
-                const Mat3 normalMat = Mat3::Transpose(Mat3::Inverse(Mat3(modelMat)));
+                const Mat3 normalMat = Mat3::Transpose(Mat3::Inverse(Mat3(list.ViewMat * modelMat)));
                 MeshResource& res = sMeshes[id];
 
                 Array<Vec4, 6> instanceData;
@@ -204,8 +209,24 @@ void RenderService::EndFrame()
         sDevice.EndRenderPass();
     }
 
-    // prepare to use gbuffer results
-    sViewportGroup.BindGBuffer(sGBuffer);
+    // SSAO pass
+    {
+        RPassBeginInfo passBI;
+        passBI.RenderPass = (RPass)sPasses.GetSSAOPass();
+        passBI.FrameBuffer = (RFrameBuffer)sSSAOBuffer;
+        sDevice.BeginRenderPass(passBI);
+
+        sDevice.SetPipeline((RPipeline)sPipelines.GetDeferredSSAOPipeline());
+        sDevice.SetBindingGroup(0, (RBindingGroup)sViewportGroup);
+        sDevice.SetBindingGroup(1, (RBindingGroup)sBindingGroups.GetSSAOGroup());
+        sDevice.SetVertexBuffer(0, sQuadVBO);
+
+        RDrawVertexInfo drawInfo{};
+        drawInfo.VertexCount = 6;
+        sDevice.DrawVertex(drawInfo);
+
+        sDevice.EndRenderPass();
+    }
 
     // Swapchain Pass
     {
@@ -304,8 +325,8 @@ void RenderService::CreateDirectionalLight(RRID& id, const Vec3& direction, cons
     LD_DEBUG_ASSERT(sDirectionalLight == 0 && "currently only allows single directional light");
 
     sDirectionalLight = id = GUID::Get();
-    sLightingUBO.DirectionalLight.Dir = { direction, 0.0f };
-    sLightingUBO.DirectionalLight.Color = { color, 1.0f };
+    sLightingUBO.DirectionalLight.Dir = { direction, 4.0f };
+    sLightingUBO.DirectionalLight.Color = { color, 0.0f };
 }
 
 void RenderService::DeleteDirectionalLight(RRID id)
@@ -323,15 +344,28 @@ void RenderService::DrawMesh(RRID id, const Mat4& transform)
 
 void RenderService::OnViewportResize(int width, int height)
 {
+    printf("RenderService::OnViewportResize(%d,%d)\n", width, height);
+
     mViewportWidth = width;
     mViewportHeight = height;
 
     // recreate swapchain
     sDevice.ResizeViewport(width, height);
 
-    // recreate framebuffers using viewport size
-    sGBuffer.Cleanup();
+    if (sGBuffer)
+        sGBuffer.Cleanup();
     sFrameBuffers.CreateGBuffer(sGBuffer, width, height);
+
+    if (sSSAOBuffer)
+        sSSAOBuffer.Cleanup();
+    sFrameBuffers.CreateSSAOBuffer(sSSAOBuffer, width, height, (RPass)sPasses.GetSSAOPass());
+
+    // make gbuffer results visible from the viewport group
+    sViewportGroup.BindGBuffer(sGBuffer);
+
+    // make ssao results visible from the viewport group
+    RTexture ssaoTexture = sSSAOBuffer.GetTexture();
+    sViewportGroup.BindSSAOTexture(ssaoTexture);
 }
 
 } // namespace LD

@@ -47,6 +47,9 @@ public:
     /// bind the gbuffer textures to this viewport
     void BindGBuffer(const GBuffer& gbuffer);
 
+    /// bind the ssao texture to this viewport
+    void BindSSAOTexture(RTexture ssao);
+
     virtual RBindingGroupLayoutData GetLayoutData() const override;
 
     /// create a corresponding layout for the viewport binding group

@@ -35,8 +35,8 @@ void main()
 
 	mat3 normalMat = mat3(aNormalMat[0].xyz, aNormalMat[1].xyz, aNormalMat[2].xyz);
 
-	vPos = (modelMat * vec4(aPos, 1.0)).xyz;   // world position
-	vNormal = normalize(normalMat * aNormal);  // world normal
+	vPos = (uViewport.View * modelMat * vec4(aPos, 1.0)).xyz;   // view space position
+	vNormal = normalize(normalMat * aNormal);                   // view space normal
 	vTexUV = aTexUV;
 
 	vec3 T = normalize(normalMat * aTangent);
@@ -44,7 +44,7 @@ void main()
 	vec3 B = cross(N, T);
 	vTBN = mat3(T, B, N);
 
-	gl_Position = uViewport.ViewProj * vec4(vPos, 1.0);
+	gl_Position = uViewport.Proj * vec4(vPos, 1.0);
 }
 
 #ludens fragment
@@ -107,7 +107,7 @@ void main()
 
 	if (uMaterial.UseNormalTexture.x > 0.0)
 	{
-		// normal mapping from tangent space to world space
+		// normal mapping from tangent space to view space
 		normal = texture(uNormals, vTexUV).rgb;
 		normal = normalize(normal * 2.0 - 1.0);   
 		normal = normalize(vTBN * normal);

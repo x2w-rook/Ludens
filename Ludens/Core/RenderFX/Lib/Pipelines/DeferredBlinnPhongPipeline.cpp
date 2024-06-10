@@ -88,15 +88,9 @@ RPipelineLayoutData DeferredBlinnPhongPipeline::GetLayoutData() const
 {
     RBindingGroupLayoutData group0 = FrameStaticGroup{}.GetLayoutData();
     RBindingGroupLayoutData group1 = ViewportGroup{}.GetLayoutData();
-    RBindingGroupLayoutData group2;
-
-    RBindingInfo binding;
-    binding.Count = 1;
-    binding.Type = RBindingType::Texture;
-    group2 = { binding, binding, binding };
 
     RPipelineLayoutData data{};
-    data.GroupLayouts = { group0, group1, group2 };
+    data.GroupLayouts = { group0, group1 };
 
     return data;
 }

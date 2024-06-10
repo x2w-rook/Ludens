@@ -24,6 +24,7 @@ namespace LD {
 		textureI.Format = info.PositionFormat;
 		textureI.Size = info.Width * info.Height * GetTextureFormatPixelSize(info.PositionFormat);
 		textureI.Data = nullptr;
+		textureI.Sampler.AddressMode = RSamplerAddressMode::ClampToEdge;
 		mDevice.CreateTexture(mPosition, textureI);
 
 		textureI.Format = info.NormalsFormat;
