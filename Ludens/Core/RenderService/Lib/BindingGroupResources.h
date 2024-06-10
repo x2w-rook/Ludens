@@ -2,6 +2,7 @@
 
 #include "Core/RenderBase/Include/RBinding.h"
 #include "Core/RenderFX/Include/Groups/FrameStaticGroup.h"
+#include "Core/RenderFX/Include/Groups/SSAOGroup.h"
 #include "Core/RenderService/Lib/RenderResources.h"
 
 namespace LD
@@ -15,6 +16,8 @@ public:
     void Cleanup();
 
     FrameStaticGroup& GetFrameStaticGroup();
+
+    SSAOGroup& GetSSAOGroup();
 
     inline RBindingGroupLayout GetFrameStaticBGL()
     {
@@ -36,12 +39,19 @@ public:
         return mRectBGL;
     }
 
+    inline RBindingGroupLayout GetSSAOBGL()
+    {
+        return mSSAOBGL;
+    }
+
 private:
     FrameStaticGroup mFrameStaticGroup;
+    SSAOGroup mSSAOGroup;
     RBindingGroupLayout mFrameStaticBGL;
     RBindingGroupLayout mViewportBGL;
     RBindingGroupLayout mMaterialBGL;
     RBindingGroupLayout mRectBGL;
+    RBindingGroupLayout mSSAOBGL;
 };
 
 } // namespace LD

@@ -13,6 +13,9 @@ void RenderPassResources::Cleanup()
     if (mGBufferPass)
         mGBufferPass.Cleanup();
 
+    if (mSSAOPass)
+        mSSAOPass.Cleanup();
+
     mDevice.ResetHandle();
 }
 
@@ -43,6 +46,17 @@ GBufferPass& RenderPassResources::GetGBufferPass()
     }
 
     return mGBufferPass;
+}
+
+SSAOPass& RenderPassResources::GetSSAOPass()
+{
+    if (!mSSAOPass)
+    {
+        mSSAOPass.Startup(mDevice);
+        LD_DEBUG_ASSERT(mSSAOPass);
+    }
+
+    return mSSAOPass;
 }
 
 } // namespace LD

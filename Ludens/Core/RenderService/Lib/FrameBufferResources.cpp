@@ -37,4 +37,18 @@ void FrameBufferResources::CreateGBuffer(GBuffer& gbuffer, int width, int height
     LD_DEBUG_ASSERT(gbuffer);
 }
 
+void FrameBufferResources::CreateSSAOBuffer(SSAOBuffer& buffer, int width, int height, RPass pass)
+{
+    LD_DEBUG_ASSERT(!buffer && width > 0 && height > 0);
+
+    SSAOBufferInfo bufferI;
+    bufferI.Device = mDevice;
+    bufferI.RenderPass = pass;
+    bufferI.Width = width;
+    bufferI.Height = height;
+
+    buffer.Startup(bufferI);
+    LD_DEBUG_ASSERT(buffer);
+}
+
 } // namespace LD
