@@ -52,7 +52,7 @@ vec4 FrameBufferTexture(sampler2D fbt, vec2 uv)
 
 void main()
 {
-	vec2 noiseScale = uViewportUBO.Extent / 4.0;
+	vec2 noiseScale = uViewportUBO.Extent / 16.0;
 	vec3 noise = normalize(texture(uNoise, vTexUV * noiseScale).xyz * 2.0 - 1.0);
 	vec3 viewP = FrameBufferTexture(uGBufferPosition, vTexUV).xyz;
 	vec3 viewN = FrameBufferTexture(uGBufferNormal, vTexUV).xyz;
@@ -71,7 +71,7 @@ void main()
 	vec3 B = cross(viewN, T);
 	mat3 TBN = mat3(T, B, viewN);
 
-	const float radius = 0.5;
+	const float radius = 0.25;
 	const float bias = 0.025;
 	float occlusion = 0.0;
 

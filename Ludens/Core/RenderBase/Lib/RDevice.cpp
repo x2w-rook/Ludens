@@ -400,12 +400,19 @@ RResult RDevice::BeginRenderPass(const RPassBeginInfo& info)
     RResult result;
     RPassBase& pass = Unwrap(info.RenderPass);
 
-    if (pass.Attachments.Size() != info.ClearValues.Size())
+    int expectedClearValues = 0;
+    for (RPassAttachment& attachment : pass.Attachments)
+    {
+        if (attachment.LoadOp == RLoadOp::Clear)
+            expectedClearValues++;
+    }
+
+    if (expectedClearValues != info.ClearValues.Size())
     {
         result.Type = RResultType::PassBeginError;
         result.PassBeginError.MissingClearValueIndex = -1;
-        result.PassBeginError.NumClearValuesExpect = info.ClearValues.Size();
-        result.PassBeginError.NumClearValuesActual = pass.Attachments.Size();
+        result.PassBeginError.NumClearValuesExpect = expectedClearValues;
+        result.PassBeginError.NumClearValuesActual = info.ClearValues.Size();
         mBase->Callback(result);
         return result;
     }

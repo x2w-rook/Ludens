@@ -72,13 +72,13 @@ void SSAOGroup::Startup(RDevice device, RBindingGroupLayout ssaoBGL)
     mHandle.BindUniformBuffer(0, mKernelUBO);
 
     Vector<u32> pixels;
-    GenerateSSAONoiseTexture(16, pixels);
+    GenerateSSAONoiseTexture(256, pixels);
 
     RTextureInfo noiseI;
     noiseI.Type = RTextureType::Texture2D;
     noiseI.Format = RTextureFormat::RGBA8;
-    noiseI.Width = 4;
-    noiseI.Height = 4;
+    noiseI.Width = 16;
+    noiseI.Height = 16;
     noiseI.Data = pixels.Data();
     noiseI.Size = pixels.ByteSize();
     noiseI.Sampler.AddressMode = RSamplerAddressMode::Repeat;

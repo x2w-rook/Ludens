@@ -26,6 +26,7 @@ void SSAOBuffer::Startup(const SSAOBufferInfo& info)
     textureI.Format = RTextureFormat::R8;
     textureI.Size = info.Width * info.Height;
     textureI.Data = nullptr;
+    textureI.Sampler.AddressMode = RSamplerAddressMode::ClampToEdge;
     mDevice.CreateTexture(mSSAOTexture, textureI);
 
     RFrameBufferInfo ssaoI{};
