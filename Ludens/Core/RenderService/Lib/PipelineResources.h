@@ -4,6 +4,7 @@
 #include "Core/RenderFX/Include/Pipelines/RectPipeline.h"
 #include "Core/RenderFX/Include/Pipelines/DeferredBlinnPhongPipeline.h"
 #include "Core/RenderFX/Include/Pipelines/DeferredSSAOPipeline.h"
+#include "Core/RenderFX/Include/Pipelines/SSAOBlurPipeline.h"
 #include "Core/RenderService/Lib/RenderResources.h"
 
 namespace LD
@@ -26,6 +27,8 @@ public:
 
     DeferredSSAOPipeline& GetDeferredSSAOPipeline();
 
+    SSAOBlurPipeline& GetSSAOBlurPipeline();
+
 private:
     RenderPassResources* mPassRes;
     BindingGroupResources* mGroupRes;
@@ -33,6 +36,7 @@ private:
     RectPipeline mRect;
     DeferredBlinnPhongPipeline mDeferredBlinnPhong;
     DeferredSSAOPipeline mDeferredSSAO;
+    SSAOBlurPipeline mSSAOBlur;
 };
 
 } // namespace LD

@@ -25,6 +25,9 @@ public:
     /// cleanup the ssao binding group, the input BGL in Startup() is not deleted
     void Cleanup();
 
+    /// bind the raw output of ssao pipeline to this binding group
+    void BindSSAOTexture(RTexture ssao);
+
     virtual RBindingGroupLayoutData GetLayoutData() const override;
 
     virtual RBindingGroupLayout CreateLayout(RDevice device) override;

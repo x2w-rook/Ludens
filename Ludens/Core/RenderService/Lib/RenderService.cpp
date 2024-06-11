@@ -41,6 +41,7 @@ static PipelineResources sPipelines;
 static TextureResources sTextures;
 static GBuffer sGBuffer;
 static SSAOBuffer sSSAOBuffer;
+static SSAOBuffer sSSAOBlurBuffer;
 static RRID sDirectionalLight;
 static FrameStaticLightingUBO sLightingUBO;
 static ViewportGroup sViewportGroup;
@@ -78,9 +79,13 @@ void RenderService::Startup(RBackend backend)
     {
         sFrameBuffers.CreateGBuffer(sGBuffer, width, height);
         sFrameBuffers.CreateSSAOBuffer(sSSAOBuffer, width, height, (RPass)sPasses.GetSSAOPass());
+        sFrameBuffers.CreateSSAOBuffer(sSSAOBlurBuffer, width, height, (RPass)sPasses.GetSSAOPass());
         sViewportGroup.Startup(sDevice, sBindingGroups.GetViewportBGL());
         sViewportGroup.BindGBuffer(sGBuffer);
-        sViewportGroup.BindSSAOTexture(sSSAOBuffer.GetTexture());
+        sViewportGroup.BindSSAOTexture(sSSAOBlurBuffer.GetTexture());
+
+        SSAOGroup& ssaoGroup = sBindingGroups.GetSSAOGroup();
+        ssaoGroup.BindSSAOTexture(sSSAOBuffer.GetTexture());
 
         RBufferInfo info;
         info.Type = RBufferType::VertexBuffer;
@@ -100,6 +105,7 @@ void RenderService::Cleanup()
         sViewportGroup.Cleanup();
         sGBuffer.Cleanup();
         sSSAOBuffer.Cleanup();
+        sSSAOBlurBuffer.Cleanup();
     }
 
     sTextures.Cleanup();
@@ -217,6 +223,25 @@ void RenderService::EndFrame()
         sDevice.BeginRenderPass(passBI);
 
         sDevice.SetPipeline((RPipeline)sPipelines.GetDeferredSSAOPipeline());
+        sDevice.SetBindingGroup(0, (RBindingGroup)sViewportGroup);
+        sDevice.SetBindingGroup(1, (RBindingGroup)sBindingGroups.GetSSAOGroup());
+        sDevice.SetVertexBuffer(0, sQuadVBO);
+
+        RDrawVertexInfo drawInfo{};
+        drawInfo.VertexCount = 6;
+        sDevice.DrawVertex(drawInfo);
+
+        sDevice.EndRenderPass();
+    }
+
+    // SSAO blur pass
+    {
+        RPassBeginInfo passBI;
+        passBI.RenderPass = (RPass)sPasses.GetSSAOPass();
+        passBI.FrameBuffer = (RFrameBuffer)sSSAOBlurBuffer;
+        sDevice.BeginRenderPass(passBI);
+
+        sDevice.SetPipeline((RPipeline)sPipelines.GetSSAOBlurPipeline());
         sDevice.SetBindingGroup(0, (RBindingGroup)sViewportGroup);
         sDevice.SetBindingGroup(1, (RBindingGroup)sBindingGroups.GetSSAOGroup());
         sDevice.SetVertexBuffer(0, sQuadVBO);
@@ -360,12 +385,17 @@ void RenderService::OnViewportResize(int width, int height)
         sSSAOBuffer.Cleanup();
     sFrameBuffers.CreateSSAOBuffer(sSSAOBuffer, width, height, (RPass)sPasses.GetSSAOPass());
 
+    if (sSSAOBlurBuffer)
+        sSSAOBlurBuffer.Cleanup();
+    sFrameBuffers.CreateSSAOBuffer(sSSAOBlurBuffer, width, height, (RPass)sPasses.GetSSAOPass());
+
     // make gbuffer results visible from the viewport group
     sViewportGroup.BindGBuffer(sGBuffer);
 
     // make ssao results visible from the viewport group
-    RTexture ssaoTexture = sSSAOBuffer.GetTexture();
-    sViewportGroup.BindSSAOTexture(ssaoTexture);
+    SSAOGroup& ssaoGroup = sBindingGroups.GetSSAOGroup();
+    ssaoGroup.BindSSAOTexture(sSSAOBuffer.GetTexture());
+    sViewportGroup.BindSSAOTexture(sSSAOBlurBuffer.GetTexture());
 }
 
 } // namespace LD

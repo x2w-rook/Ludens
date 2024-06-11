@@ -75,12 +75,14 @@ embed_shader(Rect)
 embed_shader(GBuffer)
 embed_shader(DeferredBlinnPhong)
 embed_shader(DeferredSSAO)
+embed_shader(SSAOBlur)
 
 add_custom_target(EmbedSPIRV
 	DEPENDS EmbedRect.cpp
 	DEPENDS EmbedGBuffer.cpp
 	DEPENDS EmbedDeferredBlinnPhong.cpp
 	DEPENDS EmbedDeferredSSAO.cpp
+	DEPENDS EmbedSSAOBlur.cpp
 )
 
 add_library(EmbedSPIRVLib STATIC
@@ -88,6 +90,7 @@ add_library(EmbedSPIRVLib STATIC
 	EmbedGBuffer.cpp
 	EmbedDeferredBlinnPhong.cpp
 	EmbedDeferredSSAO.cpp
+	EmbedSSAOBlur.cpp
 )
 
 add_dependencies(EmbedSPIRVLib EmbedSPIRV)

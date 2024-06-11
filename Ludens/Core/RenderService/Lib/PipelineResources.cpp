@@ -27,6 +27,9 @@ void PipelineResources::Cleanup()
 
     if (mDeferredSSAO)
         mDeferredSSAO.Cleanup();
+
+    if (mSSAOBlur)
+        mSSAOBlur.Cleanup();
     
     mGroupRes = nullptr;
     mPassRes = nullptr;
@@ -111,6 +114,26 @@ DeferredSSAOPipeline& PipelineResources::GetDeferredSSAOPipeline()
     }
 
     return mDeferredSSAO;
+}
+
+SSAOBlurPipeline& PipelineResources::GetSSAOBlurPipeline()
+{
+    if (!mSSAOBlur)
+    {
+        Array<RBindingGroupLayout, 2> groupLayout;
+        groupLayout[0] = mGroupRes->GetViewportBGL();
+        groupLayout[1] = mGroupRes->GetSSAOBGL();
+
+        SSAOBlurPipelineInfo pipelineI;
+        pipelineI.Device = mDevice;
+        pipelineI.RenderPass = (RPass)mPassRes->GetSSAOPass();
+        pipelineI.PipelineLayout.GroupLayouts = groupLayout.GetView();
+
+        mSSAOBlur.Startup(pipelineI);
+        LD_DEBUG_ASSERT(mSSAOBlur);
+    }
+
+    return mSSAOBlur;
 }
 
 } // namespace LD

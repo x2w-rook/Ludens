@@ -94,6 +94,11 @@ void SSAOGroup::Cleanup()
     mDevice.ResetHandle();
 }
 
+void SSAOGroup::BindSSAOTexture(RTexture ssao)
+{
+    mHandle.BindTexture(2, ssao);
+}
+
 RBindingGroupLayoutData SSAOGroup::GetLayoutData() const
 {
     // kernel ubo
@@ -102,11 +107,14 @@ RBindingGroupLayoutData SSAOGroup::GetLayoutData() const
     ubo.Type = RBindingType::UniformBuffer;
 
     // noise texture
-    RBindingInfo texture;
-    texture.Count = 1;
-    texture.Type = RBindingType::Texture;
+    RBindingInfo noise;
+    noise.Count = 1;
+    noise.Type = RBindingType::Texture;
 
-    return { ubo, texture };
+    // raw output of ssao pass, not blurred yet
+    RBindingInfo ssao = noise;
+
+    return { ubo, noise, ssao };
 }
 
 RBindingGroupLayout SSAOGroup::CreateLayout(RDevice device)
@@ -115,11 +123,13 @@ RBindingGroupLayout SSAOGroup::CreateLayout(RDevice device)
 
     RBindingGroupLayout ssaoBGL;
 
-    Array<RBindingInfo, 2> bindings;
+    Array<RBindingInfo, 3> bindings;
     bindings[0].Type = RBindingType::UniformBuffer;
     bindings[0].Count = 1;
     bindings[1].Type = RBindingType::Texture;
     bindings[1].Count = 1;
+    bindings[2].Type = RBindingType::Texture;
+    bindings[2].Count = 1;
 
     RBindingGroupLayoutInfo ssaoBGLI;
     ssaoBGLI.Bindings = bindings.GetView();
