@@ -10,9 +10,12 @@ UIContext::~UIContext()
 void UIContext::Startup(const UIContextInfo& info)
 {
     UIWindowInfo rootInfo;
+    rootInfo.Context = this;
     rootInfo.Parent = nullptr;
     rootInfo.Rect = { 0.0f, 0.0f, info.Width, info.Height };
-    mRoot.Startup(rootInfo, this);
+    rootInfo.DebugName = "root";
+    rootInfo.Color = { 0.0f, 0.0f, 0.0f, 0.0f };
+    mRoot.Startup(rootInfo);
 }
 
 void UIContext::Cleanup()

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/Header/Include/Singleton.h"
+#include "Core/Math/Include/Mat4.h"
 #include "Core/OS/Include/UID.h"
 #include "Core/RenderBase/Include/RTypes.h"
 
@@ -24,8 +25,11 @@ public:
     void BeginFrame();
     void EndFrame();
 
-    void BeginViewport(const Vec3& viewpos, const Mat4& view, const Mat4& projection);
-    void EndViewport();
+    void BeginWorldViewport(const Vec3& viewpos, const Mat4& view, const Mat4& projection);
+    void EndWorldViewport();
+
+    void BeginScreenViewport();
+    void EndScreenViewport();
 
     void CreateMesh(RRID& id, const Model* model);
     void DeleteMesh(RRID id);
@@ -35,11 +39,12 @@ public:
 
     void DrawMesh(RRID mesh, const Mat4& transform);
 
+    void DrawScreenUI(UIContext* ui);
+
 private:
     void OnViewportResize(int width, int height);
 
-    int mViewportWidth;
-    int mViewportHeight;
+    struct RenderContext* mCtx;
 };
 
 } // namespace LD

@@ -20,9 +20,10 @@ Document::Document(const DocumentInfo& info)
     windowRect.h = info.Height;
 
     UIWindowInfo windowI;
+    windowI.Context = mContext;
     windowI.Parent = info.Parent;
     windowI.Rect = windowRect;
-    mWindow.Startup(windowI, mContext);
+    mWindow.Startup(windowI);
     mWindow.SetPadding(LD_DOCUMENT_PADDING, UIEdge::Top);
     mWindow.SetHPadding(LD_DOCUMENT_PADDING);
 

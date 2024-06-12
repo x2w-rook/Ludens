@@ -15,6 +15,10 @@ set(MODULE_LIB
 	"Lib/BindingGroupResources.cpp"
 	"Lib/TextureResources.h"
 	"Lib/TextureResources.cpp"
+	"Lib/RenderContext.h"
+	"Lib/RenderContext.cpp"
+	"Lib/RenderUI.h"
+	"Lib/RenderUI.cpp"
 )
 
 set(MODULE_INCLUDE_DIR

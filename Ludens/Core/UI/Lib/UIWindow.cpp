@@ -1,6 +1,7 @@
 #include "Core/UI/Include/UI.h"
 
-namespace LD {
+namespace LD
+{
 
 UIWindow::UIWindow() : UIWidget(UIType::Window)
 {
@@ -11,10 +12,15 @@ UIWindow::~UIWindow()
     LD_DEBUG_ASSERT(mContext == nullptr);
 }
 
-void UIWindow::Startup(const UIWindowInfo& info, UIContext* context)
+void UIWindow::Startup(const UIWindowInfo& info)
 {
-    mContext = context;
+    mContext = info.Context;
+    mDebugName = info.DebugName;
     mRect = info.Rect;
+    mColor = info.Color;
+
+    LD_DEBUG_ASSERT(mContext);
+    LD_DEBUG_ASSERT(mRect.w > 0 && mRect.h > 0);
 
     Attach(info.Parent);
 
@@ -53,6 +59,16 @@ Vec2 UIWindow::GetSize() const
 Rect2D UIWindow::GetRect() const
 {
     return mRect;
+}
+
+void UIWindow::SetColor(const Vec4& color)
+{
+    mColor = color;
+}
+
+Vec4 UIWindow::GetColor() const
+{
+    return mColor;
 }
 
 void UIWindow::Raise()

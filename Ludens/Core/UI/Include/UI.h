@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include "Core/OS/Include/Time.h"
 #include "Core/Math/Include/Rect2D.h"
 #include "Core/Math/Include/Vec2.h"
@@ -122,10 +123,18 @@ private:
 
 struct UIWindowInfo
 {
+    UIContext* Context;
+
     UIWindow* Parent;
+
+    /// debug name, not displayed as title
+    std::string DebugName;
 
     /// position and size of the window. the position is in root coordinates.
     Rect2D Rect;
+
+    /// flat window color
+    Vec4 Color;
 };
 
 class UIWindow : public UIWidget
@@ -139,7 +148,7 @@ public:
 
     UIWindow& operator=(const UIWindow&) = delete;
 
-    void Startup(const UIWindowInfo& info, UIContext* context);
+    void Startup(const UIWindowInfo& info);
     void Cleanup();
 
     UIContext* GetContext()
@@ -166,11 +175,12 @@ public:
     /// get window rect relative to parent
     Rect2D GetRect() const;
 
-    void GetData(void** user_data);
+    /// set window background color 
+    void SetColor(const Vec4& color);
 
-    void SetSize(int w, int h);
-    void SetColor(Vec4 color);
-    void SetData(void* user_data);
+    /// get window background color
+    Vec4 GetColor() const;
+
     void Show();
     void Hide();
 
@@ -191,8 +201,9 @@ private:
 
     UIWidget* GetTopWidget(const Vec2& pos);
 
-    void* data; // user data handle
     Rect2D mRect;
+    Vec4 mColor;
+    std::string mDebugName;
     UILogicStack<UIWidget> mWidgetStack; // widget stack, one per window
     UIContext* mContext = nullptr;
     UIWindow* mParent;      // parent window

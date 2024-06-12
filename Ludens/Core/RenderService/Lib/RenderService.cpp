@@ -12,6 +12,8 @@
 #include "Core/RenderService/Lib/BindingGroupResources.h"
 #include "Core/RenderService/Lib/PipelineResources.h"
 #include "Core/RenderService/Lib/TextureResources.h"
+#include "Core/RenderService/Lib/RenderUI.h"
+#include "Core/RenderService/Lib/RenderContext.h"
 #include "Core/RenderService/Include/RenderService.h"
 
 namespace LD
@@ -23,36 +25,30 @@ struct MeshResource
     RBuffer InstanceTransforms;
 };
 
+/// maintain a draw list for each BeginViewport/EndViewport scope
 struct DrawList
 {
     Vec3 ViewPos;
     Mat4 ViewMat;
     Mat4 ProjMat;
+};
+
+struct WorldDrawList : DrawList
+{
     Vector<std::pair<RRID, Mat4>> Meshes;
 };
 
-static bool sHasBeginFrame;
-static bool sHasBeginViewport;
+struct ScreenDrawList : DrawList
+{
+    UIContext* UI = nullptr;
+};
+
 static RDevice sDevice;
-static RenderPassResources sPasses;
-static FrameBufferResources sFrameBuffers;
-static BindingGroupResources sBindingGroups;
-static PipelineResources sPipelines;
-static TextureResources sTextures;
-static GBuffer sGBuffer;
-static SSAOBuffer sSSAOBuffer;
-static SSAOBuffer sSSAOBlurBuffer;
 static RRID sDirectionalLight;
 static FrameStaticLightingUBO sLightingUBO;
-static ViewportGroup sViewportGroup;
 static std::unordered_map<RRID, MeshResource> sMeshes;
-static RBuffer sQuadVBO;
-static Vector<DrawList> sDrawLists;
-
-static float sQuadVertices[]{
-    1.0f,  1.0f,  1.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f,  -1.0f, 1.0f, 0.0f,
-    -1.0f, -1.0f, 0.0f, 0.0f, 1.0f,  1.0f,  1.0f, 1.0f, -1.0f, 1.0f,  0.0f, 1.0f,
-};
+static Vector<WorldDrawList> sWorldDrawLists;
+static Vector<ScreenDrawList> sScreenDrawLists;
 
 static void RenderServiceCallback(const RResult& result)
 {
@@ -70,49 +66,14 @@ void RenderService::Startup(RBackend backend)
     deviceI.Callback = RenderServiceCallback;
     CreateRenderDevice(sDevice, deviceI);
 
-    sPasses.Startup(sDevice);
-    sFrameBuffers.Startup(sDevice, &sPasses);
-    sBindingGroups.Startup(sDevice);
-    sPipelines.Startup(sDevice, &sPasses, &sBindingGroups);
-    sTextures.Startup(sDevice);
-
-    {
-        sFrameBuffers.CreateGBuffer(sGBuffer, width, height);
-        sFrameBuffers.CreateSSAOBuffer(sSSAOBuffer, width, height, (RPass)sPasses.GetSSAOPass());
-        sFrameBuffers.CreateSSAOBuffer(sSSAOBlurBuffer, width, height, (RPass)sPasses.GetSSAOPass());
-        sViewportGroup.Startup(sDevice, sBindingGroups.GetViewportBGL());
-        sViewportGroup.BindGBuffer(sGBuffer);
-        sViewportGroup.BindSSAOTexture(sSSAOBlurBuffer.GetTexture());
-
-        SSAOGroup& ssaoGroup = sBindingGroups.GetSSAOGroup();
-        ssaoGroup.BindSSAOTexture(sSSAOBuffer.GetTexture());
-
-        RBufferInfo info;
-        info.Type = RBufferType::VertexBuffer;
-        info.MemoryUsage = RMemoryUsage::Immutable;
-        info.Data = sQuadVertices;
-        info.Size = sizeof(sQuadVertices);
-        sDevice.CreateBuffer(sQuadVBO, info);
-    }
+    mCtx = new RenderContext();
+    mCtx->Startup(sDevice, width, height);
 }
 
 void RenderService::Cleanup()
 {
-    sDevice.WaitIdle();
-
-    {
-        sDevice.DeleteBuffer(sQuadVBO);
-        sViewportGroup.Cleanup();
-        sGBuffer.Cleanup();
-        sSSAOBuffer.Cleanup();
-        sSSAOBlurBuffer.Cleanup();
-    }
-
-    sTextures.Cleanup();
-    sPipelines.Cleanup();
-    sBindingGroups.Cleanup();
-    sFrameBuffers.Cleanup();
-    sPasses.Cleanup();
+    mCtx->Cleanup();
+    delete mCtx;
 
     DeleteRenderDevice(sDevice);
 }
@@ -125,26 +86,27 @@ void RenderService::BeginFrame()
     auto& app = Application::GetSingleton();
     app.GetWindowPixelSize(&width, &height);
 
-    if (width != mViewportWidth || height != mViewportHeight)
+    if (width != mCtx->ViewportWidth || height != mCtx->ViewportHeight)
     {
         OnViewportResize(width, height);
     }
 
-    sDrawLists.Clear();
+    sWorldDrawLists.Clear();
+    sScreenDrawLists.Clear();
 
     // upload frame static data
-    FrameStaticGroup& group = sBindingGroups.GetFrameStaticGroup();
+    FrameStaticGroup& group = mCtx->BindingGroups.GetFrameStaticGroup();
     RBuffer ubo = group.GetLightingUBO();
     ubo.SetData(0, sizeof(sLightingUBO), &sLightingUBO);
 
     sDevice.BeginFrame();
 
-    sHasBeginFrame = true;
+    mCtx->HasBeginFrame = true;
 }
 
 void RenderService::EndFrame()
 {
-    sHasBeginFrame = false;
+    mCtx->HasBeginFrame = false;
 
     // GBuffer Pass
     {
@@ -155,24 +117,27 @@ void RenderService::EndFrame()
         clearValues[3].DepthStencil = { 1.0f, 0 };
 
         RPassBeginInfo passBI;
-        passBI.RenderPass = (RPass)sPasses.GetGBufferPass();
-        passBI.FrameBuffer = (RFrameBuffer)sGBuffer;
+        passBI.RenderPass = (RPass)mCtx->Passes.GetGBufferPass();
+        passBI.FrameBuffer = (RFrameBuffer)mCtx->DefaultGBuffer;
         passBI.ClearValues = clearValues.GetView();
         sDevice.BeginRenderPass(passBI);
 
-        sDevice.SetPipeline((RPipeline)sPipelines.GetGBufferPipeline());
-        sDevice.SetBindingGroup(0, (RBindingGroup)sViewportGroup);
+        sDevice.SetPipeline((RPipeline)mCtx->Pipelines.GetGBufferPipeline());
+        sDevice.SetBindingGroup(0, (RBindingGroup)mCtx->WorldViewportGroup);
 
-        for (DrawList& list : sDrawLists)
+        // TODO: one viewport group per draw list
+        LD_DEBUG_ASSERT(sWorldDrawLists.Size() <= 1);
+
+        for (WorldDrawList& list : sWorldDrawLists)
         {
-            RBuffer& ubo = sViewportGroup.GetUBO();
+            RBuffer& ubo = mCtx->WorldViewportGroup.GetUBO();
             ViewportUBO viewportData;
             viewportData.PointLightStart = 0;
             viewportData.PointLightCount = 0;
             viewportData.ViewMat = list.ViewMat;
             viewportData.ProjMat = list.ProjMat;
             viewportData.ViewProjMat = list.ProjMat * list.ViewMat;
-            viewportData.Size = { (float)mViewportWidth, (float)mViewportHeight };
+            viewportData.Size = { (float)mCtx->ViewportWidth, (float)mCtx->ViewportHeight };
             viewportData.ViewPos = list.ViewPos;
             ubo.SetData(0, sizeof(viewportData), &viewportData);
 
@@ -218,14 +183,14 @@ void RenderService::EndFrame()
     // SSAO pass
     {
         RPassBeginInfo passBI;
-        passBI.RenderPass = (RPass)sPasses.GetSSAOPass();
-        passBI.FrameBuffer = (RFrameBuffer)sSSAOBuffer;
+        passBI.RenderPass = (RPass)mCtx->Passes.GetSSAOPass();
+        passBI.FrameBuffer = (RFrameBuffer)mCtx->DefaultSSAOBuffer;
         sDevice.BeginRenderPass(passBI);
 
-        sDevice.SetPipeline((RPipeline)sPipelines.GetDeferredSSAOPipeline());
-        sDevice.SetBindingGroup(0, (RBindingGroup)sViewportGroup);
-        sDevice.SetBindingGroup(1, (RBindingGroup)sBindingGroups.GetSSAOGroup());
-        sDevice.SetVertexBuffer(0, sQuadVBO);
+        sDevice.SetPipeline((RPipeline)mCtx->Pipelines.GetDeferredSSAOPipeline());
+        sDevice.SetBindingGroup(0, (RBindingGroup)mCtx->WorldViewportGroup);
+        sDevice.SetBindingGroup(1, (RBindingGroup)mCtx->BindingGroups.GetSSAOGroup());
+        sDevice.SetVertexBuffer(0, mCtx->QuadVBO);
 
         RDrawVertexInfo drawInfo{};
         drawInfo.VertexCount = 6;
@@ -237,14 +202,14 @@ void RenderService::EndFrame()
     // SSAO blur pass
     {
         RPassBeginInfo passBI;
-        passBI.RenderPass = (RPass)sPasses.GetSSAOPass();
-        passBI.FrameBuffer = (RFrameBuffer)sSSAOBlurBuffer;
+        passBI.RenderPass = (RPass)mCtx->Passes.GetSSAOPass();
+        passBI.FrameBuffer = (RFrameBuffer)mCtx->DefaultSSAOBlurBuffer;
         sDevice.BeginRenderPass(passBI);
 
-        sDevice.SetPipeline((RPipeline)sPipelines.GetSSAOBlurPipeline());
-        sDevice.SetBindingGroup(0, (RBindingGroup)sViewportGroup);
-        sDevice.SetBindingGroup(1, (RBindingGroup)sBindingGroups.GetSSAOGroup());
-        sDevice.SetVertexBuffer(0, sQuadVBO);
+        sDevice.SetPipeline((RPipeline)mCtx->Pipelines.GetSSAOBlurPipeline());
+        sDevice.SetBindingGroup(0, (RBindingGroup)mCtx->WorldViewportGroup);
+        sDevice.SetBindingGroup(1, (RBindingGroup)mCtx->BindingGroups.GetSSAOGroup());
+        sDevice.SetVertexBuffer(0, mCtx->QuadVBO);
 
         RDrawVertexInfo drawInfo{};
         drawInfo.VertexCount = 6;
@@ -272,14 +237,48 @@ void RenderService::EndFrame()
 
         // Lighting
         {
-            sDevice.SetPipeline((RPipeline)sPipelines.GetDeferredBlinnPhongPipeline());
-            sDevice.SetBindingGroup(0, (RBindingGroup)sBindingGroups.GetFrameStaticGroup());
-            sDevice.SetBindingGroup(1, (RBindingGroup)sViewportGroup);
-            sDevice.SetVertexBuffer(0, sQuadVBO);
+            sDevice.SetPipeline((RPipeline)mCtx->Pipelines.GetDeferredBlinnPhongPipeline());
+            sDevice.SetBindingGroup(0, (RBindingGroup)mCtx->BindingGroups.GetFrameStaticGroup());
+            sDevice.SetBindingGroup(1, (RBindingGroup)mCtx->WorldViewportGroup);
+            sDevice.SetVertexBuffer(0, mCtx->QuadVBO);
 
             RDrawVertexInfo drawInfo{};
             drawInfo.VertexCount = 6;
             sDevice.DrawVertex(drawInfo);
+        }
+
+        // TODO: one viewport group per draw list
+        LD_DEBUG_ASSERT(sScreenDrawLists.Size() <= 1);
+
+        // Render Screen Space Objects
+        for (ScreenDrawList& list : sScreenDrawLists)
+        {
+            RBuffer& ubo = mCtx->ScreenViewportGroup.GetUBO();
+            ViewportUBO viewportData;
+            viewportData.PointLightStart = 0;
+            viewportData.PointLightCount = 0;
+            viewportData.ViewMat = list.ViewMat;
+            viewportData.ProjMat = list.ProjMat;
+            viewportData.ViewProjMat = list.ProjMat * list.ViewMat;
+            viewportData.Size = { (float)mCtx->ViewportWidth, (float)mCtx->ViewportHeight };
+            viewportData.ViewPos = list.ViewPos;
+            ubo.SetData(0, sizeof(viewportData), &viewportData);
+
+            mCtx->DefaultRectBatch.Reset();
+            RenderUI(mCtx, list.UI);
+
+            RBuffer rectVBO, rectIBO;
+            mCtx->DefaultRectBatch.GetBuffers(rectVBO, rectIBO);
+
+            sDevice.SetPipeline((RPipeline)mCtx->Pipelines.GetRectPipeline());
+            sDevice.SetBindingGroup(0, (RBindingGroup)mCtx->ScreenViewportGroup);
+            sDevice.SetBindingGroup(1, (RBindingGroup)mCtx->DefaultRectGroup);
+            sDevice.SetVertexBuffer(0, rectVBO);
+            sDevice.SetIndexBuffer(rectIBO, RIndexType::u16);
+
+            RDrawIndexedInfo drawInfo{};
+            drawInfo.IndexCount = mCtx->DefaultRectBatch.GetRectCount() * 6;
+            sDevice.DrawIndexed(drawInfo);
         }
 
         sDevice.EndRenderPass();
@@ -288,25 +287,43 @@ void RenderService::EndFrame()
     sDevice.EndFrame();
 }
 
-void RenderService::BeginViewport(const Vec3& viewpos, const Mat4& view, const Mat4& projection)
+void RenderService::BeginWorldViewport(const Vec3& viewpos, const Mat4& view, const Mat4& projection)
 {
-    LD_DEBUG_ASSERT(sHasBeginFrame);
-    LD_DEBUG_ASSERT(!sHasBeginViewport);
+    LD_DEBUG_ASSERT(mCtx->HasBeginFrame);
+    LD_DEBUG_ASSERT(!mCtx->HasBeginViewport);
 
-    sDrawLists.PushBack({});
-    DrawList& list = sDrawLists.Back();
+    sWorldDrawLists.PushBack({});
+    WorldDrawList& list = sWorldDrawLists.Back();
     list.ViewPos = viewpos;
     list.ViewMat = view;
     list.ProjMat = projection;
 
-    sHasBeginViewport = true;
+    mCtx->HasBeginViewport = true;
 }
 
-void RenderService::EndViewport()
+void RenderService::EndWorldViewport()
 {
-    LD_DEBUG_ASSERT(sHasBeginViewport);
+    LD_DEBUG_ASSERT(mCtx->HasBeginViewport);
 
-    sHasBeginViewport = false;
+    mCtx->HasBeginViewport = false;
+}
+
+void RenderService::BeginScreenViewport()
+{
+    LD_DEBUG_ASSERT(!mCtx->HasBeginViewport);
+
+    sScreenDrawLists.PushBack({});
+    ScreenDrawList& list = sScreenDrawLists.Back();
+    list.ViewPos = Vec3::Zero;
+    list.ViewMat = Mat4::Identity;
+    list.ProjMat = Mat4::Orthographic(0.0f, (float)mCtx->ViewportWidth, (float)mCtx->ViewportHeight, 0.0f, -1.0f, 1.0f);
+
+    mCtx->HasBeginViewport = true;
+}
+
+void RenderService::EndScreenViewport()
+{
+    mCtx->HasBeginViewport = false;
 }
 
 void RenderService::CreateMesh(RRID& id, const Model* model)
@@ -318,7 +335,7 @@ void RenderService::CreateMesh(RRID& id, const Model* model)
 
     RMeshInfo meshI;
     meshI.Device = sDevice;
-    meshI.MaterialBGL = sBindingGroups.GetMaterialBGL();
+    meshI.MaterialBGL = mCtx->BindingGroups.GetMaterialBGL();
     meshI.Data = model;
     res.Mesh.Startup(meshI);
 
@@ -350,7 +367,7 @@ void RenderService::CreateDirectionalLight(RRID& id, const Vec3& direction, cons
     LD_DEBUG_ASSERT(sDirectionalLight == 0 && "currently only allows single directional light");
 
     sDirectionalLight = id = GUID::Get();
-    sLightingUBO.DirectionalLight.Dir = { direction, 4.0f };
+    sLightingUBO.DirectionalLight.Dir = { direction, 0.0f };
     sLightingUBO.DirectionalLight.Color = { color, 0.0f };
 }
 
@@ -361,41 +378,24 @@ void RenderService::DeleteDirectionalLight(RRID id)
 
 void RenderService::DrawMesh(RRID id, const Mat4& transform)
 {
-    LD_DEBUG_ASSERT(sHasBeginViewport);
+    LD_DEBUG_ASSERT(mCtx->HasBeginViewport);
     LD_DEBUG_ASSERT(sMeshes.find(id) != sMeshes.end());
 
-    sDrawLists.Back().Meshes.PushBack({ id, transform });
+    sWorldDrawLists.Back().Meshes.PushBack({ id, transform });
+}
+
+void RenderService::DrawScreenUI(UIContext* ui)
+{
+    LD_DEBUG_ASSERT(mCtx->HasBeginViewport);
+
+    sScreenDrawLists.Back().UI = ui;
 }
 
 void RenderService::OnViewportResize(int width, int height)
 {
     printf("RenderService::OnViewportResize(%d,%d)\n", width, height);
 
-    mViewportWidth = width;
-    mViewportHeight = height;
-
-    // recreate swapchain
-    sDevice.ResizeViewport(width, height);
-
-    if (sGBuffer)
-        sGBuffer.Cleanup();
-    sFrameBuffers.CreateGBuffer(sGBuffer, width, height);
-
-    if (sSSAOBuffer)
-        sSSAOBuffer.Cleanup();
-    sFrameBuffers.CreateSSAOBuffer(sSSAOBuffer, width, height, (RPass)sPasses.GetSSAOPass());
-
-    if (sSSAOBlurBuffer)
-        sSSAOBlurBuffer.Cleanup();
-    sFrameBuffers.CreateSSAOBuffer(sSSAOBlurBuffer, width, height, (RPass)sPasses.GetSSAOPass());
-
-    // make gbuffer results visible from the viewport group
-    sViewportGroup.BindGBuffer(sGBuffer);
-
-    // make ssao results visible from the viewport group
-    SSAOGroup& ssaoGroup = sBindingGroups.GetSSAOGroup();
-    ssaoGroup.BindSSAOTexture(sSSAOBuffer.GetTexture());
-    sViewportGroup.BindSSAOTexture(sSSAOBlurBuffer.GetTexture());
+    mCtx->OnViewportResize(width, height);
 }
 
 } // namespace LD
