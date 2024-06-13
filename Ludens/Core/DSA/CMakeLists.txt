@@ -4,6 +4,7 @@ set(MODULE_SRC
 	"Include/View.h"
 	"Include/Stack.h"
 	"Include/Vector.h"
+	"Include/String.h"
 	"Include/Optional.h"
 )
 
@@ -11,6 +12,7 @@ set(TEST_SRC
 	"Tests/TestBuffer.h"
 	"Tests/TestStack.h"
 	"Tests/TestVector.h"
+	"Tests/TestString.h"
 	"Tests/TestArray.h"
 	"Tests/TestOptional.h"
 	"Tests/DSATests.h"
