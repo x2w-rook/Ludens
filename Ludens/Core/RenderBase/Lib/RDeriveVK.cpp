@@ -14,7 +14,7 @@ struct TextureFormatMap
 // clang-format off
 static const TextureFormatMap sTextureFormatMap[]{
     { RTextureFormat::Undefined,   VK_FORMAT_UNDEFINED },
-    { RTextureFormat::R8,          VK_FORMAT_R8_SRGB },
+    { RTextureFormat::R8,          VK_FORMAT_R8_UNORM },
     { RTextureFormat::BGRA8,       VK_FORMAT_B8G8R8A8_UNORM },
     { RTextureFormat::RGBA8,       VK_FORMAT_R8G8B8A8_UNORM },
     { RTextureFormat::RGBA16F,     VK_FORMAT_R16G16B16A16_SFLOAT },
