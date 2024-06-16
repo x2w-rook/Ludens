@@ -78,6 +78,12 @@ void RenderService::Cleanup()
     DeleteRenderDevice(sDevice);
 }
 
+void RenderService::GetDefaultFont(Ref<FontTTF>& ttf, Ref<FontGlyphTable>& table)
+{
+    ttf = mCtx->DefaultFontTTF;
+    table = mCtx->DefaultFontAtlas.GetGlyphTable();
+}
+
 void RenderService::BeginFrame()
 {
     // adapt to application framebuffer size
@@ -253,6 +259,9 @@ void RenderService::EndFrame()
         // Render Screen Space Objects
         for (ScreenDrawList& list : sScreenDrawLists)
         {
+            if (!list.UI)
+                continue;
+
             RBuffer& ubo = mCtx->ScreenViewportGroup.GetUBO();
             ViewportUBO viewportData;
             viewportData.PointLightStart = 0;

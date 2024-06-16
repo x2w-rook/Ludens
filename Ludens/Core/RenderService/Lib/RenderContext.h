@@ -1,6 +1,8 @@
 #pragma once
 
+#include "Core/Media/Include/Font.h"
 #include "Core/RenderBase/Include/RDevice.h"
+#include "Core/RenderFX/Include/RFont.h"
 #include "Core/RenderFX/Include/Groups/ViewportGroup.h"
 #include "Core/RenderFX/Include/Groups/RectGroup.h"
 #include "Core/RenderFX/Include/FrameBuffers/GBuffer.h"
@@ -35,6 +37,8 @@ struct RenderContext
     TextureResources Textures;
 
     RBuffer QuadVBO;
+    Ref<FontTTF> DefaultFontTTF;
+    RFontAtlas DefaultFontAtlas;
     GBuffer DefaultGBuffer;
     SSAOBuffer DefaultSSAOBuffer;
     SSAOBuffer DefaultSSAOBlurBuffer;

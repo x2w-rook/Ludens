@@ -3,6 +3,8 @@
 #include "Core/Header/Include/Singleton.h"
 #include "Core/Math/Include/Mat4.h"
 #include "Core/OS/Include/UID.h"
+#include "Core/OS/Include/Memory.h"
+#include "Core/Media/Include/Font.h"
 #include "Core/RenderBase/Include/RTypes.h"
 
 namespace LD
@@ -21,6 +23,8 @@ class RenderService : public Singleton<RenderService>
 public:
     void Startup(RBackend backend);
     void Cleanup();
+
+    void GetDefaultFont(Ref<FontTTF>& ttf, Ref<FontGlyphTable>& table);
 
     void BeginFrame();
     void EndFrame();

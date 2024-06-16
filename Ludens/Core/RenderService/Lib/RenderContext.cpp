@@ -1,9 +1,16 @@
 #include "Core/RenderService/Lib/RenderContext.h"
 
-#define RECT_BATCH_CAPACITY  1024
+#define RECT_BATCH_CAPACITY 1024
 
 namespace LD
 {
+
+namespace Embed
+{
+
+void GetDMSans_Regular(unsigned int* size, const char** data);
+
+} // namespace Embed
 
 // clang-format off
 static float sQuadVertices[]{
@@ -35,30 +42,49 @@ void RenderContext::Startup(RDevice device, int viewportWidth, int viewportHeigh
         FrameBuffers.CreateSSAOBuffer(DefaultSSAOBuffer, ViewportWidth, ViewportHeight, (RPass)Passes.GetSSAOPass());
         FrameBuffers.CreateSSAOBuffer(DefaultSSAOBlurBuffer, ViewportWidth, ViewportHeight,
                                       (RPass)Passes.GetSSAOPass());
-        
+
         WorldViewportGroup.Startup(Device, BindingGroups.GetViewportBGL());
         WorldViewportGroup.BindGBuffer(DefaultGBuffer);
         WorldViewportGroup.BindSSAOTexture(DefaultSSAOBlurBuffer.GetTexture());
 
         ScreenViewportGroup.Startup(Device, BindingGroups.GetViewportBGL());
-        //ScreenViewportGroup.BindGBuffer(Textures.GetWhitePixel());
-        //ScreenViewportGroup.BindSSAOTexture(Textures.GetWhitePixel());
+        // ScreenViewportGroup.BindGBuffer(Textures.GetWhitePixel());
+        // ScreenViewportGroup.BindSSAOTexture(Textures.GetWhitePixel());
 
         SSAOGroup& ssaoGroup = BindingGroups.GetSSAOGroup();
         ssaoGroup.BindSSAOTexture(DefaultSSAOBuffer.GetTexture());
 
+         RBufferInfo info;
+        info.Type = RBufferType::VertexBuffer;
+        info.MemoryUsage = RMemoryUsage::Immutable;
+        info.Data = sQuadVertices;
+        info.Size = sizeof(sQuadVertices);
+        Device.CreateBuffer(QuadVBO, info);
+
+        unsigned int ttfSize;
+        const char* ttfData;
+        Embed::GetDMSans_Regular(&ttfSize, &ttfData);
+
+        FontTTFInfo ttfI;
+        ttfI.Name = "DMSansRegular";
+        ttfI.TTFData = (const void*)ttfData;
+        ttfI.TTFSize = (size_t)ttfSize;
+        ttfI.PixelSize = 24.0f;
+        DefaultFontTTF = MakeRef<FontTTF>(ttfI);
+
+        RFontAtlasInfo atlasI;
+        atlasI.Device = Device;
+        atlasI.FontData = DefaultFontTTF;
+        DefaultFontAtlas.Startup(atlasI);
+
+        // TODO: flush when batch capacity is full
         DefaultRectBatch.Startup(Device, RECT_BATCH_CAPACITY);
         DefaultRectGroup.Startup(Device, BindingGroups.GetRectBGL());
 
         for (int i = 0; i < 16; i++)
             DefaultRectGroup.BindTexture(Textures.GetWhitePixel(), i);
 
-        RBufferInfo info;
-        info.Type = RBufferType::VertexBuffer;
-        info.MemoryUsage = RMemoryUsage::Immutable;
-        info.Data = sQuadVertices;
-        info.Size = sizeof(sQuadVertices);
-        Device.CreateBuffer(QuadVBO, info);
+        DefaultRectGroup.BindTexture(DefaultFontAtlas.GetAtlas(), 1);
     }
 }
 
@@ -67,9 +93,11 @@ void RenderContext::Cleanup()
     Device.WaitIdle();
 
     {
-        Device.DeleteBuffer(QuadVBO);
         DefaultRectGroup.Cleanup();
         DefaultRectBatch.Cleanup();
+        DefaultFontAtlas.Cleanup();
+        DefaultFontTTF = nullptr;
+        Device.DeleteBuffer(QuadVBO);
         ScreenViewportGroup.Cleanup();
         WorldViewportGroup.Cleanup();
         DefaultGBuffer.Cleanup();
