@@ -1,12 +1,15 @@
-#include "Core/UI/Include/UIWidget.h"
 #include "Core/UI/Include/UI.h"
-#include "Core/UI/Include/Control/UILabel.h"
-#include "Core/UI/Include/Control/UIPanel.h"
-#include "Core/UI/Include/Control/UIButton.h"
-#include "Core/UI/Include/Control/UITexture.h"
+#include "Core/UI/Include/UIWidget.h"
+#include "Core/UI/Include/Control/Control.h"
 
 namespace LD
 {
+
+float UIText::GetGlyphScale() const
+{
+    LD_DEBUG_ASSERT(Font);
+    return Size / Font->GetTTF()->GetPixelSize();
+}
 
 UIWidget::UIWidget(UIType type) : mType(type), mNext(nullptr), mParent(nullptr), mChild(nullptr), mIsAlive(false)
 {
@@ -24,9 +27,11 @@ void UIWidget::Startup(const UIWidgetInfo& info)
 
     UILayoutNode* parentLayout = nullptr;
 
-
     if (info.Parent && mType != UIType::Window)
         parentLayout = &info.Parent->mLayout;
+
+    LD_DEBUG_ASSERT(!(info.FlexDirection == UIFlexDirection::Row && info.Width == 0.0f && info.FlexGrow == 0.0f));
+    LD_DEBUG_ASSERT(!(info.FlexDirection == UIFlexDirection::Column && info.Height == 0.0f && info.FlexGrow == 0.0f));
 
     UILayoutNodeInfo layoutInfo;
     layoutInfo.Parent = parentLayout;

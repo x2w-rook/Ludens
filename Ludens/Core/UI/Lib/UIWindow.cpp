@@ -1,4 +1,5 @@
 #include "Core/UI/Include/UI.h"
+#include "Core/UI/Include/UIWidget.h"
 
 namespace LD
 {
@@ -28,8 +29,11 @@ void UIWindow::Startup(const UIWindowInfo& info)
     widgetInfo.Width = mRect.w;
     widgetInfo.Height = mRect.h;
     widgetInfo.Parent = nullptr;
+    widgetInfo.FlexDirection = UIFlexDirection::Column;
     UIWidget::Startup(widgetInfo);
-    // TODO: Set flex direction row vs column for root node
+
+    mLayout.SetBorder(info.Border);
+    mLayout.SetPadding(info.Padding);
 }
 
 void UIWindow::Cleanup()
@@ -40,23 +44,32 @@ void UIWindow::Cleanup()
     mContext = nullptr;
 }
 
-Vec2 UIWindow::GetRootPos() const
+Vec2 UIWindow::GetWindowPos() const
 {
-    return mRect.Min();
+    return { mRect.x, mRect.y };
 }
 
-void UIWindow::SetRootPos(const Vec2& pos)
+void UIWindow::SetWindowPos(const Vec2& pos)
 {
     mRect.x = pos.x;
     mRect.y = pos.y;
 }
 
-Vec2 UIWindow::GetSize() const
+
+Vec2 UIWindow::GetWindowSize() const
 {
     return { mRect.w, mRect.h };
 }
 
-Rect2D UIWindow::GetRect() const
+float UIWindow::GetBorder() const
+{
+    float border;
+    mLayout.GetBorder(border);
+
+    return border;
+}
+
+Rect2D UIWindow::GetWindowRect() const
 {
     return mRect;
 }

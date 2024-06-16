@@ -3,6 +3,7 @@
 #include "Core/OS/Include/UID.h"
 #include "Core/OS/Include/Allocator.h"
 #include "Core/UI/Include/UI.h"
+#include "Core/UI/Include/Control/Control.h"
 
 namespace LD {
 

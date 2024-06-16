@@ -1,10 +1,9 @@
 #pragma once
 
-#include <string>
-#include <yoga/Yoga.h>
 #include "Core/Math/Include/Rect2D.h"
 #include "Core/Math/Include/Vec4.h"
 #include "Core/DSA/Include/Vector.h"
+#include "Core/DSA/Include/String.h"
 #include "Core/Media/Include/Font.h"
 #include "Core/OS/Include/Memory.h"
 #include "Core/OS/Include/UID.h"
@@ -18,6 +17,9 @@ class UIContext;
 class UIFont;
 using UIWidgetFn = void (*)(UIContext*, UIWidget*);
 
+// TODO: will have to switch to Unicode sooner or later
+using UIString = String;
+
 enum class UIType
 {
     Window = 0,
@@ -26,6 +28,11 @@ enum class UIType
     Button,
     Texture,
 };
+
+class UIPanel;
+class UILabel;
+class UIButton;
+class UITexture;
 
 using UIWidgetOnEnter = void (*)(UIContext*, UIWidget*);
 using UIWidgetOnLeave = void (*)(UIContext*, UIWidget*);
@@ -53,7 +60,7 @@ struct UIWidgetInfo
     UIWidget* Parent = nullptr;
     UIWidgetCallback Callback;
     UIFlexDirection FlexDirection = UIFlexDirection::Column;
-    float FlexGrow = 1.0f;
+    float FlexGrow = 0.0f;
     float Width = 0.0f;
     float Height = 0.0f;
 };

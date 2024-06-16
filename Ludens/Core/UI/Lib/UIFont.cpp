@@ -35,7 +35,7 @@ Ref<FontGlyphTable> UIFont::GetGlyphTable()
     return mGlyphTable;
 }
 
-bool UIFont::DeriveTextSize(const std::string& text, float ratio, Vec2& size, FontGlyphExt* glyphsExt)
+bool UIFont::DeriveTextSize(const UIString& text, float ratio, Vec2& size, FontGlyphExt* glyphsExt)
 {
     int lineSpace;
     mTTF->GetVerticalMetrics(nullptr, nullptr, nullptr, &lineSpace);
@@ -43,7 +43,7 @@ bool UIFont::DeriveTextSize(const std::string& text, float ratio, Vec2& size, Fo
     size.x = 0.0f;
     size.y = (float)lineSpace * ratio;
 
-    for (size_t i = 0; i < text.size(); i++)
+    for (size_t i = 0; i < text.Size(); i++)
     {
         FontGlyphExt& glyph = glyphsExt[i];
         if (!mGlyphTable->GetGlyph((u32)text[i], glyph))
@@ -59,7 +59,7 @@ bool UIFont::DeriveTextSize(const std::string& text, float ratio, Vec2& size, Fo
     return true;
 }
 
-bool UIFont::DeriveTextSizeLimitWidth(const std::string& text, float ratio, float limitWidth, float& height, FontGlyphExt* glyphsExt)
+bool UIFont::DeriveTextSizeLimitWidth(const UIString& text, float ratio, float limitWidth, float& height, FontGlyphExt* glyphsExt)
 {
     float width = 0.0f;
     int lineSpace;
@@ -67,7 +67,7 @@ bool UIFont::DeriveTextSizeLimitWidth(const std::string& text, float ratio, floa
 
     height = 0.0f;
 
-    for (size_t i = 0; i < text.size(); i++)
+    for (size_t i = 0; i < text.Size(); i++)
     {
         FontGlyphExt& glyph = glyphsExt[i];
         if (!mGlyphTable->GetGlyph((u32)text[i], glyph))

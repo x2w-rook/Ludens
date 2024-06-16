@@ -3,7 +3,7 @@
 
 namespace LD {
 
-UILabel::UILabel() : UIWidget(UIType::Label), mFont(nullptr)
+UILabel::UILabel() : UIWidget(UIType::Label), mLimitWidth(0.0f)
 {
 }
 
@@ -14,66 +14,57 @@ UILabel::~UILabel()
 
 void UILabel::Startup(const UILabelInfo& info)
 {
-    UIWidget::Startup(info);
+    UIWidget::Startup(info.Widget);
 
-    LD_DEBUG_ASSERT(info.Font);
+    LD_DEBUG_ASSERT(info.Text.Font);
 
-    mLimitWidth = info.Width;
-    mFont = info.Font;
-    mTextSize = info.TextSize;
-    mTextColor = info.TextColor;
-    SetText(info.Text);
+    mText.Color = info.Text.Color;
+    mText.Font = info.Text.Font;
+    mText.Size = info.Text.Size;
+    SetText(info.Text.Content);
+
+    mLimitWidth = info.Widget.Width;
 }
 
 void UILabel::Cleanup()
 {
     UIWidget::Cleanup();
 
-    mFont = nullptr;
+    mText.Font = nullptr;
 }
 
-std::string UILabel::GetText()
+UIString UILabel::GetText()
 {
-    return mText;
+    return mText.Content;
 }
 
-void UILabel::SetText(const std::string& text)
+void UILabel::SetText(const UIString& text)
 {
-    mText = text;
-    mTextGlyphs.Resize(mText.size());
+    mText.Content = text;
+    mTextGlyphs.Resize(mText.Content.Size());
 
     Vec2 textSize;
-    float scale = mTextSize / mFont->GetTTF()->GetPixelSize();
+    float scale = GetGlyphScale();
 
     if (mLimitWidth > 0.0f)
     {
         textSize.x = mLimitWidth;
-        mFont->DeriveTextSizeLimitWidth(mText, scale, mLimitWidth, textSize.y, mTextGlyphs.Data());
+        mText.Font->DeriveTextSizeLimitWidth(mText.Content, scale, mLimitWidth, textSize.y, mTextGlyphs.Data());
     }
     else
-        mFont->DeriveTextSize(mText, scale, textSize, mTextGlyphs.Data());
+        mText.Font->DeriveTextSize(mText.Content, scale, textSize, mTextGlyphs.Data());
 
     mLayout.SetSize(textSize);
 }
 
 float UILabel::GetTextSize()
 {
-    return mTextSize;
+    return mText.Size;
 }
 
 void UILabel::SetTextSize(float size)
 {
-    mTextSize = size;
-}
-
-Vec4 UILabel::GetTextColor()
-{
-    return mTextColor;
-}
-
-void UILabel::SetTextColor(const Vec4& color)
-{
-    mTextColor = color;
+    mText.Size = size;
 }
 
 View<FontGlyphExt> UILabel::GetTextGlyphs()
@@ -83,14 +74,13 @@ View<FontGlyphExt> UILabel::GetTextGlyphs()
 
 float UILabel::GetGlyphScale()
 {
-    LD_DEBUG_ASSERT(mFont);
-    return mTextSize / mFont->GetTTF()->GetPixelSize();
+    return mText.GetGlyphScale();
 }
 
 UIFont* UILabel::GetFont()
 {
-    LD_DEBUG_ASSERT(mFont);
-    return mFont;
+    LD_DEBUG_ASSERT(mText.Font);
+    return mText.Font;
 }
 
 } // namespace LD

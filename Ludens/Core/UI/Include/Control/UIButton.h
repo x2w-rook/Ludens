@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/UI/Include/UIWidget.h"
+#include "Core/UI/Include/Control/UILabel.h"
 
 namespace LD {
 
@@ -13,9 +14,10 @@ enum class UIClickMode
     ClickOnRelease,
 };
 
-struct UIButtonInfo : UIWidgetInfo
+struct UIButtonInfo
 {
-    Vec4 Color;
+    UIWidgetInfo Widget;
+    UIText Text;
     UIButtonOnClick OnClick = nullptr;
     UIClickMode ClickMode = UIClickMode::ClickOnRelease;
 };
@@ -32,10 +34,18 @@ public:
     void Startup(const UIButtonInfo& info);
     void Cleanup();
 
+    float GetGlyphScale();
+    UIFont* GetFont();
+    View<FontGlyphExt> GetTextGlyphs();
+
+    void SetText(const UIString& text);
+
 private:
     static void OnPress(UIContext*, UIWidget*);
     static void OnRelease(UIContext*, UIWidget*);
 
+    Vector<FontGlyphExt> mTextGlyphs;
+    UIText mText;
     UIButtonOnClick mOnClick = nullptr;
     UIClickMode mClickMode;
 };

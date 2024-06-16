@@ -4,8 +4,9 @@
 
 namespace LD {
 
-struct UITextureInfo : UIWidgetInfo
+struct UITextureInfo
 {
+    UIWidgetInfo Widget;
     UID TextureID;
 };
 

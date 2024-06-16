@@ -13,7 +13,7 @@ UITexture::~UITexture()
 
 void UITexture::Startup(const UITextureInfo& info)
 {
-    UIWidget::Startup(info);
+    UIWidget::Startup(info.Widget);
 
     mTextureID = info.TextureID;
 }

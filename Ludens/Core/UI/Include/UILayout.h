@@ -121,6 +121,20 @@ public:
         return *this;
     }
 
+    /// the layout system does not do any drawing, border acts exactly
+    /// the same as padding and is a hint for the renderer to draw the border.
+    inline UILayoutNode& SetBorder(float border)
+    {
+        YGNodeStyleSetBorder(mNode, YGEdgeAll, border);
+        return *this;
+    }
+
+    inline const UILayoutNode& GetBorder(float& border) const
+    {
+        border = YGNodeStyleGetBorder(mNode, YGEdgeAll);
+        return *this;
+    }
+
     inline UILayoutNode& SetMargin(float margin)
     {
         YGNodeStyleSetMargin(mNode, YGEdgeAll, margin);

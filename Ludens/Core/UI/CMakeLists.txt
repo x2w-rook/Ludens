@@ -2,6 +2,7 @@ set(MODULE_INCLUDE
 	"Include/UI.h"
 	"Include/UILayout.h"
 	"Include/UIWidget.h"
+	"Include/Control/Control.h"
 	"Include/Control/UIPanel.h"
 	"Include/Control/UILabel.h"
 	"Include/Control/UIButton.h"

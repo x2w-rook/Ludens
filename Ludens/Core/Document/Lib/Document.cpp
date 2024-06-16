@@ -1,5 +1,7 @@
 #include "Core/Document/Include/Document.h"
 #include "Core/Document/Include/DocumentLink.h"
+#include "Core/UI/Include/UI.h"
+#include "Core/UI/Include/Control/Control.h"
 
 #define LD_DOCUMENT_PADDING 60
 
@@ -28,12 +30,11 @@ Document::Document(const DocumentInfo& info)
     mWindow.SetHPadding(LD_DOCUMENT_PADDING);
 
     UILabelInfo labelI;
-    labelI.FlexGrow = 0.0f;
-    labelI.Parent = &mWindow;
-    labelI.Font = info.Font;
-    labelI.Text = info.Title;
-    labelI.TextColor = { 1.0f, 1.0f, 1.0f, 1.0f };
-    labelI.TextSize = 60.0f;
+    labelI.Widget.Parent = &mWindow;
+    labelI.Text.Content = info.Title;
+    labelI.Text.Font = info.Font;
+    labelI.Text.Size = 60.0f;
+    labelI.Text.Color = { 1.0f, 1.0f, 1.0f, 1.0f };
     mTitle.Startup(labelI);
 }
 

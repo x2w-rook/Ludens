@@ -1,15 +1,15 @@
 #pragma once
 
-#include "Core/UI/Include/UIWidget.h"
+#include "Core/UI/Include/UI.h"
 
 namespace LD {
 
-struct UILabelInfo : UIWidgetInfo
+class UIButton;
+
+struct UILabelInfo
 {
-    UIFont* Font;
-    std::string Text;
-    float TextSize = 16.0f;
-    Vec4 TextColor;
+    UIWidgetInfo Widget;
+    UIText Text;
 };
 
 class UILabel : public UIWidget
@@ -25,22 +25,16 @@ public:
     void Cleanup();
 
     /// get the text content
-    std::string GetText();
+    UIString GetText();
 
     /// set the text content
-    void SetText(const std::string& text);
+    void SetText(const UIString& text);
 
     /// get the text size
     float GetTextSize();
 
     /// set the text size
     void SetTextSize(float size);
-
-    /// get the text color
-    Vec4 GetTextColor();
-
-    /// set the text color
-    void SetTextColor(const Vec4& color);
 
     /// get a view to the glyphs for each character in text,
     /// the view is invalidated between calls to SetText().
@@ -53,10 +47,7 @@ public:
 
 private:
     Vector<FontGlyphExt> mTextGlyphs;
-    UIFont* mFont;
-    Vec4 mTextColor;
-    float mTextSize;
-    std::string mText;
+    UIText mText;
     float mLimitWidth;
 };
 

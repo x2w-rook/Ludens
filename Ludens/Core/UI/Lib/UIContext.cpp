@@ -30,7 +30,7 @@ UIWindow* UIContext::GetRoot()
 
 Vec2 UIContext::GetSize()
 {
-    return mRoot.GetSize();
+    return mRoot.GetWindowSize();
 }
 
 void UIContext::BeginFrame(DeltaTime dt)
@@ -78,7 +78,7 @@ void UIContext::InputMouseButtonPressed(MouseButton button)
 
         if (rect.Contains(mMousePos))
         {
-            Vec2 windowPos = window->GetRootPos();
+            Vec2 windowPos = window->GetWindowPos();
             window->InputMouseButtonPressed(button, mMousePos - windowPos);
             break;
         }
@@ -94,7 +94,7 @@ void UIContext::InputMouseButtonReleased(MouseButton button)
 
         if (rect.Contains(mMousePos))
         {
-            Vec2 windowPos = window->GetRootPos();
+            Vec2 windowPos = window->GetWindowPos();
             window->InputMouseButtonReleased(button, mMousePos - windowPos);
             break;
         }

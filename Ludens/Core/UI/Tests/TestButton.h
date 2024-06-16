@@ -2,7 +2,7 @@
 
 #include <doctest.h>
 #include "Core/UI/Include/UI.h"
-#include "Core/UI/Include/UIWidget.h"
+#include "Core/UI/Include/Control/Control.h"
 
 using namespace LD;
 
@@ -25,15 +25,16 @@ TEST_CASE("UIButton Click On Press")
 	context.Startup(info);
 
 	UIWindowInfo windowI{};
+    windowI.Context = &context;
 	windowI.Parent = context.GetRoot();
 	windowI.Rect = { 0.0f, 0.0f, 600.0f, 500.0f };
-	window.Startup(windowI, &context);
+	window.Startup(windowI);
 	{
 		UIButtonInfo buttonI{};
-		buttonI.Color = { 1.0f, 0.0f, 0.0f, 1.0f };
-		buttonI.Parent = &window;
-		buttonI.Width = 200.0f;
-		buttonI.Height = 200.0f;
+		buttonI.Widget.Parent = &window;
+		buttonI.Widget.Width = 200.0f;
+		buttonI.Widget.Height = 200.0f;
+		buttonI.FGColor = { 1.0f, 0.0f, 0.0f, 1.0f };
 		buttonI.ClickMode = UIClickMode::ClickOnPress;
 		buttonI.OnClick = Click;
 		button.Startup(buttonI);
