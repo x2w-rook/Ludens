@@ -150,6 +150,13 @@ struct TVec4
         return LD_MATH_ABS(LengthSquared() - static_cast<T>(1)) <= tolerance;
     }
 
+    /// @brief linear interpolate two vec4
+    /// @note ratio is not clampled to [0, 1]
+    static TVec4<T> Lerp(const TVec4<T>& from, const TVec4<T>& to, T ratio)
+    {
+        return from * (1 - ratio) + to * ratio;
+    }
+
     // TODO: swizzle
 };
 
