@@ -1,5 +1,6 @@
 set(MODULE_SRC
 	"Include/Math.h"
+	"Include/Hash.h"
 	"Include/Bits.h"
 	"Include/Hex.h"
 	"Include/Vec2.h"
