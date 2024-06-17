@@ -7,6 +7,7 @@
 #include "Core/DSA/Tests/TestStack.h"
 #include "Core/DSA/Tests/TestVector.h"
 #include "Core/DSA/Tests/TestString.h"
+#include "Core/DSA/Tests/TestStringHash.h"
 #include "Core/DSA/Tests/TestOptional.h"
 
 int Foo::CtorCounter = 0;

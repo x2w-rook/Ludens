@@ -1,7 +1,10 @@
 #pragma once
 
 #include <cstring>
+#include <cstddef>
+#include "Core/DSA/Include/View.h"
 #include "Core/Math/Include/Bits.h"
+#include "Core/Math/Include/Hash.h"
 
 namespace LD
 {
@@ -12,6 +15,11 @@ template <typename TChar, size_t TLocalCapacity>
 class TString
 {
 public:
+    static size_t LocalCapacity()
+    {
+        return TLocalCapacity;
+    }
+
     /// minimum initialization
     TString() : mBase(mLocal), mSize(0), mCapacity(TLocalCapacity)
     {
@@ -109,6 +117,26 @@ public:
     inline size_t Size() const
     {
         return mSize;
+    }
+
+    inline void Resize(size_t size)
+    {
+        if (size > mCapacity)
+            GrowCapacity(size);
+
+        mSize = size;
+    }
+
+    inline void Clear()
+    {
+        mSize = 0;
+    }
+
+    /// get a string view that is valid until the next
+    /// non-const member function is called
+    inline View<TChar> GetView() const
+    {
+        return View<TChar> { mSize, mBase };
     }
 
     /// number of bytes if viewed as a byte-stream
@@ -237,5 +265,57 @@ private:
 };
 
 using String = TString<char, 24>;
+
+/// pre-hashed string, optimized for fast equality test.
+template <typename TChar, typename THash>
+class TStringHash
+{
+public:
+
+    /// @warn empty string will assume a hash of zero
+    TStringHash() : mHash(0)
+    {
+    }
+
+    explicit TStringHash(const TChar* str, size_t len)
+    {
+        mHash = THash{}(str, len);
+    }
+
+    /// construct from null terminated c string
+    explicit TStringHash(const char* cstr)
+    {
+        mHash = THash{}(cstr, strlen(cstr));
+    }
+
+    /// assign new hash from string
+    TStringHash& operator=(const View<TChar>& view)
+    {
+        mHash = THash{}(view.Data(), view.Size());
+        return *this;
+    }
+
+    /// assign new hash from null terminated c string 
+    TStringHash& operator=(const char* cstr)
+    {
+        mHash = THash{}(cstr, strlen(cstr));
+        return *this;
+    }
+
+    bool operator==(const TStringHash& other) const
+    {
+        return mHash == other.mHash;
+    }
+
+    bool operator!=(const TStringHash& other) const
+    {
+        return !(*this == other);
+    }
+
+private:
+    size_t mHash;
+};
+
+using StringHash = TStringHash<char, DJB2<char>>;
 
 } // namespace LD
