@@ -38,6 +38,8 @@ public:
     UIFont* GetFont();
     View<FontGlyphExt> GetTextGlyphs();
 
+    void GetColors(Vec4& bg, Vec4& fg) const;
+
     void SetText(const UIString& text);
 
 private:
@@ -45,6 +47,7 @@ private:
     static void OnRelease(UIContext*, UIWidget*);
 
     Vector<FontGlyphExt> mTextGlyphs;
+    Vec4 mBGColor, mFGColor;
     UIText mText;
     UIButtonOnClick mOnClick = nullptr;
     UIClickMode mClickMode;

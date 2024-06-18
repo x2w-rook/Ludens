@@ -34,7 +34,6 @@ TEST_CASE("UIButton Click On Press")
 		buttonI.Widget.Parent = &window;
 		buttonI.Widget.Width = 200.0f;
 		buttonI.Widget.Height = 200.0f;
-		buttonI.FGColor = { 1.0f, 0.0f, 0.0f, 1.0f };
 		buttonI.ClickMode = UIClickMode::ClickOnPress;
 		buttonI.OnClick = Click;
 		button.Startup(buttonI);

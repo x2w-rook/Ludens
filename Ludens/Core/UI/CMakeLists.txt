@@ -1,5 +1,6 @@
 set(MODULE_INCLUDE
 	"Include/UI.h"
+	"Include/UITheme.h"
 	"Include/UILayout.h"
 	"Include/UIWidget.h"
 	"Include/Control/Control.h"
@@ -11,6 +12,7 @@ set(MODULE_INCLUDE
 
 set(MODULE_LIB
 	"Lib/UIFont.cpp"
+	"Lib/UITheme.cpp"
 	"Lib/UIContext.cpp"
 	"Lib/UILayout.cpp"
 	"Lib/UIWidget.cpp"

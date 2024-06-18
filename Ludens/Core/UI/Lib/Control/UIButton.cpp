@@ -1,6 +1,7 @@
 #include "Core/UI/Include/Control/UIButton.h"
 
-namespace LD {
+namespace LD
+{
 
 UIButton::UIButton() : UIWidget(UIType::Button)
 {
@@ -14,11 +15,19 @@ UIButton::~UIButton()
 void UIButton::Startup(const UIButtonInfo& info)
 {
     UIWidget::Startup(info.Widget);
+    UIContext* ctx = mWindow->GetContext();
+    UITheme* theme = ctx->GetTheme();
+
+    theme->GetPrimaryColor(mBGColor);
+    theme->GetOnPrimaryColor(mFGColor);
+
+    // TODO:
+    float margin = 4.0f;
+    mLayout.SetMargin(margin);
 
     mLibCallback.OnPress = &UIButton::OnPress;
     mLibCallback.OnRelease = &UIButton::OnRelease;
 
-    mText.Color = info.Text.Color;
     mText.Font = info.Text.Font;
     mText.Size = info.Text.Size;
     SetText(info.Text.Content);
@@ -50,6 +59,12 @@ UIFont* UIButton::GetFont()
 View<FontGlyphExt> UIButton::GetTextGlyphs()
 {
     return mTextGlyphs.GetView();
+}
+
+void UIButton::GetColors(Vec4& bg, Vec4& fg) const
+{
+    bg = mBGColor;
+    fg = mFGColor;
 }
 
 void UIButton::SetText(const UIString& text)

@@ -15,10 +15,16 @@ UIWindow::~UIWindow()
 
 void UIWindow::Startup(const UIWindowInfo& info)
 {
+    UITheme* theme = info.Context->GetTheme();
+
     mContext = info.Context;
     mDebugName = info.DebugName;
     mRect = info.Rect;
-    mColor = info.Color;
+
+    float border, padding;
+    theme->GetBackgroundColor(mColor);
+    theme->GetWindowBorder(border);
+    theme->GetWindowPadding(padding);
 
     LD_DEBUG_ASSERT(mContext);
     LD_DEBUG_ASSERT(mRect.w > 0 && mRect.h > 0);
@@ -32,8 +38,8 @@ void UIWindow::Startup(const UIWindowInfo& info)
     widgetInfo.FlexDirection = UIFlexDirection::Column;
     UIWidget::Startup(widgetInfo);
 
-    mLayout.SetBorder(info.Border);
-    mLayout.SetPadding(info.Padding);
+    mLayout.SetBorder(border);
+    mLayout.SetPadding(padding);
 }
 
 void UIWindow::Cleanup()

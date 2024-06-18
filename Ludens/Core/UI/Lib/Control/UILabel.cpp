@@ -1,7 +1,8 @@
 #include "Core/UI/Include/Control/UILabel.h"
 #include "Core/UI/Include/UI.h"
 
-namespace LD {
+namespace LD
+{
 
 UILabel::UILabel() : UIWidget(UIType::Label), mLimitWidth(0.0f)
 {
@@ -15,10 +16,13 @@ UILabel::~UILabel()
 void UILabel::Startup(const UILabelInfo& info)
 {
     UIWidget::Startup(info.Widget);
+    UIContext* ctx = mWindow->GetContext();
+    UITheme* theme = ctx->GetTheme();
+    theme->GetBackgroundColor(mBGColor);
+    theme->GetOnBackgroundColor(mFGColor);
 
     LD_DEBUG_ASSERT(info.Text.Font);
 
-    mText.Color = info.Text.Color;
     mText.Font = info.Text.Font;
     mText.Size = info.Text.Size;
     SetText(info.Text.Content);
@@ -36,6 +40,12 @@ void UILabel::Cleanup()
 UIString UILabel::GetText()
 {
     return mText.Content;
+}
+
+void UILabel::GetColors(Vec4& bg, Vec4& fg) const
+{
+    bg = mBGColor;
+    fg = mFGColor;
 }
 
 void UILabel::SetText(const UIString& text)

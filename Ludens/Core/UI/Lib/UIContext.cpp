@@ -9,18 +9,28 @@ UIContext::~UIContext()
 
 void UIContext::Startup(const UIContextInfo& info)
 {
+    mTheme = new UITheme();
+
     UIWindowInfo rootInfo;
     rootInfo.Context = this;
     rootInfo.Parent = nullptr;
     rootInfo.Rect = { 0.0f, 0.0f, info.Width, info.Height };
     rootInfo.DebugName = "root";
-    rootInfo.Color = { 0.0f, 0.0f, 0.0f, 0.0f };
     mRoot.Startup(rootInfo);
+    mRoot.SetColor({ 0.0f, 0.0f, 0.0f, 0.0f });
 }
 
 void UIContext::Cleanup()
 {
     mRoot.Cleanup();
+
+    delete mTheme;
+    mTheme = nullptr;
+}
+
+UITheme* UIContext::GetTheme()
+{
+    return mTheme;
 }
 
 UIWindow* UIContext::GetRoot()

@@ -5,6 +5,7 @@
 #include "Core/Math/Include/Rect2D.h"
 #include "Core/Math/Include/Vec2.h"
 #include "Core/Math/Include/Vec4.h"
+#include "Core/DSA/Include/Optional.h"
 #include "Core/DSA/Include/Vector.h"
 #include "Core/DSA/Include/View.h"
 #include "Core/DSA/Include/String.h"
@@ -12,6 +13,7 @@
 #include "Core/Media/Include/Font.h"
 #include "Core/UI/Include/UILayout.h"
 #include "Core/UI/Include/UIWidget.h"
+#include "Core/UI/Include/UITheme.h"
 
 namespace LD
 {
@@ -68,7 +70,6 @@ struct UIText
 {
     UIFont* Font = nullptr;
     UIString Content;
-    Vec4 Color;
     float Size;
 
     /// get the ratio of displayed pixel size to the actual glyph size
@@ -141,12 +142,6 @@ struct UIWindowInfo
 
     /// position and size of the window. the position is in root coordinates.
     Rect2D Rect;
-
-    /// flat window color
-    Vec4 Color;
-
-    float Border = 2.0f;
-    float Padding = 4.0f;
 };
 
 class UIWindow : public UIWidget
@@ -181,7 +176,7 @@ public:
         return mChild;
     }
 
-    /// get next sibling window 
+    /// get next sibling window
     UIWindow* GetWindowNext() const
     {
         return mNext;
@@ -190,7 +185,7 @@ public:
     /// get the window's position in root coordinates
     Vec2 GetWindowPos() const;
 
-    /// set the window's position in root coordinates 
+    /// set the window's position in root coordinates
     void SetWindowPos(const Vec2& pos);
 
     /// get width and height of the window
@@ -225,7 +220,7 @@ private:
 
     UIWidget* GetTopWidget(const Vec2& pos);
 
-    Rect2D mRect;           // position and size relative to root window
+    Rect2D mRect; // position and size relative to root window
     Vec4 mColor;
     UIString mDebugName;
     UILogicStack<UIWidget> mWidgetStack; // widget stack, one per window
@@ -257,6 +252,8 @@ public:
 
     void Startup(const UIContextInfo& info);
     void Cleanup();
+
+    UITheme* GetTheme();
 
     UIWindow* GetRoot();
 
@@ -297,6 +294,7 @@ private:
     UIWidget* mLastAttach;               // last widget that is attached to a parent
     UIWidget* mLastDetach;               // last widget that is detached from a parent
     UIWidget* mTooltip;                  // the tooltip widget, rendered beside mouse cursor
+    UITheme* mTheme;                     // the current active theme
     Vec2 mMousePos;                      // mouse cursor position in the viewport
     Vec2 mAnchorPos;                     // anchor position, transforms local position to viewport position
     bool mIsWithinFrame = false;

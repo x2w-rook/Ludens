@@ -27,6 +27,8 @@ public:
     /// get the text content
     UIString GetText();
 
+    void GetColors(Vec4& bg, Vec4& fg) const;
+
     /// set the text content
     void SetText(const UIString& text);
 
@@ -47,6 +49,7 @@ public:
 
 private:
     Vector<FontGlyphExt> mTextGlyphs;
+    Vec4 mBGColor, mFGColor;
     UIText mText;
     float mLimitWidth;
 };

@@ -38,7 +38,6 @@ static void RenderUIWindow(RenderContext* ctx, UIWindow* window)
 
     float border = window->GetBorder();
 
-    // TODO: UI color scheme or palette
     Vec4 borderColor = Vec4::Lerp(windowColor, { 1.0f, 1.0f, 1.0f, windowColor.a }, 0.5f);
     batch.AddRectOutline(windowRect, borderColor, border);
 
@@ -97,9 +96,8 @@ static void RenderUILabel(RenderContext* ctx, const Rect2D& rect, UILabel* label
     // put cursor at baseline, left most point
     Vec2 cursor = Vec2{ rect.x, rect.y + ascent * scale };
 
-    // TODO: skinning/themes
-    Vec4 bgColor = Hex(0x121212FF);
-    Vec4 fgColor = Hex(0xCCCCCCFF);
+    Vec4 bgColor, fgColor;
+    label->GetColors(bgColor, fgColor);
 
     if (bgColor.a != 0.0f)
         batch.AddRectFilled(rect, bgColor);
@@ -118,9 +116,8 @@ static void RenderUIButton(RenderContext* ctx, const Rect2D& rect, UIButton* but
     Ref<FontTTF> ttf = uiFont->GetTTF();
     RectBatch& batch = ctx->DefaultRectBatch;
 
-    // TODO: skinning/themes
-    Vec4 bgColor = Hex(0x121212FF);
-    Vec4 fgColor = Hex(0xCCCCCCFF);
+    Vec4 bgColor, fgColor;
+    button->GetColors(bgColor, fgColor);
 
     batch.AddRectFilled(rect, bgColor);
 
