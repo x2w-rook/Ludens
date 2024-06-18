@@ -1,8 +1,67 @@
+#include <vector>
 #include <iostream>
+#include "Core/DSA/Include/Vector.h"
 #include "Core/DSA/Include/String.h"
 #include "Core/OS/Include/Time.h"
 
 using namespace LD;
+
+static void BenchVector()
+{
+    const size_t N = 10000000;
+    double timeVectorPushBack;
+    double timeStdVectorPushBack;
+    double timeVectorAccess;
+    double timeStdVectorAccess;
+
+    Vector<size_t> vector;
+    std::vector<size_t> stdVector;
+
+    {
+        ScopeTimer timer(&timeVectorPushBack);
+
+        for (size_t i = 0; i < N; i++)
+        {
+            vector.PushBack(i);
+        }
+    }
+
+    {
+        ScopeTimer timer(&timeStdVectorPushBack);
+
+        for (size_t i = 0; i < N; i++)
+        {
+            stdVector.push_back(i);
+        }
+    }
+
+    {
+        ScopeTimer timer(&timeVectorAccess);
+
+        for (size_t i = 0; i < N / 2; i++)
+        {
+            size_t tmp = vector[i];
+            vector[i] = vector[N - 1 - i];
+            vector[N - 1 - i] = tmp;
+        }
+    }
+
+    {
+        ScopeTimer timer(&timeStdVectorAccess);
+
+        for (size_t i = 0; i < N / 2; i++)
+        {
+            size_t tmp = stdVector[i];
+            stdVector[i] = stdVector[N - 1 - i];
+            stdVector[N - 1 - i] = tmp;
+        }
+    }
+
+    std::cout << "LD  Vector Push Back " << timeVectorPushBack << std::endl;
+    std::cout << "STD Vector Push Back " << timeStdVectorPushBack << std::endl;
+    std::cout << "LD  Vector Access " << timeVectorAccess << std::endl;
+    std::cout << "STD Vector Access " << timeStdVectorAccess << std::endl;
+}
 
 // compare string hash equality test
 static void BenchStringHash()
@@ -102,5 +161,6 @@ static void BenchStringHash()
 
 int main()
 {
+    BenchVector();
     BenchStringHash();
 }

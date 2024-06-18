@@ -2,6 +2,7 @@
 
 #include <cstring>
 #include <cstddef>
+#include <utility>
 #include "Core/DSA/Include/View.h"
 #include "Core/Math/Include/Bits.h"
 #include "Core/Math/Include/Hash.h"
@@ -312,6 +313,11 @@ public:
         return !(*this == other);
     }
 
+    inline size_t GetHash() const
+    {
+        return mHash;
+    }
+
 private:
     size_t mHash;
 };
@@ -319,3 +325,13 @@ private:
 using StringHash = TStringHash<char, DJB2<char>>;
 
 } // namespace LD
+
+// STL compatibility for using StringHashes as key types
+template <>
+struct std::hash<LD::StringHash>
+{
+    std::size_t operator()(const LD::StringHash& key) const
+    {
+        return key.GetHash();
+    }
+};
