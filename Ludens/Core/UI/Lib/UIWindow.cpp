@@ -99,7 +99,7 @@ void UIWindow::Raise()
 
 void UIWindow::InputMouseButtonPressed(MouseButton button, const Vec2& pos)
 {
-    UIWidget* widget = GetTopWidget(pos);
+    UIWidget* widget = GetTopWidget(pos, UIWidget::IS_PRESSABLE_BIT);
 
     if (!widget)
         return;
@@ -109,7 +109,7 @@ void UIWindow::InputMouseButtonPressed(MouseButton button, const Vec2& pos)
 
 void UIWindow::InputMouseButtonReleased(MouseButton button, const Vec2& pos)
 {
-    UIWidget* widget = GetTopWidget(pos);
+    UIWidget* widget = GetTopWidget(pos, UIWidget::IS_PRESSABLE_BIT);
     if (!widget)
         return;
 
@@ -157,12 +157,16 @@ void UIWindow::Detach()
     mParent = nullptr;
 }
 
-UIWidget* UIWindow::GetTopWidget(const Vec2& pos)
+UIWidget* UIWindow::GetTopWidget(const Vec2& pos, u32 filterFlags)
 {
     for (int i = (int)mWidgetStack.Size() - 1; i >= 0; i--)
     {
         UIWidget* widget = mWidgetStack[i];
         Rect2D rect = widget->GetRect();
+        u32 flags = widget->GetFlags();
+
+        if ((flags & filterFlags) != filterFlags)
+            continue;
 
         if (rect.Contains(pos))
             return widget;

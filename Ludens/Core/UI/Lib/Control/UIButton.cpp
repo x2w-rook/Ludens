@@ -25,6 +25,7 @@ void UIButton::Startup(const UIButtonInfo& info)
     float margin = 4.0f;
     mLayout.SetMargin(margin);
 
+    mFlags |= (IS_HOVERABLE_BIT | IS_PRESSABLE_BIT);
     mLibCallback.OnPress = &UIButton::OnPress;
     mLibCallback.OnRelease = &UIButton::OnRelease;
 
@@ -63,7 +64,14 @@ View<FontGlyphExt> UIButton::GetTextGlyphs()
 
 void UIButton::GetColors(Vec4& bg, Vec4& fg) const
 {
-    bg = mBGColor;
+    float mix = 0.0f;
+    
+    if (mFlags & IS_PRESSED_BIT)
+        mix = 0.10f;
+    else if (mFlags & IS_HOVERED_BIT)
+        mix = 0.04f;
+
+    bg = Vec4::Lerp(mBGColor, mFGColor, mix);
     fg = mFGColor;
 }
 

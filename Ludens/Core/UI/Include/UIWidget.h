@@ -80,6 +80,14 @@ public:
 
     void CalculateLayout();
 
+    enum Flags
+    {
+        IS_HOVERABLE_BIT = 1,
+        IS_HOVERED_BIT = 2,
+        IS_PRESSABLE_BIT = 4,
+        IS_PRESSED_BIT = 8,
+    };
+
     /// get widget type 
     UIType GetType() const;
 
@@ -88,6 +96,12 @@ public:
 
     /// get position and size of this widget, position is relative to parent window
     Rect2D GetRect() const;
+
+    /// get widget flags 
+    inline u32 GetFlags() const
+    {
+        return mFlags;
+    }
 
     /// get the window that the widget lives in
     inline UIWindow* GetWindow() const
@@ -154,6 +168,7 @@ public:
     void OnRelease();
 
 protected:
+    u32 mFlags;
     UIType mType;
     UILayoutNode mLayout;
     UIWidgetCallback mUserCallback;

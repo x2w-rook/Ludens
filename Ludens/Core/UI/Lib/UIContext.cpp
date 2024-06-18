@@ -10,6 +10,7 @@ UIContext::~UIContext()
 void UIContext::Startup(const UIContextInfo& info)
 {
     mTheme = new UITheme();
+    mHoverWidget = nullptr;
 
     UIWindowInfo rootInfo;
     rootInfo.Context = this;
@@ -71,7 +72,23 @@ void UIContext::InputMousePosition(Vec2 pos)
 {
     mMousePos = pos;
 
-    // TODO: hot code path, widget hover
+    UIWindow* window = GetTopWindow(pos);
+
+    if (!window)
+        return;
+
+    Vec2 windowPos = window->GetWindowPos();
+    UIWidget* hover = window->GetTopWidget(mMousePos - windowPos, UIWidget::IS_HOVERABLE_BIT);
+
+    if (hover != mHoverWidget)
+    {
+        if (hover)
+            hover->OnEnter();
+        else if (mHoverWidget)
+            mHoverWidget->OnLeave();
+
+        mHoverWidget = hover;
+    }
 }
 
 void UIContext::InputMouseScroll(float& deltaX, float& deltaY)
@@ -81,34 +98,24 @@ void UIContext::InputMouseScroll(float& deltaX, float& deltaY)
 
 void UIContext::InputMouseButtonPressed(MouseButton button)
 {
-    for (int i = (int)mWindowStack.Size() - 1; i >= 0; i--)
-    {
-        UIWindow* window = mWindowStack[i];
-        Rect2D rect = window->GetRect();
+    UIWindow* window = GetTopWindow(mMousePos);
 
-        if (rect.Contains(mMousePos))
-        {
-            Vec2 windowPos = window->GetWindowPos();
-            window->InputMouseButtonPressed(button, mMousePos - windowPos);
-            break;
-        }
-    }
+    if (!window)
+        return;
+
+    Vec2 windowPos = window->GetWindowPos();
+    window->InputMouseButtonPressed(button, mMousePos - windowPos);
 }
 
 void UIContext::InputMouseButtonReleased(MouseButton button)
 {
-    for (int i = (int)mWindowStack.Size() - 1; i >= 0; i--)
-    {
-        UIWindow* window = mWindowStack[i];
-        Rect2D rect = window->GetRect();
+    UIWindow* window = GetTopWindow(mMousePos);
 
-        if (rect.Contains(mMousePos))
-        {
-            Vec2 windowPos = window->GetWindowPos();
-            window->InputMouseButtonReleased(button, mMousePos - windowPos);
-            break;
-        }
-    }
+    if (!window)
+        return;
+
+    Vec2 windowPos = window->GetWindowPos();
+    window->InputMouseButtonReleased(button, mMousePos - windowPos);
 }
 
 void UIContext::InputKeyPress(KeyCode key)
@@ -117,6 +124,20 @@ void UIContext::InputKeyPress(KeyCode key)
 
 void UIContext::InputKeyRelease(KeyCode key)
 {
+}
+
+UIWindow* UIContext::GetTopWindow(const Vec2& pos)
+{
+    for (int i = (int)mWindowStack.Size() - 1; i >= 0; i--)
+    {
+        UIWindow* window = mWindowStack[i];
+        Rect2D rect = window->GetWindowRect();
+
+        if (rect.Contains(pos))
+            return window;
+    }
+
+    return nullptr;
 }
 
 } // namespace LD

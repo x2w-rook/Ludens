@@ -206,6 +206,12 @@ public:
     /// raise the window to the top
     void Raise();
 
+    /// @brief find the top-most widget in this window
+    /// @param pos point relative to window origin (0, 0)
+    /// @param filterFlags only match widgets with *all* bits matching the filter
+    /// @return the top-most widget will all filter flags set, or nullptr
+    UIWidget* GetTopWidget(const Vec2& pos, u32 filterFlags = 0);
+
     // by default, the context forwards input events to destination window,
     // but the user can also directly inject input into a specific window.
 
@@ -218,8 +224,6 @@ private:
     void Attach(UIWindow* parent);
     void Detach();
 
-    UIWidget* GetTopWidget(const Vec2& pos);
-
     Rect2D mRect; // position and size relative to root window
     Vec4 mColor;
     UIString mDebugName;
@@ -228,7 +232,6 @@ private:
     UIWindow* mParent;      // parent window
     UIWindow* mChild;       // first child window
     UIWindow* mNext;        // next sibling window
-    UIWidget* mHoverWidget; // widget hovered by mouse cursor
 };
 
 struct UIContextInfo
@@ -268,6 +271,12 @@ public:
         return mWindowStack.GetView();
     }
 
+    /// get the widget hovered by mouse cursor, or nullptr
+    UIWidget* GetHoverWidget()
+    {
+        return mHoverWidget;
+    }
+
     void BeginFrame(DeltaTime dt);
     void EndFrame();
 
@@ -285,11 +294,14 @@ public:
     void InputKeyRelease(KeyCode key);
 
 private:
+    UIWindow* GetTopWindow(const Vec2& pos);
+
     UILogicStack<UIWindow> mWindowStack; // window stack, one per context
     UIWindow mRoot;                      // root window is provided by context
     UIWindow* mFocus;                    // window receiving key input
     UIWindow* mPress;                    // window last pressed and not released by mouse button
     UIWindow* mHoverWindow;              // window last entered and not leaved by mouse cursor
+    UIWidget* mHoverWidget;              // widget last entered and not leaved by mouse cursor
     UIWidget* mDragWidget;               // widget pressed and dragged by mouse cursor
     UIWidget* mLastAttach;               // last widget that is attached to a parent
     UIWidget* mLastDetach;               // last widget that is detached from a parent

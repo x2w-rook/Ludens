@@ -34,7 +34,6 @@ Document::Document(const DocumentInfo& info)
     labelI.Text.Content = info.Title;
     labelI.Text.Font = info.Font;
     labelI.Text.Size = 60.0f;
-    labelI.Text.Color = { 1.0f, 1.0f, 1.0f, 1.0f };
     mTitle.Startup(labelI);
 }
 

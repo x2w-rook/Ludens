@@ -23,6 +23,7 @@ void UIWidget::Startup(const UIWidgetInfo& info)
 {
     Attach(info.Parent);
 
+    mFlags = 0;
     mUserCallback = info.Callback;
 
     UILayoutNode* parentLayout = nullptr;
@@ -114,11 +115,13 @@ Rect2D UIWidget::GetRect() const
 
 void UIWidget::OnEnter()
 {
+    LD_DEBUG_ASSERT(mFlags & IS_HOVERABLE_BIT);
+
     UIContext* ctx = mWindow->GetContext();
 
+    mFlags |= IS_HOVERED_BIT;
+
     // TODO: cursor hint
-    // if (ctx->cursor_hint && widget->on_press)
-    //	ctx->cursor_hint(ctx, IG_CURSOR_PRESS);
 
     if (mLibCallback.OnEnter)
         mLibCallback.OnEnter(ctx, this);
@@ -129,7 +132,11 @@ void UIWidget::OnEnter()
 
 void UIWidget::OnLeave()
 {
+    LD_DEBUG_ASSERT(mFlags & IS_HOVERABLE_BIT);
+
     UIContext* ctx = mWindow->GetContext();
+
+    mFlags &= ~IS_HOVERED_BIT;
 
     // TODO: cursor hint
 
@@ -142,7 +149,11 @@ void UIWidget::OnLeave()
 
 void UIWidget::OnPress()
 {
+    LD_DEBUG_ASSERT(mFlags & IS_PRESSABLE_BIT);
+
     UIContext* ctx = mWindow->GetContext();
+
+    mFlags |= IS_PRESSED_BIT;
 
     if (mLibCallback.OnPress)
         mLibCallback.OnPress(ctx, this);
@@ -150,13 +161,16 @@ void UIWidget::OnPress()
     if (mUserCallback.OnPress)
         mUserCallback.OnPress(ctx, this);
 
-    // if (widget->on_drag)
-    //	widget_drag_begin(widget);
+    // TODO: widget drag
 }
 
 void UIWidget::OnRelease()
 {
+    LD_DEBUG_ASSERT(mFlags & IS_PRESSABLE_BIT);
+
     UIContext* ctx = mWindow->GetContext();
+
+    mFlags &= ~IS_PRESSED_BIT;
 
     if (mLibCallback.OnRelease)
         mLibCallback.OnRelease(ctx, this);
