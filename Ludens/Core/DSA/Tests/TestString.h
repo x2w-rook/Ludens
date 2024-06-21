@@ -89,4 +89,26 @@ TEST_CASE("String operator+=")
 
     s2 += "bar";
     CHECK(s2 == "barbarbar");
+
+    // append char type
+    s1 += 'b';
+    CHECK(s1 == "barbarb");
+
+    s1 += 1 + (int)'0';
+    CHECK(s1 == "barbarb1");
+}
+
+TEST_CASE("String CStr")
+{
+    String s1("cstr");
+    const char* cstr = s1.CStr();
+    size_t len = strlen(cstr);
+
+    // temporarily appends null, but size should not change
+    CHECK(s1.Size() == 4);
+    CHECK(len == 4);
+
+    // do not access cstr anymore
+    s1 += "!";
+    CHECK(s1 == "cstr!");
 }

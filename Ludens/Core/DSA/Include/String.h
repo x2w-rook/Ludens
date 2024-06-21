@@ -151,6 +151,17 @@ public:
         return mSize == 0;
     }
 
+    /// get a null terminated string that is valid until the next
+    /// non-const member function is called
+    inline const TChar* CStr()
+    {
+        if (mSize == mCapacity)
+            GrowCapacity(mCapacity + 1);
+
+        mBase[mSize] = '\0';
+        return mBase;
+    }
+
     const TChar& operator[](int idx) const
     {
         return mBase[idx];
@@ -239,6 +250,16 @@ public:
     TString& operator+=(const char* cstr)
     {
         return *this = *this + cstr;
+    }
+
+    /// append a character 
+    TString& operator+=(TChar c)
+    {
+        if (mSize == mCapacity)
+            GrowCapacity(mCapacity + 1);
+
+        mBase[mSize++] = c;
+        return *this;
     }
 
 private:
