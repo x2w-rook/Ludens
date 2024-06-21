@@ -4,8 +4,9 @@
 
 namespace LD {
 
-struct UIPanelInfo : UIWidgetInfo
+struct UIPanelInfo
 {
+    UIWidgetInfo Widget;
     Vec4 Color;
 };
 
@@ -20,6 +21,9 @@ public:
 
     void Startup(const UIPanelInfo& info);
     void Cleanup();
+
+    Vec4 GetColor() const;
+    void SetColor(const Vec4& color);
 
 private:
     Vec4 mColor;

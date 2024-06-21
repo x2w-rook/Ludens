@@ -14,6 +14,8 @@ UIButton::~UIButton()
 
 void UIButton::Startup(const UIButtonInfo& info)
 {
+    LD_DEBUG_ASSERT(info.Text.Font && info.Text.Size > 0.0f);
+
     UIWidget::Startup(info.Widget);
     UIContext* ctx = mWindow->GetContext();
     UITheme* theme = ctx->GetTheme();
