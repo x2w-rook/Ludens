@@ -27,6 +27,8 @@ public:
     virtual Rect2D AdjustedRect(const Rect2D&) override;
 
 private:
+    static void OnScroll(UIContext* ctx, UIWidget* widget, float dx, float dy);
+
     float mScroll;            // scroll offset on the main axis
     UILayoutNode mLayoutRoot; // root layout node that contains child widgets
 };

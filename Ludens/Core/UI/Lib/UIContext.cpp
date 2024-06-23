@@ -99,7 +99,13 @@ void UIContext::InputMousePosition(Vec2 pos)
 
 void UIContext::InputMouseScroll(float& deltaX, float& deltaY)
 {
-    // TODO: focus widget takes the scroll
+    UIWindow* window = GetTopWindow(mMousePos);
+
+    if (!window)
+        return;
+
+    Vec2 windowPos = window->GetWindowPos();
+    window->InputMouseScroll(mMousePos - windowPos, deltaX, deltaY);
 }
 
 void UIContext::InputMouseButtonPressed(MouseButton button)
@@ -110,7 +116,7 @@ void UIContext::InputMouseButtonPressed(MouseButton button)
         return;
 
     Vec2 windowPos = window->GetWindowPos();
-    window->InputMouseButtonPressed(button, mMousePos - windowPos);
+    window->InputMouseButtonPressed(mMousePos - windowPos, button);
 }
 
 void UIContext::InputMouseButtonReleased(MouseButton button)
@@ -121,7 +127,7 @@ void UIContext::InputMouseButtonReleased(MouseButton button)
         return;
 
     Vec2 windowPos = window->GetWindowPos();
-    window->InputMouseButtonReleased(button, mMousePos - windowPos);
+    window->InputMouseButtonReleased(mMousePos - windowPos, button);
 }
 
 void UIContext::InputKeyPress(KeyCode key)

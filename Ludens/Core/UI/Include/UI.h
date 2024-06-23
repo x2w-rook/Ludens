@@ -147,8 +147,9 @@ public:
     // by default, the context forwards input events to destination window,
     // but the user can also directly inject input into a specific window.
 
-    void InputMouseButtonPressed(MouseButton button, const Vec2& pos);
-    void InputMouseButtonReleased(MouseButton button, const Vec2& pos);
+    void InputMouseScroll(const Vec2& pos, float dx, float dy);
+    void InputMouseButtonPressed(const Vec2& pos, MouseButton button);
+    void InputMouseButtonReleased(const Vec2& pos, MouseButton button);
     void InputKeyPress(KeyCode key);
     void InputKeyRelease(KeyCode key);
 

@@ -96,7 +96,18 @@ void UIWindow::Raise()
     mContext->RaiseWindow(this);
 }
 
-void UIWindow::InputMouseButtonPressed(MouseButton button, const Vec2& pos)
+void UIWindow::InputMouseScroll(const Vec2& pos, float dx, float dy)
+{
+    auto filter = [](UIWidget* widget) -> bool { return widget->GetFlags() & UIWidget::IS_SCROLLABLE_BIT; };
+    UIWidget* widget = GetTopWidget(pos, filter);
+
+    if (!widget)
+        return;
+
+    widget->OnScroll(dx, dy);
+}
+
+void UIWindow::InputMouseButtonPressed(const Vec2& pos, MouseButton button)
 {
     auto filter = [](UIWidget* widget) -> bool { return widget->GetFlags() & UIWidget::IS_PRESSABLE_BIT; };
     UIWidget* widget = GetTopWidget(pos, filter);
@@ -107,7 +118,7 @@ void UIWindow::InputMouseButtonPressed(MouseButton button, const Vec2& pos)
     widget->OnPress();
 }
 
-void UIWindow::InputMouseButtonReleased(MouseButton button, const Vec2& pos)
+void UIWindow::InputMouseButtonReleased(const Vec2& pos, MouseButton button)
 {
     auto filter = [](UIWidget* widget) -> bool { return widget->GetFlags() & UIWidget::IS_PRESSABLE_BIT; };
     UIWidget* widget = GetTopWidget(pos, filter);

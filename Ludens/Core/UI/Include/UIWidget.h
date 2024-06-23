@@ -46,6 +46,7 @@ class UITexture;
 using UIWidgetOnEnter = void (*)(UIContext*, UIWidget*);
 using UIWidgetOnLeave = void (*)(UIContext*, UIWidget*);
 using UIWidgetOnPress = void (*)(UIContext*, UIWidget*);
+using UIWidgetOnScroll = void (*)(UIContext*, UIWidget*, float, float);
 using UIWidgetOnRelease = void (*)(UIContext*, UIWidget*);
 
 struct UIWidgetCallback
@@ -53,6 +54,7 @@ struct UIWidgetCallback
     UIWidgetOnEnter OnEnter = nullptr;
     UIWidgetOnLeave OnLeave = nullptr;
     UIWidgetOnPress OnPress = nullptr;
+    UIWidgetOnScroll OnScroll = nullptr;
     UIWidgetOnRelease OnRelease = nullptr;
 
     void Reset()
@@ -60,6 +62,7 @@ struct UIWidgetCallback
         OnEnter = nullptr;
         OnLeave = nullptr;
         OnPress = nullptr;
+        OnScroll = nullptr;
         OnRelease = nullptr;
     }
 };
@@ -98,6 +101,7 @@ public:
         IS_HOVERED_BIT = 1 << 2,
         IS_PRESSABLE_BIT = 1 << 3,
         IS_PRESSED_BIT = 1 << 4,
+        IS_SCROLLABLE_BIT = 1 << 5,
     };
 
     /// get widget type
@@ -182,6 +186,7 @@ public:
     void OnEnter();
     void OnLeave();
     void OnPress();
+    void OnScroll(float dx, float dy);
     void OnRelease();
 
 protected:

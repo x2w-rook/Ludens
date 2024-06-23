@@ -6,6 +6,7 @@ namespace LD
 
 UIScroll::UIScroll() : UIContainerWidget(UIType::Scroll), mScroll(0.0f)
 {
+    mFlags |= UIWidget::IS_SCROLLABLE_BIT;
 }
 
 UIScroll::~UIScroll()
@@ -19,6 +20,8 @@ void UIScroll::Startup(const UIScrollInfo& info)
     widgetI.FlexGrow = 1.0f;
     UIWidget::Startup(widgetI);
 
+    mLibCallback.OnScroll = &UIScroll::OnScroll;
+
     // scroll container uses two layout nodes, the UIWidget::mLayout node is only
     // used to calculate visible scroll dimension. Another layout node is used
     // as the parent for widgets in the scroll container
@@ -27,7 +30,7 @@ void UIScroll::Startup(const UIScrollInfo& info)
     layoutI.Parent = nullptr;
     layoutI.FlexGrow = 1.0f;
     layoutI.FlexDirection = UIFlexDirection::Column; // TODO: flex row and horizontal scroll
-    
+
     mLayoutRoot.Startup(layoutI);
     ctx->AddLayoutRoot(&mLayoutRoot);
 }
@@ -48,7 +51,7 @@ float UIScroll::GetScroll() const
 
 void UIScroll::SetScroll(float value)
 {
-    mScroll = value;
+    mScroll = std::max(0.0f, value);
 }
 
 UILayoutNode* UIScroll::GetLayoutRoot()
@@ -63,6 +66,15 @@ Rect2D UIScroll::AdjustedRect(const Rect2D& rect)
     scrolled.y -= mScroll;
 
     return scrolled;
+}
+
+void UIScroll::OnScroll(UIContext* ctx, UIWidget* widget, float dx, float dy)
+{
+    // TODO: animate widget properties for smooth scrolling over time
+    UIScroll* scroll = (UIScroll*)widget;
+
+    float sc = scroll->GetScroll();
+    scroll->SetScroll(sc - dy * 3.0f);
 }
 
 } // namespace LD

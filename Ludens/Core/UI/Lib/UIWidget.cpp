@@ -187,6 +187,19 @@ void UIWidget::OnPress()
     // TODO: widget drag
 }
 
+void UIWidget::OnScroll(float dx, float dy)
+{
+    LD_DEBUG_ASSERT(mFlags & IS_SCROLLABLE_BIT);
+
+    UIContext* ctx = mWindow->GetContext();
+
+    if (mLibCallback.OnScroll)
+        mLibCallback.OnScroll(ctx, this, dx, dy);
+
+    if (mUserCallback.OnScroll)
+        mUserCallback.OnScroll(ctx, this, dx, dy);
+}
+
 void UIWidget::OnRelease()
 {
     LD_DEBUG_ASSERT(mFlags & IS_PRESSABLE_BIT);
@@ -341,10 +354,13 @@ UIWidget* UIContainerWidget::GetTopWidget(const Vec2& pos, bool (*filter)(UIWidg
         }
 
         // apply filter on non-container leaf widget
-        return filter(widget) ? widget : nullptr;
+        if (filter(widget))
+            return widget;
+        
     }
 
-    return nullptr;
+    // apply filter on self
+    return filter(this) ? this : nullptr;
 }
 
 } // namespace LD
