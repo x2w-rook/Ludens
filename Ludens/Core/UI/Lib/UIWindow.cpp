@@ -4,7 +4,7 @@
 namespace LD
 {
 
-UIWindow::UIWindow() : UIWidget(UIType::Window)
+UIWindow::UIWindow() : UIContainerWidget(UIType::Window)
 {
 }
 
@@ -61,7 +61,6 @@ void UIWindow::SetWindowPos(const Vec2& pos)
     mRect.y = pos.y;
 }
 
-
 Vec2 UIWindow::GetWindowSize() const
 {
     return { mRect.w, mRect.h };
@@ -99,7 +98,8 @@ void UIWindow::Raise()
 
 void UIWindow::InputMouseButtonPressed(MouseButton button, const Vec2& pos)
 {
-    UIWidget* widget = GetTopWidget(pos, UIWidget::IS_PRESSABLE_BIT);
+    auto filter = [](UIWidget* widget) -> bool { return widget->GetFlags() & UIWidget::IS_PRESSABLE_BIT; };
+    UIWidget* widget = GetTopWidget(pos, filter);
 
     if (!widget)
         return;
@@ -109,7 +109,9 @@ void UIWindow::InputMouseButtonPressed(MouseButton button, const Vec2& pos)
 
 void UIWindow::InputMouseButtonReleased(MouseButton button, const Vec2& pos)
 {
-    UIWidget* widget = GetTopWidget(pos, UIWidget::IS_PRESSABLE_BIT);
+    auto filter = [](UIWidget* widget) -> bool { return widget->GetFlags() & UIWidget::IS_PRESSABLE_BIT; };
+    UIWidget* widget = GetTopWidget(pos, filter);
+
     if (!widget)
         return;
 
@@ -155,24 +157,6 @@ void UIWindow::Detach()
     LD_DEBUG_ASSERT(*w != nullptr);
     *w = (*w)->mNext;
     mParent = nullptr;
-}
-
-UIWidget* UIWindow::GetTopWidget(const Vec2& pos, u32 filterFlags)
-{
-    for (int i = (int)mWidgetStack.Size() - 1; i >= 0; i--)
-    {
-        UIWidget* widget = mWidgetStack[i];
-        Rect2D rect = widget->GetRect();
-        u32 flags = widget->GetFlags();
-
-        if ((flags & filterFlags) != filterFlags)
-            continue;
-
-        if (rect.Contains(pos))
-            return widget;
-    }
-
-    return nullptr;
 }
 
 } // namespace LD

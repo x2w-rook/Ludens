@@ -1,9 +1,30 @@
 #include "Core/UI/Include/UI.h"
 #include "Core/UI/Include/UIWidget.h"
 #include "Core/UI/Include/Control/Control.h"
+#include "Core/UI/Include/Container/Container.h"
 
 namespace LD
 {
+
+#define CASE(TYPE)                                                                                                     \
+    case UIType::TYPE:                                                                                                 \
+        return "UI" #TYPE;
+
+String UITypeString(UIType type)
+{
+    switch (type)
+    {
+        CASE(Window)
+        CASE(Scroll)
+        CASE(Panel)
+        CASE(Label)
+        CASE(Button)
+        CASE(Texture)
+    }
+
+    LD_DEBUG_UNREACHABLE;
+}
+#undef CASE
 
 float UIText::GetGlyphScale() const
 {
@@ -11,28 +32,29 @@ float UIText::GetGlyphScale() const
     return Size / Font->GetTTF()->GetPixelSize();
 }
 
-UIWidget::UIWidget(UIType type) : mType(type), mNext(nullptr), mParent(nullptr), mChild(nullptr), mIsAlive(false)
+UIWidget::UIWidget(UIType type) : mType(type), mFlags(0), mNext(nullptr), mParent(nullptr), mChild(nullptr), mHasStartup(false)
 {
 }
 
 UIWidget::~UIWidget()
 {
+    LD_DEBUG_ASSERT(!mHasStartup);
 }
 
 void UIWidget::Startup(const UIWidgetInfo& info)
 {
+    LD_DEBUG_ASSERT(!mHasStartup);
+
     Attach(info.Parent);
 
-    mFlags = 0;
     mUserCallback = info.Callback;
 
     UILayoutNode* parentLayout = nullptr;
 
-    if (info.Parent && mType != UIType::Window)
+    if (info.Parent && info.Parent->mType == UIType::Scroll)
+        parentLayout = static_cast<UIScroll*>(info.Parent)->GetLayoutRoot();
+    else if (info.Parent && mType != UIType::Window)
         parentLayout = &info.Parent->mLayout;
-
-    LD_DEBUG_ASSERT(!(info.FlexDirection == UIFlexDirection::Row && info.Width == 0.0f && info.FlexGrow == 0.0f));
-    LD_DEBUG_ASSERT(!(info.FlexDirection == UIFlexDirection::Column && info.Height == 0.0f && info.FlexGrow == 0.0f));
 
     UILayoutNodeInfo layoutInfo;
     layoutInfo.Parent = parentLayout;
@@ -42,13 +64,15 @@ void UIWidget::Startup(const UIWidgetInfo& info)
     layoutInfo.FlexGrow = info.FlexGrow;
     mLayout.Startup(layoutInfo);
 
-    mIsAlive = true;
+    mHasStartup = true;
 }
 
 void UIWidget::Cleanup()
 {
-    if (!mIsAlive)
+    if (!mHasStartup)
         return;
+
+    mHasStartup = false;
 
     // NOTE: child Detach() modifies the mChild linked list,
     //       hence the while loop instead of for loop iteration
@@ -57,7 +81,6 @@ void UIWidget::Cleanup()
         CleanupRecursive(mChild);
     }
 
-    mIsAlive = false;
     mLayout.Cleanup();
 
     Detach();
@@ -196,6 +219,9 @@ void UIWidget::CleanupRecursive(UIWidget* widget)
     case UIType::Texture:
         static_cast<UITexture*>(widget)->Cleanup();
         break;
+    case UIType::Scroll:
+        static_cast<UIScroll*>(widget)->Cleanup();
+        break;
     default:
         LD_DEBUG_UNREACHABLE;
     }
@@ -205,17 +231,24 @@ void UIWidget::Attach(UIWidget* parent)
 {
     if (!parent) // window widget
     {
+        LD_DEBUG_ASSERT(mType == UIType::Window);
+
         mWindow = (UIWindow*)this;
         mParent = mNext = mChild = nullptr;
+        mContainer = (UIContainerWidget*)this;
         return;
     }
 
+    // attach to parent and window
     mWindow = parent->mWindow;
-    mWindow->mWidgetStack.PushTop(this);
-
     mParent = parent;
     mNext = parent->mChild;
     parent->mChild = this;
+
+    // attach to container
+    bool parentIsContainer = (parent->GetFlags() & UIWidget::IS_CONTAINER_BIT);
+    mContainer = parentIsContainer ? (UIContainerWidget*)parent : parent->mContainer;
+    mContainer->AddToContainer(this);
 }
 
 void UIWidget::Detach()
@@ -226,15 +259,92 @@ void UIWidget::Detach()
         return;
     }
 
-    mWindow->mWidgetStack.Remove(this);
+    // detach from container
+    mContainer->RemoveFromContainer(this);
+    mContainer = nullptr;
 
+    // detach from parent and window
     UIWidget** w;
     for (w = &mParent->mChild; *w && *w != this; w = &((*w)->mNext))
         ;
+
     LD_DEBUG_ASSERT(*w != nullptr);
 
     *w = (*w)->mNext;
     mParent = nullptr;
+    mWindow = nullptr;
+}
+
+UIContainerWidget::UIContainerWidget(UIType type) : UIWidget(type)
+{
+    mFlags |= UIWidget::IS_CONTAINER_BIT;
+}
+
+void UIContainerWidget::AddToContainer(UIWidget* widget)
+{
+    mWidgetStack.PushTop(widget);
+}
+
+void UIContainerWidget::RemoveFromContainer(UIWidget* widget)
+{
+    mWidgetStack.Remove(widget);
+}
+
+void UIContainerWidget::Debug(String& str)
+{
+    Debug(str, 0);
+}
+
+void UIContainerWidget::Debug(String& str, int indent)
+{
+    for (int i = 0; i < indent; i++)
+        str += " ";
+
+    str += UITypeString(mType);
+    str += "\n";
+
+    indent += 2;
+
+    for (UIWidget* widget : GetWidgets())
+    {
+        if (widget->GetFlags() & UIWidget::IS_CONTAINER_BIT)
+        {
+           static_cast<UIContainerWidget*>(widget)->Debug(str, indent);
+        }
+        else
+        {
+            for (int i = 0; i < indent; i++)
+                str += " ";
+
+            str += UITypeString(widget->GetType());
+            str += "\n";
+        }
+    }
+}
+
+UIWidget* UIContainerWidget::GetTopWidget(const Vec2& pos, bool (*filter)(UIWidget*))
+{
+    for (int i = (int)mWidgetStack.Size() - 1; i >= 0; i--)
+    {
+        UIWidget* widget = mWidgetStack[i];
+        Rect2D rect = AdjustedRect(widget->GetRect());
+        u32 flags = widget->GetFlags();
+
+        if (!rect.Contains(pos))
+            continue;
+
+        // recursive container search
+        if (flags & UIWidget::IS_CONTAINER_BIT)
+        {
+            Vec2 localPos = pos - rect.Min();
+            return static_cast<UIContainerWidget*>(widget)->GetTopWidget(localPos, filter);
+        }
+
+        // apply filter on non-container leaf widget
+        return filter(widget) ? widget : nullptr;
+    }
+
+    return nullptr;
 }
 
 } // namespace LD

@@ -6,16 +6,16 @@
 #include "Core/RenderService/Include/RenderService.h"
 #include "Core/RenderService/Lib/RenderContext.h"
 #include "Core/RenderService/Lib/RenderUI.h"
-#include "Core/UI/Include/Control/UILabel.h"
-#include "Core/UI/Include/Control/UIPanel.h"
-#include "Core/UI/Include/Control/UIButton.h"
-#include "Core/UI/Include/Control/UITexture.h"
+#include "Core/UI/Include/Control/Control.h"
+#include "Core/UI/Include/Container/Container.h"
 
 namespace LD
 {
 
 static void RenderUIWindow(RenderContext* ctx, UIWindow* window);
 static void RenderUIWidget(RenderContext* ctx, const Rect2D& rect, UIWidget* widget);
+static void RenderUIContainer(RenderContext* ctx, const Rect2D& rect, UIContainerWidget* widget);
+static void RenderUIScroll(RenderContext* ctx, const Rect2D& rect, UIScroll* scroll);
 static void RenderUILabel(RenderContext* ctx, const Rect2D& rect, UILabel* label);
 static void RenderUIPanel(RenderContext* ctx, const Rect2D& rect, UIPanel* panel);
 static void RenderUITexture(RenderContext* ctx, const Rect2D& rect, UITexture* texture);
@@ -41,7 +41,8 @@ static void RenderUIWindow(RenderContext* ctx, UIWindow* window)
     Vec4 borderColor = Vec4::Lerp(windowColor, { 1.0f, 1.0f, 1.0f, windowColor.a }, 0.5f);
     batch.AddRectOutline(windowRect, borderColor, border);
 
-    for (UIWidget* widget = window->GetChildren(); widget; widget = widget->GetNext())
+    // render direct child of window
+    for (UIWidget* widget : window->GetWidgets())
     {
         Rect2D rect = widget->GetRect();
         rect.x += windowRect.x;
@@ -52,6 +53,13 @@ static void RenderUIWindow(RenderContext* ctx, UIWindow* window)
 
 static void RenderUIWidget(RenderContext* ctx, const Rect2D& rect, UIWidget* widget)
 {
+    if (widget->GetFlags() & UIWidget::IS_CONTAINER_BIT)
+    {
+        UIContainerWidget* container = static_cast<UIContainerWidget*>(widget);
+        RenderUIContainer(ctx, rect, container);
+        return;
+    }
+
     UIType type = widget->GetType();
     switch (type)
     {
@@ -67,19 +75,46 @@ static void RenderUIWidget(RenderContext* ctx, const Rect2D& rect, UIWidget* wid
     case UIType::Texture:
         RenderUITexture(ctx, rect, (UITexture*)widget);
         break;
+    default:
+        LD_DEBUG_UNREACHABLE;
     }
+}
+
+static void RenderUIContainer(RenderContext* ctx, const Rect2D& rect, UIContainerWidget* container)
+{
+    UIType type = container->GetType();
+
+    switch (type)
+    {
+    case UIType::Scroll:
+        RenderUIScroll(ctx, rect, (UIScroll*)container);
+        break;
+    default:
+        LD_DEBUG_UNREACHABLE;
+    }
+
+    for (UIWidget* widget : container->GetWidgets())
+    {
+        Rect2D widgetRect = container->AdjustedRect(widget->GetRect());
+        widgetRect.x += rect.x;
+        widgetRect.y += rect.y;
+        RenderUIWidget(ctx, widgetRect, widget);
+    }
+}
+
+static void RenderUIScroll(RenderContext* ctx, const Rect2D& rect, UIScroll* scroll)
+{
+    RectBatch& batch = ctx->DefaultRectBatch;
+
+    Vec4 color = Hex(0xCC2222FF);
+    batch.AddRectFilled(rect, color);
 }
 
 static void RenderUIPanel(RenderContext* ctx, const Rect2D& rect, UIPanel* panel)
 {
-    for (UIWidget* widget = panel->GetChildren(); widget; widget = widget->GetNext())
-    {
-        Vec2 widgetPos = widget->GetPos();
-        Rect2D widgetRect = rect;
-        widgetRect.x += widgetPos.x;
-        widgetRect.y += widgetPos.y;
-        RenderUIWidget(ctx, widgetRect, widget);
-    }
+    RectBatch& batch = ctx->DefaultRectBatch;
+
+    batch.AddRectFilled(rect, panel->GetColor());
 }
 
 static void RenderUILabel(RenderContext* ctx, const Rect2D& rect, UILabel* label)
@@ -129,7 +164,7 @@ static void RenderUIButton(RenderContext* ctx, const Rect2D& rect, UIButton* but
 
     for (const FontGlyphExt& glyphExt : glyphsExts)
     {
-        ctx->DefaultRectBatch.AddGlyph(cursor + glyphExt.Offset, glyphExt, scale, fgColor, 1);
+        batch.AddGlyph(cursor + glyphExt.Offset, glyphExt, scale, fgColor, 1);
     }
 }
 

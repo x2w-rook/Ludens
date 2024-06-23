@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <unordered_set>
 #include "Core/OS/Include/Time.h"
 #include "Core/Math/Include/Rect2D.h"
 #include "Core/Math/Include/Vec2.h"
@@ -12,6 +13,7 @@
 #include "Core/Application/Include/Input.h"
 #include "Core/Media/Include/Font.h"
 #include "Core/UI/Include/UILayout.h"
+#include "Core/UI/Include/UILogicStack.h"
 #include "Core/UI/Include/UIWidget.h"
 #include "Core/UI/Include/UITheme.h"
 
@@ -76,61 +78,6 @@ struct UIText
     float GetGlyphScale() const;
 };
 
-/// stack of pointers for logic ordering,
-/// input events are passed from stack top to bottom
-/// while items are rendered from stack bottom to top
-template <typename T>
-class UILogicStack
-{
-public:
-    void PushTop(T* item)
-    {
-        mItems.PushBack(item);
-    }
-
-    void Remove(T* item)
-    {
-        size_t i;
-        size_t count = mItems.Size();
-
-        for (i = 0; i < count && mItems[i] != item; i++)
-            ;
-
-        if (i >= count)
-            return;
-
-        for (; i + 1 < count; i++)
-            mItems[i] = mItems[i + 1];
-
-        mItems.Resize(count - 1);
-    }
-
-    inline const T* operator[](int idx) const
-    {
-        LD_DEBUG_ASSERT(0 <= idx && idx < mItems.Size());
-        return mItems[idx];
-    }
-
-    inline T* operator[](int idx)
-    {
-        LD_DEBUG_ASSERT(0 <= idx && idx < mItems.Size());
-        return mItems[idx];
-    }
-
-    View<T*> GetView() const
-    {
-        return { mItems.Size(), mItems.Begin() };
-    }
-
-    size_t Size() const
-    {
-        return mItems.Size();
-    }
-
-private:
-    Vector<T*> mItems;
-};
-
 struct UIWindowInfo
 {
     UIContext* Context;
@@ -144,10 +91,8 @@ struct UIWindowInfo
     Rect2D Rect;
 };
 
-class UIWindow : public UIWidget
+class UIWindow : public UIContainerWidget
 {
-    friend class UIWidget;
-
 public:
     UIWindow();
     UIWindow(const UIWindow&) = delete;
@@ -161,13 +106,6 @@ public:
     UIContext* GetContext()
     {
         return mContext;
-    }
-
-    /// get a view to all the widgets in the window, from bottom to top.
-    /// the view is invalidated whenever widget ordering changes.
-    View<UIWidget*> GetWidgets()
-    {
-        return mWidgetStack.GetView();
     }
 
     /// get first child window
@@ -206,12 +144,6 @@ public:
     /// raise the window to the top
     void Raise();
 
-    /// @brief find the top-most widget in this window
-    /// @param pos point relative to window origin (0, 0)
-    /// @param filterFlags only match widgets with *all* bits matching the filter
-    /// @return the top-most widget will all filter flags set, or nullptr
-    UIWidget* GetTopWidget(const Vec2& pos, u32 filterFlags = 0);
-
     // by default, the context forwards input events to destination window,
     // but the user can also directly inject input into a specific window.
 
@@ -227,7 +159,6 @@ private:
     Rect2D mRect; // position and size relative to root window
     Vec4 mColor;
     UIString mDebugName;
-    UILogicStack<UIWidget> mWidgetStack; // widget stack, one per window
     UIContext* mContext = nullptr;
     UIWindow* mParent;      // parent window
     UIWindow* mChild;       // first child window
@@ -293,9 +224,13 @@ public:
     void InputKeyPress(KeyCode key);
     void InputKeyRelease(KeyCode key);
 
+    void AddLayoutRoot(UILayoutNode* root);
+    void RemoveLayoutRoot(UILayoutNode* root);
+
 private:
     UIWindow* GetTopWindow(const Vec2& pos);
 
+    std::unordered_set<UILayoutNode*> mLayoutRoots;
     UILogicStack<UIWindow> mWindowStack; // window stack, one per context
     UIWindow mRoot;                      // root window is provided by context
     UIWindow* mFocus;                    // window receiving key input

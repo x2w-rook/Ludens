@@ -8,10 +8,13 @@
 #include "Core/OS/Include/Memory.h"
 #include "Core/OS/Include/UID.h"
 #include "Core/UI/Include/UILayout.h"
+#include "Core/UI/Include/UILogicStack.h"
 
-namespace LD {
+namespace LD
+{
 
 class UIWidget;
+class UIContainerWidget;
 class UIWindow;
 class UIContext;
 class UIFont;
@@ -22,12 +25,18 @@ using UIString = String;
 
 enum class UIType
 {
+    // container widgets
     Window = 0,
+    Scroll,
+
+    // control widgets
     Panel,
     Label,
     Button,
     Texture,
 };
+
+String UITypeString(UIType);
 
 class UIPanel;
 class UILabel;
@@ -67,6 +76,8 @@ struct UIWidgetInfo
 
 class UIWidget
 {
+    friend class UIContext;
+
 public:
     UIWidget() = delete;
     UIWidget(UIType type);
@@ -82,22 +93,23 @@ public:
 
     enum Flags
     {
-        IS_HOVERABLE_BIT = 1,
-        IS_HOVERED_BIT = 2,
-        IS_PRESSABLE_BIT = 4,
-        IS_PRESSED_BIT = 8,
+        IS_CONTAINER_BIT = 1 << 0,
+        IS_HOVERABLE_BIT = 1 << 1,
+        IS_HOVERED_BIT = 1 << 2,
+        IS_PRESSABLE_BIT = 1 << 3,
+        IS_PRESSED_BIT = 1 << 4,
     };
 
-    /// get widget type 
+    /// get widget type
     UIType GetType() const;
 
     /// get position relative to parent window
     Vec2 GetPos() const;
 
-    /// get position and size of this widget, position is relative to parent window
+    /// get position and size of this widget, position is relative to parent container
     Rect2D GetRect() const;
 
-    /// get widget flags 
+    /// get widget flags
     inline u32 GetFlags() const
     {
         return mFlags;
@@ -162,6 +174,11 @@ public:
         SetMargin(margin, UIEdge::Bottom);
     }
 
+    UILayoutNode* GetLayout()
+    {
+        return &mLayout;
+    }
+
     void OnEnter();
     void OnLeave();
     void OnPress();
@@ -173,17 +190,57 @@ protected:
     UILayoutNode mLayout;
     UIWidgetCallback mUserCallback;
     UIWidgetCallback mLibCallback;
-    UIWindow* mWindow; // the window this widget lives in
-    UIWidget* mParent; // parent widget
-    UIWidget* mChild;  // first child widget
-    UIWidget* mNext;   // next sibling widget
+    UIContainerWidget* mContainer; // first ancestor widget that is a container
+    UIWindow* mWindow;             // the window this widget lives in
+    UIWidget* mParent;             // parent widget
+    UIWidget* mChild;              // first child widget
+    UIWidget* mNext;               // next sibling widget
 
 private:
     void CleanupRecursive(UIWidget* widget);
     void Attach(UIWidget* parent);
     void Detach();
 
-    bool mIsAlive;
+    bool mHasStartup;
+};
+
+class UIContainerWidget : public UIWidget
+{
+public:
+    UIContainerWidget(UIType type);
+    virtual ~UIContainerWidget() = default;
+
+    void AddToContainer(UIWidget* widget);
+    void RemoveFromContainer(UIWidget* widget);
+
+    /// @brief find the top-most widget in this container
+    /// @param pos point relative to container origin (0, 0)
+    /// @param filter a predicate function to filter the widgets in container
+    /// @return the top-most widget will all filter flags set, or nullptr
+    UIWidget* GetTopWidget(const Vec2& pos, bool (*filter)(UIWidget*));
+
+    /// get a view to all the widgets in the container, from bottom to top.
+    /// the view is invalidated whenever widget ordering changes.
+    View<UIWidget*> GetWidgets()
+    {
+        return mWidgetStack.GetView();
+    }
+
+    void Debug(String& str);
+
+    /// @brief the container may adjust the rect of the contained widgets
+    /// @param rect original widget rect relative to this container
+    /// @return rect after the container applies offset or scaling
+    /// @see UIScroll container, which overrides this function
+    virtual Rect2D AdjustedRect(const Rect2D& rect)
+    {
+        return rect;
+    }
+
+protected:
+    void Debug(String& str, int indent);
+
+    UILogicStack<UIWidget> mWidgetStack; // widgets in this container
 };
 
 } // namespace LD

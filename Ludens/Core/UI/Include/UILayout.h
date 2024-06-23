@@ -42,8 +42,6 @@ struct UILayoutNodeInfo
 
 class UILayoutNode
 {
-    friend class UILayout;
-
 public:
     UILayoutNode();
     UILayoutNode(const UILayoutNode&) = delete;

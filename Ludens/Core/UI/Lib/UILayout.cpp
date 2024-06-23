@@ -15,6 +15,8 @@ UILayoutNode::~UILayoutNode()
 
 void UILayoutNode::Startup(const UILayoutNodeInfo& info)
 {
+    LD_DEBUG_ASSERT(mNode == nullptr);
+
     mNode = YGNodeNew();
     mChildCount = 0;
     

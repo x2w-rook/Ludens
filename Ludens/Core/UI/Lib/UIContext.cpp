@@ -1,10 +1,12 @@
 #include "Core/UI/Include/UI.h"
 
-namespace LD {
+namespace LD
+{
 
 UIContext::~UIContext()
 {
     LD_DEBUG_ASSERT(mWindowStack.Size() == 0);
+    LD_DEBUG_ASSERT(mLayoutRoots.size() == 0);
 }
 
 void UIContext::Startup(const UIContextInfo& info)
@@ -55,6 +57,9 @@ void UIContext::BeginFrame(DeltaTime dt)
         UIWindow* window = mWindowStack[i];
         window->CalculateLayout();
     }
+
+    for (UILayoutNode* layoutRoot : mLayoutRoots)
+        layoutRoot->CalculateLayout();
 }
 
 void UIContext::EndFrame()
@@ -77,8 +82,9 @@ void UIContext::InputMousePosition(Vec2 pos)
     if (!window)
         return;
 
+    auto filter = [](UIWidget* widget) -> bool { return widget->GetFlags() & UIWidget::IS_HOVERABLE_BIT; };
     Vec2 windowPos = window->GetWindowPos();
-    UIWidget* hover = window->GetTopWidget(mMousePos - windowPos, UIWidget::IS_HOVERABLE_BIT);
+    UIWidget* hover = window->GetTopWidget(mMousePos - windowPos, filter);
 
     if (hover != mHoverWidget)
     {
@@ -124,6 +130,20 @@ void UIContext::InputKeyPress(KeyCode key)
 
 void UIContext::InputKeyRelease(KeyCode key)
 {
+}
+
+void UIContext::AddLayoutRoot(UILayoutNode* root)
+{
+    LD_DEBUG_ASSERT(mLayoutRoots.find(root) == mLayoutRoots.end());
+
+    mLayoutRoots.insert(root);
+}
+
+void UIContext::RemoveLayoutRoot(UILayoutNode* root)
+{
+    LD_DEBUG_ASSERT(mLayoutRoots.find(root) != mLayoutRoots.end());
+
+    mLayoutRoots.erase(root);
 }
 
 UIWindow* UIContext::GetTopWindow(const Vec2& pos)
