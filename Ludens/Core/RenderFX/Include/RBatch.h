@@ -3,106 +3,106 @@
 #include "Core/OS/Include/Memory.h"
 #include "Core/DSA/Include/View.h"
 
-namespace LD {
+namespace LD
+{
 
+template <typename TVertex, typename TIndex>
+class RBatch
+{
+public:
+    /// @brief startup the vertex batching service
+    void Startup(int vertexPerElement, View<int> indexSequence, int elementCapacity)
+    {
+        mVertexPerElement = vertexPerElement;
+        mIndexPerElement = (int)indexSequence.Size();
+        mElementCapacity = elementCapacity;
+        mElementCtr = 0;
 
+        mVertices = (TVertex*)MemoryAlloc(sizeof(TVertex) * mVertexPerElement * mElementCapacity);
+        mIndices = (TIndex*)MemoryAlloc(sizeof(TIndex) * mIndexPerElement * mElementCapacity);
 
-	template <typename TVertex, typename TIndex>
-	class RBatch
-	{
-	public:
+        // initialize index buffer data
+        for (int element = 0; element < mElementCapacity; element++)
+            for (int index = 0; index < mIndexPerElement; index++)
+                mIndices[mIndexPerElement * element + index] =
+                    static_cast<TIndex>(mVertexPerElement * element + indexSequence[index]);
+    }
 
-		/// @brief startup the vertex batching service
-		void Startup(int vertexPerElement, View<int> indexSequence, int elementCapacity)
-		{
-			mVertexPerElement = vertexPerElement;
-			mIndexPerElement = (int)indexSequence.Size();
-			mElementCapacity = elementCapacity;
+    /// @brief cleanup the vertex batching service.
+    void Cleanup()
+    {
+        MemoryFree(mVertices);
+        MemoryFree(mIndices);
 
-			mVertices = (TVertex*)MemoryAlloc(sizeof(TVertex) * mVertexPerElement * mElementCapacity);
-			mIndices = (TIndex*)MemoryAlloc(sizeof(TIndex) * mIndexPerElement * mElementCapacity);
+        mVertices = nullptr;
+        mIndices = nullptr;
+    }
 
-			// initialize index buffer data
-			for (int element = 0; element < mElementCapacity; element++)
-				for (int index = 0; index < mIndexPerElement; index++)
-					mIndices[mIndexPerElement * element + index] = static_cast<TIndex>(mVertexPerElement * element + indexSequence[index]);
-		}
+    int GetVertexCount() const
+    {
+        return mVertexPerElement * mElementCtr;
+    }
 
-		/// @brief cleanup the vertex batching service.
-		void Cleanup()
-		{
-			MemoryFree(mVertices);
-			MemoryFree(mIndices);
+    int GetIndexCount() const
+    {
+        return mIndexPerElement * mElementCtr;
+    }
 
-			mVertices = nullptr;
-			mIndices = nullptr;
-		}
+    int GetElementCount() const
+    {
+        return mElementCtr;
+    }
 
-		int GetVertexCount() const
-		{
-			return mVertexPerElement * mElementCtr;
-		}
+    int GetElementCapacity() const
+    {
+        return mElementCapacity;
+    }
 
-		int GetIndexCount() const
-		{
-			return mIndexPerElement * mElementCtr;
-		}
+    size_t GetVertexBufferSize() const
+    {
+        return sizeof(TVertex) * mVertexPerElement * mElementCapacity;
+    }
 
-		int GetElementCount() const
-		{
-			return mElementCtr;
-		}
+    size_t GetIndexBufferSize() const
+    {
+        return sizeof(TIndex) * mIndexPerElement * mElementCapacity;
+    }
 
-		int GetElementCapacity() const
-		{
-			return mElementCapacity;
-		}
+    const TIndex* GetIndices() const
+    {
+        return (const TIndex*)mIndices;
+    }
 
-		size_t GetVertexBufferSize() const
-		{
-			return sizeof(TVertex) * mVertexPerElement * mElementCapacity;
-		}
+    const TVertex* GetVertices() const
+    {
+        return (const TVertex*)mVertices;
+    }
 
-		size_t GetIndexBufferSize() const
-		{
-			return sizeof(TIndex) * mIndexPerElement * mElementCapacity;
-		}
+    bool AddElement(const TVertex* src)
+    {
+        if (mElementCtr == mElementCapacity)
+            return false;
 
-		const TIndex* GetIndices() const
-		{
-			return (const TIndex*)mIndices;
-		}
+        TVertex* dst = mVertices + mVertexPerElement * mElementCtr++;
 
-		const TVertex* GetVertices() const
-		{
-			return (const TVertex*)mVertices;
-		}
+        for (int i = 0; i < mVertexPerElement; i++)
+            dst[i] = src[i];
 
-		bool AddElement(const TVertex* src)
-		{
-			if (mElementCtr == mElementCapacity)
-				return false;
+        return true;
+    }
 
-			TVertex* dst = mVertices + mVertexPerElement * mElementCtr++;
-			
-			for (int i = 0; i < mVertexPerElement; i++)
-				dst[i] = src[i];
+    void Reset()
+    {
+        mElementCtr = 0;
+    }
 
-			return true;
-		}
-
-		void Reset()
-		{
-			mElementCtr = 0;
-		}
-
-	private:
-		TVertex* mVertices;
-		TIndex* mIndices;
-		int mVertexPerElement;
-		int mIndexPerElement;
-		int mElementCapacity;
-		int mElementCtr;
-	};
+private:
+    TVertex* mVertices;
+    TIndex* mIndices;
+    int mVertexPerElement;
+    int mIndexPerElement;
+    int mElementCapacity;
+    int mElementCtr;
+};
 
 } // namespace LD
