@@ -1,6 +1,6 @@
 #include "Core/RenderService/Lib/RenderContext.h"
 
-#define RECT_BATCH_CAPACITY 1024
+#define RECT_BATCH_CAPACITY 8192
 
 namespace LD
 {
@@ -30,6 +30,7 @@ void RenderContext::Startup(RDevice device, int viewportWidth, int viewportHeigh
 
     ViewportWidth = viewportWidth;
     ViewportHeight = viewportHeight;
+    Device.ResizeViewport(ViewportWidth, ViewportHeight);
 
     Passes.Startup(device);
     FrameBuffers.Startup(Device, &Passes);
@@ -54,7 +55,7 @@ void RenderContext::Startup(RDevice device, int viewportWidth, int viewportHeigh
         SSAOGroup& ssaoGroup = BindingGroups.GetSSAOGroup();
         ssaoGroup.BindSSAOTexture(DefaultSSAOBuffer.GetTexture());
 
-         RBufferInfo info;
+        RBufferInfo info;
         info.Type = RBufferType::VertexBuffer;
         info.MemoryUsage = RMemoryUsage::Immutable;
         info.Data = sQuadVertices;
@@ -77,8 +78,19 @@ void RenderContext::Startup(RDevice device, int viewportWidth, int viewportHeigh
         atlasI.FontData = DefaultFontTTF;
         DefaultFontAtlas.Startup(atlasI);
 
-        // TODO: flush when batch capacity is full
-        DefaultRectBatch.Startup(Device, RECT_BATCH_CAPACITY);
+        // one draw call per commit
+        auto onRectBatchCommit = [&](RBuffer vbo, RBuffer ibo, int indexStart, int indexCount)
+        {
+            Device.SetVertexBuffer(0, vbo);
+            Device.SetIndexBuffer(ibo, RIndexType::u16);
+
+            RDrawIndexedInfo drawI;
+            drawI.IndexStart = indexStart;
+            drawI.IndexCount = indexCount;
+            Device.DrawIndexed(drawI);
+        };
+
+        DefaultRectBatcher.Startup(Device, RECT_BATCH_CAPACITY, onRectBatchCommit);
         DefaultRectGroup.Startup(Device, BindingGroups.GetRectBGL());
 
         for (int i = 0; i < 16; i++)
@@ -93,8 +105,8 @@ void RenderContext::Cleanup()
     Device.WaitIdle();
 
     {
+        DefaultRectBatcher.Cleanup();
         DefaultRectGroup.Cleanup();
-        DefaultRectBatch.Cleanup();
         DefaultFontAtlas.Cleanup();
         DefaultFontTTF = nullptr;
         Device.DeleteBuffer(QuadVBO);

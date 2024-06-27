@@ -33,13 +33,13 @@ static void RenderUIWindow(RenderContext* ctx, UIWindow* window)
 {
     Rect2D windowRect = window->GetWindowRect();
     Vec4 windowColor = window->GetColor();
-    RectBatch& batch = ctx->DefaultRectBatch;
-    batch.AddRectFilled(windowRect, windowColor);
+    RectBatcher& batcher = ctx->DefaultRectBatcher;
+    batcher.AddRectFilled(windowRect, windowColor);
 
     float border = window->GetBorder();
 
     Vec4 borderColor = Vec4::Lerp(windowColor, { 1.0f, 1.0f, 1.0f, windowColor.a }, 0.5f);
-    batch.AddRectOutline(windowRect, borderColor, border);
+    batcher.AddRectOutline(windowRect, borderColor, border);
 
     // render direct child of window
     for (UIWidget* widget : window->GetWidgets())
@@ -83,6 +83,13 @@ static void RenderUIWidget(RenderContext* ctx, const Rect2D& rect, UIWidget* wid
 static void RenderUIContainer(RenderContext* ctx, const Rect2D& rect, UIContainerWidget* container)
 {
     UIType type = container->GetType();
+    bool commitAndScissor = type == UIType::Scroll;
+
+    if (commitAndScissor)
+    {
+        ctx->DefaultRectBatcher.Commit();
+        ctx->Device.PushScissor(rect);
+    }
 
     switch (type)
     {
@@ -100,21 +107,27 @@ static void RenderUIContainer(RenderContext* ctx, const Rect2D& rect, UIContaine
         widgetRect.y += rect.y;
         RenderUIWidget(ctx, widgetRect, widget);
     }
+
+    if (commitAndScissor)
+    {
+        ctx->DefaultRectBatcher.Commit();
+        ctx->Device.PopScissor();
+    }
 }
 
 static void RenderUIScroll(RenderContext* ctx, const Rect2D& rect, UIScroll* scroll)
 {
-    RectBatch& batch = ctx->DefaultRectBatch;
+    RectBatcher& batcher = ctx->DefaultRectBatcher;
 
     Vec4 color = Hex(0xCC2222FF);
-    batch.AddRectFilled(rect, color);
+    batcher.AddRectFilled(rect, color);
 }
 
 static void RenderUIPanel(RenderContext* ctx, const Rect2D& rect, UIPanel* panel)
 {
-    RectBatch& batch = ctx->DefaultRectBatch;
+    RectBatcher& batcher = ctx->DefaultRectBatcher;
 
-    batch.AddRectFilled(rect, panel->GetColor());
+    batcher.AddRectFilled(rect, panel->GetColor());
 }
 
 static void RenderUILabel(RenderContext* ctx, const Rect2D& rect, UILabel* label)
@@ -123,7 +136,7 @@ static void RenderUILabel(RenderContext* ctx, const Rect2D& rect, UILabel* label
     float scale = label->GetGlyphScale();
     UIFont* uiFont = label->GetFont();
     Ref<FontTTF> ttf = uiFont->GetTTF();
-    RectBatch& batch = ctx->DefaultRectBatch;
+    RectBatcher& batcher = ctx->DefaultRectBatcher;
 
     int ascent;
     ttf->GetVerticalMetrics(&ascent, nullptr, nullptr, nullptr);
@@ -135,11 +148,11 @@ static void RenderUILabel(RenderContext* ctx, const Rect2D& rect, UILabel* label
     label->GetColors(bgColor, fgColor);
 
     if (bgColor.a != 0.0f)
-        batch.AddRectFilled(rect, bgColor);
+        batcher.AddRectFilled(rect, bgColor);
 
     for (const FontGlyphExt& glyphExt : glyphsExts)
     {
-        ctx->DefaultRectBatch.AddGlyph(cursor + glyphExt.Offset, glyphExt, scale, fgColor, 1);
+        batcher.AddGlyph(cursor + glyphExt.Offset, glyphExt, scale, fgColor, 1);
     }
 }
 
@@ -149,12 +162,12 @@ static void RenderUIButton(RenderContext* ctx, const Rect2D& rect, UIButton* but
     float scale = button->GetGlyphScale();
     UIFont* uiFont = button->GetFont();
     Ref<FontTTF> ttf = uiFont->GetTTF();
-    RectBatch& batch = ctx->DefaultRectBatch;
+    RectBatcher& batcher = ctx->DefaultRectBatcher;
 
     Vec4 bgColor, fgColor;
     button->GetColors(bgColor, fgColor);
 
-    batch.AddRectFilled(rect, bgColor);
+    batcher.AddRectFilled(rect, bgColor);
 
     int ascent;
     ttf->GetVerticalMetrics(&ascent, nullptr, nullptr, nullptr);
@@ -164,15 +177,17 @@ static void RenderUIButton(RenderContext* ctx, const Rect2D& rect, UIButton* but
 
     for (const FontGlyphExt& glyphExt : glyphsExts)
     {
-        batch.AddGlyph(cursor + glyphExt.Offset, glyphExt, scale, fgColor, 1);
+        batcher.AddGlyph(cursor + glyphExt.Offset, glyphExt, scale, fgColor, 1);
     }
 }
 
 static void RenderUITexture(RenderContext* ctx, const Rect2D& rect, UITexture* texture)
 {
+    RectBatcher& batcher = ctx->DefaultRectBatcher;
+
     Vec4 white(1.0f, 1.0f, 1.0f, 1.0f);
     Vec2 size(rect.w, rect.h);
-    ctx->DefaultRectBatch.AddTexture(rect, { 0.0f, 0.0f, rect.w, rect.h }, size, white, texture->GetTextureID());
+    batcher.AddTexture(rect, { 0.0f, 0.0f, rect.w, rect.h }, size, white, texture->GetTextureID());
 }
 
 } // namespace LD

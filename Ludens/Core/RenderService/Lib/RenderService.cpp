@@ -273,21 +273,14 @@ void RenderService::EndFrame()
             viewportData.ViewPos = list.ViewPos;
             ubo.SetData(0, sizeof(viewportData), &viewportData);
 
-            mCtx->DefaultRectBatch.Reset();
+            mCtx->Device.SetPipeline((RPipeline)mCtx->Pipelines.GetRectPipeline());
+            mCtx->Device.SetBindingGroup(0, (RBindingGroup)mCtx->ScreenViewportGroup);
+            mCtx->Device.SetBindingGroup(1, (RBindingGroup)mCtx->DefaultRectGroup);
+            mCtx->DefaultRectBatcher.Reset();
+
             RenderUI(mCtx, list.UI);
 
-            RBuffer rectVBO, rectIBO;
-            mCtx->DefaultRectBatch.GetBuffers(rectVBO, rectIBO);
-
-            sDevice.SetPipeline((RPipeline)mCtx->Pipelines.GetRectPipeline());
-            sDevice.SetBindingGroup(0, (RBindingGroup)mCtx->ScreenViewportGroup);
-            sDevice.SetBindingGroup(1, (RBindingGroup)mCtx->DefaultRectGroup);
-            sDevice.SetVertexBuffer(0, rectVBO);
-            sDevice.SetIndexBuffer(rectIBO, RIndexType::u16);
-
-            RDrawIndexedInfo drawInfo{};
-            drawInfo.IndexCount = mCtx->DefaultRectBatch.GetRectCount() * 6;
-            sDevice.DrawIndexed(drawInfo);
+            mCtx->DefaultRectBatcher.Commit();
         }
 
         sDevice.EndRenderPass();
@@ -398,6 +391,11 @@ void RenderService::DrawScreenUI(UIContext* ui)
     LD_DEBUG_ASSERT(mCtx->HasBeginViewport);
 
     sScreenDrawLists.Back().UI = ui;
+}
+
+void RenderService::SetDebugValue(float value)
+{
+    sLightingUBO.DirectionalLight.Dir.w = value;
 }
 
 void RenderService::OnViewportResize(int width, int height)

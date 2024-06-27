@@ -45,6 +45,9 @@ public:
 
     void DrawScreenUI(UIContext* ui);
 
+    // TODO: remove
+    void SetDebugValue(float value);
+
 private:
     void OnViewportResize(int width, int height);
 

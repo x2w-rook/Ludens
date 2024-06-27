@@ -28,6 +28,8 @@ struct RenderContext
     bool HasBeginFrame;
     int ViewportWidth;
     int ViewportHeight;
+    int RectBatchCtr;
+    int RectBatchIndexCtr;
 
     RDevice Device;
     RenderPassResources Passes;
@@ -42,7 +44,7 @@ struct RenderContext
     GBuffer DefaultGBuffer;
     SSAOBuffer DefaultSSAOBuffer;
     SSAOBuffer DefaultSSAOBlurBuffer;
-    RectBatch DefaultRectBatch;
+    RectBatcher DefaultRectBatcher;
     RectGroup DefaultRectGroup;
     ViewportGroup WorldViewportGroup;
     ViewportGroup ScreenViewportGroup;
