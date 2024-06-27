@@ -42,6 +42,9 @@ RectBatch::~RectBatch()
 
 void RectBatch::Startup(RDevice device, int capacity)
 {
+    LD_DEBUG_ASSERT(capacity >= 4 && "AddRectOutline uses 4 rects");
+    LD_DEBUG_ASSERT(capacity < 65535 / 6 && "16 bit indices");
+
     // one rect is 4 vertices referenced by 6 indices
     int indexSequence[] = { 0, 1, 2, 2, 3, 0 };
 
@@ -61,7 +64,7 @@ void RectBatch::Startup(RDevice device, int capacity)
     info.Data = mBatch.GetIndices();
     mDevice.CreateBuffer(mIndexBuffer, info);
 
-    mRectCount = 0;
+    mRectCommited = 0;
 }
 
 void RectBatch::Cleanup()
@@ -75,7 +78,7 @@ void RectBatch::Cleanup()
 void RectBatch::Reset()
 {
     mBatch.Reset();
-    mRectCount = -1;
+    mRectCommited = 0;
 }
 
 bool RectBatch::AddCustom(const RectVertex* vertices)
@@ -203,24 +206,163 @@ bool RectBatch::AddGlyph(const Vec2& cursor, const FontGlyph& glyph, float scale
     return ok;
 }
 
-
 int RectBatch::GetRectCount()
 {
     return mBatch.GetElementCount();
 }
 
-void RectBatch::GetBuffers(RBuffer& vertexBuffer, RBuffer& indexBuffer)
+int RectBatch::GetRectCommitedCount()
+{
+    return mRectCommited;
+}
+
+void RectBatch::Commit()
 {
     int rectCount = mBatch.GetElementCount();
 
-    if (rectCount != mRectCount)
-    {
-        mVertexBuffer.SetData(0, sizeof(RectVertex) * 4 * rectCount, mBatch.GetVertices());
-        mRectCount = rectCount;
-    }
+    if (rectCount == mRectCommited)
+        return;
 
+    int toCommit = rectCount - mRectCommited;
+    u32 dataOffset = sizeof(RectVertex) * 4 * mRectCommited;
+    u32 dataSize = sizeof(RectVertex) * 4 * toCommit;
+    const void* data = mBatch.GetVertices() + 4 * mRectCommited;
+
+    mVertexBuffer.SetData(dataOffset, dataSize, data);
+    mRectCommited = rectCount;
+}
+
+void RectBatch::GetBuffers(RBuffer& vertexBuffer, RBuffer& indexBuffer)
+{
     vertexBuffer = mVertexBuffer;
     indexBuffer = mIndexBuffer;
+}
+
+RectBatcher::RectBatcher()
+{
+}
+
+RectBatcher::~RectBatcher()
+{
+    LD_DEBUG_ASSERT(!mDevice && mBatches.IsEmpty());
+}
+
+void RectBatcher::Startup(RDevice device, int rectCapacity, OnCommit callback)
+{
+    constexpr int initialBatchCount = 4;
+
+    mDevice = device;
+    mBatchCapacity = rectCapacity;
+    mBatches.Resize(initialBatchCount);
+    mCommitCallback = callback;
+    
+    for (int i = 0; i < initialBatchCount; i++)
+    {
+        mBatches[i] = new RectBatch();
+        mBatches[i]->Startup(mDevice, mBatchCapacity);
+    }
+}
+
+void RectBatcher::Cleanup()
+{
+    for (size_t i = 0; i < mBatches.Size(); i++)
+    {
+        mBatches[i]->Cleanup();
+        delete mBatches[i];
+    }
+
+    mBatches.Clear();
+    mDevice.ResetHandle();
+}
+
+void RectBatcher::Reset()
+{
+    for (size_t i = 0; i < mBatches.Size(); i++)
+    {
+        mBatches[i]->Reset();
+    }
+
+    mBatchCtr = 0;
+}
+
+void RectBatcher::Commit()
+{
+    RectBatch* batch = mBatches[mBatchCtr];
+
+    int rectCount = batch->GetRectCount();
+    int commitedCount = batch->GetRectCommitedCount();
+    int toCommit = rectCount - commitedCount;
+
+    if (toCommit == 0)
+        return;
+
+    RBuffer vbo, ibo;
+    batch->Commit();
+    batch->GetBuffers(vbo, ibo);
+    mCommitCallback(vbo, ibo, commitedCount * 6, toCommit * 6);
+}
+
+void RectBatcher::AddCustom(const RectVertex* vertices)
+{
+    RectBatch* batch = GetRectBatch(1);
+
+    bool ok = batch->AddCustom(vertices);
+    LD_DEBUG_ASSERT(ok);
+}
+
+void RectBatcher::AddRectOutline(const Rect2D& rect, Vec4 color, float lineWidth)
+{
+    RectBatch* batch = GetRectBatch(4);
+
+    bool ok = batch->AddRectOutline(rect, color, lineWidth);
+    LD_DEBUG_ASSERT(ok);
+}
+
+void RectBatcher::AddRectFilled(const Rect2D& rect, Vec4 color)
+{
+    RectBatch* batch = GetRectBatch(1);
+    
+    bool ok = batch->AddRectFilled(rect, color);
+    LD_DEBUG_ASSERT(ok);
+}
+
+void RectBatcher::AddTexture(const Rect2D& rect, const Rect2D& texRegion, Vec2 texSize, Vec4 color, int texID)
+{
+    RectBatch* batch = GetRectBatch(1);
+
+    bool ok = batch->AddTexture(rect, texRegion, texSize, color, texID);
+    LD_DEBUG_ASSERT(ok);
+}
+
+void RectBatcher::AddGlyph(const Vec2& cursor, const FontGlyph& glyph, float scale, Vec4 color, int texID)
+{
+    RectBatch* batch = GetRectBatch(1);
+
+    bool ok = batch->AddGlyph(cursor, glyph, scale, color, texID);
+    LD_DEBUG_ASSERT(ok);
+}
+
+RectBatch* RectBatcher::GetRectBatch(int reserve)
+{
+    RectBatch* batch = mBatches[mBatchCtr];
+
+    if (mBatchCapacity - batch->GetRectCount() < reserve)
+    {
+        // last commit of this batch, start a new one
+        Commit();
+        mBatchCtr++;
+
+        if (mBatchCtr == mBatches.Size())
+        {
+            mBatches.PushBack(new RectBatch());
+            mBatches.Back()->Startup(mDevice, mBatchCapacity);
+        }
+
+        batch = mBatches[mBatchCtr];
+    }
+
+    LD_DEBUG_ASSERT(mBatchCapacity - batch->GetRectCount() >= reserve);
+    return batch;
 }
 
 RectPipeline::RectPipeline()

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include "Core/DSA/Include/Optional.h"
 #include "Core/Header/Include/Types.h"
 #include "Core/Math/Include/Mat4.h"
@@ -14,7 +15,8 @@
 #include "Core/RenderFX/Include/PrefabPipeline.h"
 #include "Core/Media/Include/Font.h"
 
-namespace LD {
+namespace LD
+{
 
 struct RectVertex
 {
@@ -38,12 +40,17 @@ public:
     void Startup(RDevice device, int rectCapacity);
     void Cleanup();
 
+    inline bool IsFull() const
+    {
+        return mBatch.GetElementCapacity() == mBatch.GetElementCount();
+    }
+
     void Reset();
     bool AddCustom(const RectVertex* vertices);
     bool AddRectOutline(const Rect2D& rect, Vec4 color, float lineWidth);
     bool AddRectFilled(const Rect2D& rect, Vec4 color);
     bool AddTexture(const Rect2D& rect, const Rect2D& texRegion, Vec2 texSize, Vec4 color, int texID);
-    
+
     /// @brief add a font glyph
     /// @param cursor the cursor resides on the baseline
     /// @param glyph the glyph to render, whose bounding box is decided from cursor and glyph bearing.
@@ -53,6 +60,8 @@ public:
     bool AddGlyph(const Vec2& cursor, const FontGlyph& glyph, float scale, Vec4 color, int texID);
 
     int GetRectCount();
+    int GetRectCommitedCount();
+    void Commit();
     void GetBuffers(RBuffer& vertexBuffer, RBuffer& indexBuffer);
 
 private:
@@ -60,7 +69,48 @@ private:
     RBuffer mVertexBuffer;
     RBuffer mIndexBuffer;
     RBatch<RectVertex, u16> mBatch;
-    int mRectCount;
+    int mRectCommited;
+};
+
+/// Manages one or more RectBatches, such that there is always space to add new elements.
+/// User supplies a OnCommit callback that is called whenever a RectBatch is full,
+/// or when RectBatcher::Commit is called.
+class RectBatcher
+{
+public:
+
+    /// called by the batcher whenever a batch is full
+    using OnCommit = std::function<void(RBuffer vertexBuffer, RBuffer indexBuffer, int indexStart, int indexCount)>;
+
+    RectBatcher();
+    RectBatcher(const RectBatcher&) = delete;
+    ~RectBatcher();
+
+    RectBatcher& operator=(const RectBatcher&) = delete;
+
+    void Startup(RDevice device, int rectCapacity, OnCommit callback);
+    void Cleanup();
+
+    /// reset all batches
+    void Reset();
+
+    /// manually perform a commit
+    void Commit();
+
+    void AddCustom(const RectVertex* vertices);
+    void AddRectOutline(const Rect2D& rect, Vec4 color, float lineWidth);
+    void AddRectFilled(const Rect2D& rect, Vec4 color);
+    void AddTexture(const Rect2D& rect, const Rect2D& texRegion, Vec2 texSize, Vec4 color, int texID);
+    void AddGlyph(const Vec2& cursor, const FontGlyph& glyph, float scale, Vec4 color, int texID);
+
+private:
+    RectBatch* GetRectBatch(int reserve);
+
+    RDevice mDevice;
+    Vector<RectBatch*> mBatches;
+    OnCommit mCommitCallback;
+    int mBatchCapacity;
+    int mBatchCtr;
 };
 
 struct RectPipelineInfo
