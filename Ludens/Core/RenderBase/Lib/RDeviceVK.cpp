@@ -573,19 +573,27 @@ RResult RDeviceVK::PopScissor()
     LD_DEBUG_ASSERT(!Scissors.IsEmpty());
 
     FrameData& frame = Frames[FrameIndex];
+    VkRect2D vkScissor;
 
     Scissors.Pop();
 
     if (!Scissors.IsEmpty())
     {
         const Rect2D scissor = Scissors.Top();
-        VkRect2D vkScissor;
         vkScissor.extent.width = scissor.w;
         vkScissor.extent.height = scissor.h;
         vkScissor.offset.x = scissor.x;
         vkScissor.offset.y = scissor.y;
-        frame.CommandBuffer.CmdSetScissor(vkScissor);
     }
+    else
+    {
+        vkScissor.extent.width = ViewportExtent.x;
+        vkScissor.extent.height = ViewportExtent.y;
+        vkScissor.offset.x = 0;
+        vkScissor.offset.y = 0;
+    }
+
+    frame.CommandBuffer.CmdSetScissor(vkScissor);
 
     return {};
 }
