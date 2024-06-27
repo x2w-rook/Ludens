@@ -549,7 +549,45 @@ RResult RDeviceVK::SetIndexBuffer(RBuffer& bufferH, RIndexType indexType)
     VkIndexType vkIndexType = DeriveVKIndexType(indexType);
     frame.CommandBuffer.CmdBindIndexBuffer(buffer.GetHandle(), 0, vkIndexType);
 
-    return RResult();
+    return {};
+}
+
+RResult RDeviceVK::PushScissor(const Rect2D& scissor)
+{
+    FrameData& frame = Frames[FrameIndex];
+
+    Scissors.Push(scissor);
+
+    VkRect2D vkScissor;
+    vkScissor.extent.width = scissor.w;
+    vkScissor.extent.height = scissor.h;
+    vkScissor.offset.x = scissor.x;
+    vkScissor.offset.y = scissor.y;
+    frame.CommandBuffer.CmdSetScissor(vkScissor);
+    
+    return {};
+}
+
+RResult RDeviceVK::PopScissor()
+{
+    LD_DEBUG_ASSERT(!Scissors.IsEmpty());
+
+    FrameData& frame = Frames[FrameIndex];
+
+    Scissors.Pop();
+
+    if (!Scissors.IsEmpty())
+    {
+        const Rect2D scissor = Scissors.Top();
+        VkRect2D vkScissor;
+        vkScissor.extent.width = scissor.w;
+        vkScissor.extent.height = scissor.h;
+        vkScissor.offset.x = scissor.x;
+        vkScissor.offset.y = scissor.y;
+        frame.CommandBuffer.CmdSetScissor(vkScissor);
+    }
+
+    return {};
 }
 
 RResult RDeviceVK::DrawVertex(const RDrawVertexInfo& info)
@@ -567,9 +605,8 @@ RResult RDeviceVK::DrawIndexed(const RDrawIndexedInfo& info)
 {
     FrameData& frame = Frames[FrameIndex];
 
-    LD_DEBUG_ASSERT(info.IndexStart == 0);
     LD_DEBUG_ASSERT(info.InstanceStart == 0);
-    frame.CommandBuffer.CmdDrawIndexed(info.IndexCount, info.InstanceCount);
+    frame.CommandBuffer.CmdDrawIndexed(info.IndexCount, info.InstanceCount, info.IndexStart);
 
     return {};
 }

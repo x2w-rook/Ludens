@@ -28,6 +28,7 @@ enum class RResultType
     BindingGroupMismatch,
     BindingMismatch,
     PassBeginError,
+    ScissorStackEmpty,
 };
 
 enum class RResourceType

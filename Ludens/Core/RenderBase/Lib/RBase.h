@@ -2,6 +2,7 @@
 
 #include <string>
 #include "Core/DSA/Include/Array.h"
+#include "Core/DSA/Include/Stack.h"
 #include "Core/RenderBase/Include/RTexture.h"
 #include "Core/RenderBase/Include/RBuffer.h"
 #include "Core/RenderBase/Include/RShader.h"
@@ -91,6 +92,9 @@ struct RDeviceBase
     virtual RResult SetVertexBuffer(u32 slot, RBuffer& buffer) = 0;
     virtual RResult SetIndexBuffer(RBuffer& buffer, RIndexType indexType) = 0;
 
+    virtual RResult PushScissor(const Rect2D& scissor) = 0;
+    virtual RResult PopScissor() = 0;
+
     virtual RResult DrawVertex(const RDrawVertexInfo& info) = 0;
     virtual RResult DrawIndexed(const RDrawIndexedInfo& info) = 0;
 
@@ -99,6 +103,8 @@ struct RDeviceBase
     virtual void WaitIdle() {}
 
     CUID<RDeviceBase> ID;
+    Stack<Rect2D> Scissors;
+    Vec2 ViewportExtent;
     RDrawStats* Stats = nullptr;
     RResultCallback Callback;
     RPipeline BoundPipelineH;

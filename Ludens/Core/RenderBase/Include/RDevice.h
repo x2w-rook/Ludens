@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/Header/Include/Types.h"
+#include "Core/Math/Include/Rect2D.h"
 #include "Core/OS/Include/UID.h"
 #include "Core/DSA/Include/Optional.h"
 #include "Core/RenderBase/Include/RTypes.h"
@@ -108,6 +109,9 @@ public:
     // TODO: Multiple drawstats overlapping on one device.
     RResult BeginDrawStats(RDrawStats* stats);
     RResult EndDrawStats();
+
+    RResult PushScissor(const Rect2D& scissor);
+    RResult PopScissor();
 
     RResult DrawVertex(const RDrawVertexInfo& info);
     RResult DrawIndexed(const RDrawIndexedInfo& info);

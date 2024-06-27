@@ -511,6 +511,43 @@ RResult RDeviceGL::SetIndexBuffer(RBuffer& bufferH, RIndexType indexType)
     return {};
 }
 
+RResult RDeviceGL::PushScissor(const Rect2D& scissor)
+{
+    if (Scissors.IsEmpty())
+    {
+        glEnable(GL_SCISSOR_TEST);
+    }
+
+    Scissors.Push(scissor);
+
+    GLint sx = scissor.x;
+    GLint sy = ViewportExtent.y - scissor.h - scissor.y;
+    glScissor(sx, sy, (GLsizei)scissor.w, (GLsizei)scissor.h);
+
+    return {};
+}
+
+RResult RDeviceGL::PopScissor()
+{
+    LD_DEBUG_ASSERT(!Scissors.IsEmpty());
+
+    Scissors.Pop();
+
+    if (Scissors.IsEmpty())
+    {
+        glDisable(GL_SCISSOR_TEST);
+    }
+    else
+    {
+        const Rect2D& scissor = Scissors.Top();
+        GLint sx = scissor.x;
+        GLint sy = ViewportExtent.y - scissor.h - scissor.y;
+        glScissor(sx, sy, (GLsizei)scissor.w, (GLsizei)scissor.h);
+    }
+
+    return {};
+}
+
 RResult RDeviceGL::DrawVertex(const RDrawVertexInfo& info)
 {
     LD_DEBUG_ASSERT(BoundPipelineH);
@@ -527,18 +564,19 @@ RResult RDeviceGL::DrawVertex(const RDrawVertexInfo& info)
 RResult RDeviceGL::DrawIndexed(const RDrawIndexedInfo& info)
 {
     LD_DEBUG_ASSERT(BoundPipelineH);
-    LD_DEBUG_ASSERT(info.IndexStart == 0);
 
     RPipelineGL& pipeline = Derive<RPipelineGL>(BoundPipelineH);
 
     GLCommand::DrawElementsInstanced(pipeline.GLPrimitiveTopology, info.IndexCount, IndexType, info.InstanceCount,
-                                     info.InstanceStart);
+                                     info.IndexStart, info.InstanceStart);
 
     return {};
 }
 
 RResult RDeviceGL::ResizeViewport(int width, int height)
 {
+    ViewportExtent.x = width;
+    ViewportExtent.y = height;
     glViewport(0, 0, width, height);
 
     return {};

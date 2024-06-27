@@ -70,6 +70,9 @@ struct RDeviceGL : RDeviceBase
     virtual RResult SetVertexBuffer(u32 slot, RBuffer& buffer) override;
     virtual RResult SetIndexBuffer(RBuffer& buffer, RIndexType indexType) override;
 
+    virtual RResult PushScissor(const Rect2D& scissor) override;
+    virtual RResult PopScissor() override;
+
     virtual RResult DrawVertex(const RDrawVertexInfo& info) override;
     virtual RResult DrawIndexed(const RDrawIndexedInfo& info) override;
 

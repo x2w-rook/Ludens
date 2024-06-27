@@ -595,6 +595,30 @@ RResult RDevice::EndDrawStats()
     return result;
 }
 
+RResult RDevice::PushScissor(const Rect2D& scissor)
+{
+    RResult result;
+
+    result = mBase->PushScissor(scissor);
+    mBase->Callback(result);
+    return result;
+}
+
+RResult RDevice::PopScissor()
+{
+    RResult result;
+
+    if (mBase->Scissors.IsEmpty())
+    {
+        result.Type = RResultType::ScissorStackEmpty;
+        return result;
+    }
+
+    result = mBase->PopScissor();
+    mBase->Callback(result);
+    return result;
+}
+
 RResult RDevice::DrawVertex(const RDrawVertexInfo& info)
 {
     RResult result;
