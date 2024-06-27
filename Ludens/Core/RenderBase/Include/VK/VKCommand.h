@@ -74,7 +74,7 @@ public:
     void CmdSetScissor(VkRect2D scissor);
 
     void CmdDrawVertex(u32 vertexCount, u32 instanceCount);
-    void CmdDrawIndexed(u32 indexCount, u32 instanceCount);
+    void CmdDrawIndexed(u32 indexCount, u32 instanceCount, u32 indexStart);
 
     void CmdImageLayoutTransition(VKImage& image, VkImageSubresourceRange range, VkImageLayout oldLayout,
                                   VkImageLayout newLayout);
@@ -195,9 +195,9 @@ inline void VKCommandBuffer::CmdDrawVertex(u32 vertexCount, u32 instanceCount)
     vkCmdDraw(mHandle, vertexCount, instanceCount, 0, 0);
 }
 
-inline void VKCommandBuffer::CmdDrawIndexed(u32 indexCount, u32 instanceCount)
+inline void VKCommandBuffer::CmdDrawIndexed(u32 indexCount, u32 instanceCount, u32 indexStart)
 {
-    vkCmdDrawIndexed(mHandle, indexCount, instanceCount, 0, 0, 0);
+    vkCmdDrawIndexed(mHandle, indexCount, instanceCount, indexStart, 0, 0);
 }
 
 } // namespace LD

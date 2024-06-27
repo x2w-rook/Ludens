@@ -17,6 +17,9 @@ void DrawElementsInstanced(GLenum primitive, u32 indexCount, GLenum indexType, G
 void DrawElementsInstanced(GLenum primitive, u32 indexCount, GLenum indexType, GLsizei instanceCount,
                            GLuint instanceStart);
 
+void DrawElementsInstanced(GLenum primitive, u32 indexCount, GLenum indexType, GLsizei instanceCount, GLuint indexStart,
+                           GLuint instanceStart);
+
 } // namespace GLCommand
 
 } // namespace LD

@@ -1,3 +1,4 @@
+#include "Core/Header/Include/Error.h"
 #include "Core/RenderBase/Include/GL/GLCommand.h"
 
 namespace LD
@@ -36,6 +37,15 @@ void DrawElementsInstanced(GLenum primitive, u32 indexCount, GLenum indexType, G
     // NOTE: the instanceStart offset is *NOT* applied to the gl_InstanceID variable in the vertex shader GLSL,
     //       use the gl_InstanceIndex variable provided by GL_KHR_vulkan_glsl instead.
     glDrawElementsInstancedBaseInstance(primitive, indexCount, indexType, nullptr, instanceCount, instanceStart);
+}
+
+void DrawElementsInstanced(GLenum primitive, u32 indexCount, GLenum indexType, GLsizei instanceCount,
+                           GLuint indexStart, GLuint instanceStart)
+{
+    LD_DEBUG_ASSERT(indexType == GL_UNSIGNED_INT || indexType == GL_UNSIGNED_SHORT);
+    size_t indexSize = indexType == GL_UNSIGNED_INT ? 4 : 2;
+    size_t offset = indexStart * indexSize;
+    glDrawElementsInstancedBaseInstance(primitive, indexCount, indexType, (void*)offset, instanceCount, instanceStart);
 }
 
 } // namespace GLCommand
