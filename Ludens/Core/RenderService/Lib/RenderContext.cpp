@@ -39,18 +39,21 @@ void RenderContext::Startup(RDevice device, int viewportWidth, int viewportHeigh
     Textures.Startup(Device);
 
     {
-        FrameBuffers.CreateGBuffer(DefaultGBuffer, ViewportWidth, ViewportHeight);
-        FrameBuffers.CreateSSAOBuffer(DefaultSSAOBuffer, ViewportWidth, ViewportHeight, (RPass)Passes.GetSSAOPass());
-        FrameBuffers.CreateSSAOBuffer(DefaultSSAOBlurBuffer, ViewportWidth, ViewportHeight,
-                                      (RPass)Passes.GetSSAOPass());
+        int vw = ViewportWidth;
+        int vh = ViewportHeight;
+
+        FrameBuffers.CreateGBuffer(DefaultGBuffer, vw, vh);
+        FrameBuffers.CreateSSAOBuffer(DefaultSSAOBuffer, vw, vh, &Passes.GetSSAOPass());
+        FrameBuffers.CreateSSAOBuffer(DefaultSSAOBlurBuffer, vw, vh, &Passes.GetSSAOPass());
+        FrameBuffers.CreateColorBuffer(ColorBufferHDR, vw, vh, &Passes.GetColorPassHDR());
+        FrameBuffers.CreateColorBuffer(ColorBufferLDR, vw, vh, &Passes.GetColorPassLDR());
 
         WorldViewportGroup.Startup(Device, BindingGroups.GetViewportBGL());
         WorldViewportGroup.BindGBuffer(DefaultGBuffer);
         WorldViewportGroup.BindSSAOTexture(DefaultSSAOBlurBuffer.GetTexture());
 
         ScreenViewportGroup.Startup(Device, BindingGroups.GetViewportBGL());
-        // ScreenViewportGroup.BindGBuffer(Textures.GetWhitePixel());
-        // ScreenViewportGroup.BindSSAOTexture(Textures.GetWhitePixel());
+        ScreenViewportGroup.BindColorTextures(ColorBufferHDR, ColorBufferLDR);
 
         SSAOGroup& ssaoGroup = BindingGroups.GetSSAOGroup();
         ssaoGroup.BindSSAOTexture(DefaultSSAOBuffer.GetTexture());
@@ -115,6 +118,8 @@ void RenderContext::Cleanup()
         DefaultGBuffer.Cleanup();
         DefaultSSAOBuffer.Cleanup();
         DefaultSSAOBlurBuffer.Cleanup();
+        ColorBufferHDR.Cleanup();
+        ColorBufferLDR.Cleanup();
     }
 
     Textures.Cleanup();
@@ -140,11 +145,19 @@ void RenderContext::OnViewportResize(int viewportWidth, int viewportHeight)
 
     if (DefaultSSAOBuffer)
         DefaultSSAOBuffer.Cleanup();
-    FrameBuffers.CreateSSAOBuffer(DefaultSSAOBuffer, ViewportWidth, ViewportHeight, (RPass)Passes.GetSSAOPass());
+    FrameBuffers.CreateSSAOBuffer(DefaultSSAOBuffer, ViewportWidth, ViewportHeight, &Passes.GetSSAOPass());
 
     if (DefaultSSAOBlurBuffer)
         DefaultSSAOBlurBuffer.Cleanup();
-    FrameBuffers.CreateSSAOBuffer(DefaultSSAOBlurBuffer, ViewportWidth, ViewportHeight, (RPass)Passes.GetSSAOPass());
+    FrameBuffers.CreateSSAOBuffer(DefaultSSAOBlurBuffer, ViewportWidth, ViewportHeight, &Passes.GetSSAOPass());
+
+    if (ColorBufferHDR)
+        ColorBufferHDR.Cleanup();
+    FrameBuffers.CreateColorBuffer(ColorBufferHDR, ViewportWidth, ViewportHeight, &Passes.GetColorPassHDR());
+
+    if (ColorBufferLDR)
+        ColorBufferLDR.Cleanup();
+    FrameBuffers.CreateColorBuffer(ColorBufferLDR, ViewportWidth, ViewportHeight, &Passes.GetColorPassLDR());
 
     // make gbuffer results visible from the viewport group
     WorldViewportGroup.BindGBuffer(DefaultGBuffer);
@@ -153,6 +166,9 @@ void RenderContext::OnViewportResize(int viewportWidth, int viewportHeight)
     SSAOGroup& ssaoGroup = BindingGroups.GetSSAOGroup();
     ssaoGroup.BindSSAOTexture(DefaultSSAOBuffer.GetTexture());
     WorldViewportGroup.BindSSAOTexture(DefaultSSAOBlurBuffer.GetTexture());
+
+    // make HDR and LDR results visible from the viewport group
+    ScreenViewportGroup.BindColorTextures(ColorBufferHDR, ColorBufferLDR);
 }
 
 } // namespace LD

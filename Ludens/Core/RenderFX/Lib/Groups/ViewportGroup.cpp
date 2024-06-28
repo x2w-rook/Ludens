@@ -1,6 +1,7 @@
 #include "Core/DSA/Include/Array.h"
 #include "Core/RenderFX/Include/Groups/ViewportGroup.h"
 #include "Core/RenderFX/Include/FrameBuffers/GBuffer.h"
+#include "Core/RenderFX/Include/FrameBuffers/ColorBuffer.h"
 
 namespace LD {
 
@@ -45,6 +46,12 @@ void ViewportGroup::BindGBuffer(const GBuffer& gbuffer)
 void ViewportGroup::BindSSAOTexture(RTexture ssao)
 {
     mHandle.BindTexture(4, ssao);
+}
+
+void ViewportGroup::BindColorTextures(const ColorBuffer& hdr, const ColorBuffer& ldr)
+{
+    mHandle.BindTexture(1, hdr.GetColorAttachment());
+    mHandle.BindTexture(2, ldr.GetColorAttachment());
 }
 
 RBindingGroupLayoutData ViewportGroup::GetLayoutData() const

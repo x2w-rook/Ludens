@@ -5,6 +5,8 @@
 #include "Core/RenderFX/Include/Pipelines/DeferredBlinnPhongPipeline.h"
 #include "Core/RenderFX/Include/Pipelines/DeferredSSAOPipeline.h"
 #include "Core/RenderFX/Include/Pipelines/SSAOBlurPipeline.h"
+#include "Core/RenderFX/Include/Pipelines/SwapChainTransferPipeline.h"
+#include "Core/RenderFX/Include/Pipelines/PostProcess/ToneMappingPipeline.h"
 #include "Core/RenderService/Lib/RenderResources.h"
 
 namespace LD
@@ -29,6 +31,10 @@ public:
 
     SSAOBlurPipeline& GetSSAOBlurPipeline();
 
+    ToneMappingPipeline& GetToneMappingPipeline();
+
+    SwapChainTransferPipeline& GetSwapChainTransferPipeline();
+
 private:
     RenderPassResources* mPassRes;
     BindingGroupResources* mGroupRes;
@@ -37,6 +43,8 @@ private:
     DeferredBlinnPhongPipeline mDeferredBlinnPhong;
     DeferredSSAOPipeline mDeferredSSAO;
     SSAOBlurPipeline mSSAOBlur;
+    SwapChainTransferPipeline mSwapChainTransfer;
+    ToneMappingPipeline mToneMapping;
 };
 
 } // namespace LD

@@ -16,6 +16,12 @@ void RenderPassResources::Cleanup()
     if (mSSAOPass)
         mSSAOPass.Cleanup();
 
+    if (mColorPassHDR)
+        mColorPassHDR.Cleanup();
+
+    if (mColorPassLDR)
+        mColorPassLDR.Cleanup();
+
     mDevice.ResetHandle();
 }
 
@@ -57,6 +63,38 @@ SSAOPass& RenderPassResources::GetSSAOPass()
     }
 
     return mSSAOPass;
+}
+
+ColorPass& RenderPassResources::GetColorPassHDR()
+{
+    if (!mColorPassHDR)
+    {
+        ColorPassInfo passI;
+        passI.Device = mDevice;
+        passI.ColorFormat = RTextureFormat::RGBA16F;
+        passI.InitialState = RState::Undefined;
+        passI.FinalState = RState::ShaderResource;
+        mColorPassHDR.Startup(passI);
+        LD_DEBUG_ASSERT(mColorPassHDR);
+    }
+
+    return mColorPassHDR;
+}
+
+ColorPass& RenderPassResources::GetColorPassLDR()
+{
+    if (!mColorPassLDR)
+    {
+        ColorPassInfo passI;
+        passI.Device = mDevice;
+        passI.ColorFormat = RTextureFormat::RGBA8;
+        passI.InitialState = RState::Undefined;
+        passI.FinalState = RState::ShaderResource;
+        mColorPassLDR.Startup(passI);
+        LD_DEBUG_ASSERT(mColorPassLDR);
+    }
+
+    return mColorPassLDR;
 }
 
 } // namespace LD

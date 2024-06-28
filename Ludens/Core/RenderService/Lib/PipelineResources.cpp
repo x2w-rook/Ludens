@@ -30,6 +30,12 @@ void PipelineResources::Cleanup()
 
     if (mSSAOBlur)
         mSSAOBlur.Cleanup();
+
+    if (mSwapChainTransfer)
+        mSwapChainTransfer.Cleanup();
+
+    if (mToneMapping)
+        mToneMapping.Cleanup();
     
     mGroupRes = nullptr;
     mPassRes = nullptr;
@@ -48,11 +54,10 @@ GBufferPipeline& PipelineResources::GetGBufferPipeline()
         pipelineI.Device = mDevice;
         pipelineI.RenderPass = (RPass)mPassRes->GetGBufferPass();
         pipelineI.GBufferPipelineLayout.GroupLayouts = groupLayout.GetView();
-
         mGBuffer.Startup(pipelineI);
-        LD_DEBUG_ASSERT(mGBuffer);
     }
 
+    LD_DEBUG_ASSERT(mGBuffer);
     return mGBuffer;
 }
 
@@ -66,13 +71,12 @@ RectPipeline& PipelineResources::GetRectPipeline()
 
         RectPipelineInfo pipelineI;
         pipelineI.Device = mDevice;
-        pipelineI.RenderPass = (RPass)mPassRes->GetSwapChainRenderPass();
+        pipelineI.RenderPass = (RPass)mPassRes->GetColorPassLDR();
         pipelineI.RectPipelineLayout.GroupLayouts = groupLayout.GetView();
-
         mRect.Startup(pipelineI);
-        LD_DEBUG_ASSERT(mRect);
     }
 
+    LD_DEBUG_ASSERT(mRect);
     return mRect;
 }
 
@@ -86,13 +90,12 @@ DeferredBlinnPhongPipeline& PipelineResources::GetDeferredBlinnPhongPipeline()
 
         DeferredBlinnPhongPipelineInfo pipelineI;
         pipelineI.Device = mDevice;
-        pipelineI.RenderPass = (RPass)mPassRes->GetSwapChainRenderPass();
+        pipelineI.RenderPass = (RPass)mPassRes->GetColorPassHDR();
         pipelineI.PipelineLayout.GroupLayouts = groupLayout.GetView();
-
         mDeferredBlinnPhong.Startup(pipelineI);
-        LD_DEBUG_ASSERT(mDeferredBlinnPhong);
     }
 
+    LD_DEBUG_ASSERT(mDeferredBlinnPhong);
     return mDeferredBlinnPhong;
 }
 
@@ -108,11 +111,10 @@ DeferredSSAOPipeline& PipelineResources::GetDeferredSSAOPipeline()
         pipelineI.Device = mDevice;
         pipelineI.RenderPass = (RPass)mPassRes->GetSSAOPass();
         pipelineI.PipelineLayout.GroupLayouts = groupLayout.GetView();
-
         mDeferredSSAO.Startup(pipelineI);
-        LD_DEBUG_ASSERT(mDeferredSSAO);
     }
 
+    LD_DEBUG_ASSERT(mDeferredSSAO);
     return mDeferredSSAO;
 }
 
@@ -128,12 +130,49 @@ SSAOBlurPipeline& PipelineResources::GetSSAOBlurPipeline()
         pipelineI.Device = mDevice;
         pipelineI.RenderPass = (RPass)mPassRes->GetSSAOPass();
         pipelineI.PipelineLayout.GroupLayouts = groupLayout.GetView();
-
         mSSAOBlur.Startup(pipelineI);
-        LD_DEBUG_ASSERT(mSSAOBlur);
     }
 
+    LD_DEBUG_ASSERT(mSSAOBlur);
     return mSSAOBlur;
+}
+
+ToneMappingPipeline& PipelineResources::GetToneMappingPipeline()
+{
+    if (!mToneMapping)
+    {
+        Array<RBindingGroupLayout, 2> groupLayout;
+        groupLayout[0] = mGroupRes->GetFrameStaticBGL();
+        groupLayout[1] = mGroupRes->GetViewportBGL();
+
+        ToneMappingPipelineInfo pipelineI;
+        pipelineI.Device = mDevice;
+        pipelineI.RenderPass = (RPass)mPassRes->GetColorPassLDR();
+        pipelineI.PipelineLayout.GroupLayouts = groupLayout.GetView();
+        mToneMapping.Startup(pipelineI);
+    }
+
+    LD_DEBUG_ASSERT(mToneMapping);
+    return mToneMapping;
+}
+
+SwapChainTransferPipeline& PipelineResources::GetSwapChainTransferPipeline()
+{
+    if (!mSwapChainTransfer)
+    {
+        Array<RBindingGroupLayout, 2> groupLayout;
+        groupLayout[0] = mGroupRes->GetFrameStaticBGL();
+        groupLayout[1] = mGroupRes->GetViewportBGL();
+
+        SwapChainTransferPipelineInfo pipelineI;
+        pipelineI.Device = mDevice;
+        pipelineI.RenderPass = (RPass)mPassRes->GetSwapChainRenderPass();
+        pipelineI.PipelineLayout.GroupLayouts = groupLayout.GetView();
+        mSwapChainTransfer.Startup(pipelineI);
+    }
+
+    LD_DEBUG_ASSERT(mSwapChainTransfer);
+    return mSwapChainTransfer;
 }
 
 } // namespace LD

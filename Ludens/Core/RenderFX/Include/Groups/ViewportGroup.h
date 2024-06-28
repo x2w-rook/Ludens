@@ -9,6 +9,7 @@ namespace LD
 {
 
 class GBuffer;
+class ColorBuffer;
 
 /// binding 0, viewport information
 struct ViewportUBO
@@ -44,11 +45,17 @@ public:
     /// cleanup the viewport binding group, the input BGL during Startup() is not deleted
     void Cleanup();
 
-    /// bind the gbuffer textures to this viewport
+    /// bind the gbuffer textures to this viewport,
+    /// the textures are bound at bindings 1 to 3 of this group.
     void BindGBuffer(const GBuffer& gbuffer);
 
-    /// bind the ssao texture to this viewport
+    /// bind the ssao texture to this viewport,
+    /// the texture is bound at binding 4 of this group.
     void BindSSAOTexture(RTexture ssao);
+
+    /// bind the HDR and LDR color buffers to this viewport
+    /// the textures are bound at binding 1 and 2 of this group.
+    void BindColorTextures(const ColorBuffer& hdr, const ColorBuffer& ldr);
 
     virtual RBindingGroupLayoutData GetLayoutData() const override;
 
