@@ -59,7 +59,7 @@ void SwapChainTransferPipeline::Startup(const SwapChainTransferPipelineInfo& inf
     mDevice.CreateShader(mSwapChainTransferFS, fragmentSI);
 
     RPipelineInfo pipelineI{};
-    pipelineI.Name = "ToneMappingPipeline";
+    pipelineI.Name = "SwapChainTransferPipeline";
     pipelineI.PrimitiveTopology = RPrimitiveTopology::TriangleList;
     pipelineI.VertexLayout.Slots = { 1, &slot };
     pipelineI.VertexShader = mSwapChainTransferVS;
