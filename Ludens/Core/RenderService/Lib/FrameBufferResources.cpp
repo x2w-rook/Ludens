@@ -1,3 +1,8 @@
+#include "Core/RenderFX/Include/FrameBuffers/GBuffer.h"
+#include "Core/RenderFX/Include/FrameBuffers/SSAOBuffer.h"
+#include "Core/RenderFX/Include/FrameBuffers/ColorBuffer.h"
+#include "Core/RenderFX/Include/Passes/SSAOPass.h"
+#include "Core/RenderFX/Include/Passes/ColorPass.h"
 #include "Core/RenderService/Lib/FrameBufferResources.h"
 #include "Core/RenderService/Lib/RenderPassResources.h"
 
@@ -37,11 +42,25 @@ void FrameBufferResources::CreateGBuffer(GBuffer& gbuffer, int width, int height
     LD_DEBUG_ASSERT(gbuffer);
 }
 
-void FrameBufferResources::CreateSSAOBuffer(SSAOBuffer& buffer, int width, int height, RPass pass)
+void FrameBufferResources::CreateSSAOBuffer(SSAOBuffer& buffer, int width, int height, SSAOPass* pass)
 {
     LD_DEBUG_ASSERT(!buffer && width > 0 && height > 0);
 
     SSAOBufferInfo bufferI;
+    bufferI.Device = mDevice;
+    bufferI.RenderPass = (RPass)*pass;
+    bufferI.Width = width;
+    bufferI.Height = height;
+
+    buffer.Startup(bufferI);
+    LD_DEBUG_ASSERT(buffer);
+}
+
+void FrameBufferResources::CreateColorBuffer(ColorBuffer& buffer, int width, int height, ColorPass* pass)
+{
+    LD_DEBUG_ASSERT(!buffer && width > 0 && height > 0);
+
+    ColorBufferInfo bufferI;
     bufferI.Device = mDevice;
     bufferI.RenderPass = pass;
     bufferI.Width = width;

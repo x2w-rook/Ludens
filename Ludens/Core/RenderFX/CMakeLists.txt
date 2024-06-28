@@ -1,6 +1,8 @@
 set(MODULE_INCLUDE
+	"Include/Passes/ColorPass.h"
 	"Include/Passes/GBufferPass.h"
 	"Include/Passes/SSAOPass.h"
+	"Include/FrameBuffers/ColorBuffer.h"
 	"Include/FrameBuffers/GBuffer.h"
 	"Include/FrameBuffers/SSAOBuffer.h"
 	"Include/Groups/FrameStaticGroup.h"
@@ -24,8 +26,10 @@ set(MODULE_INCLUDE
 )
 
 set(MODULE_LIB
+	"Lib/Passes/ColorPass.cpp"
 	"Lib/Passes/GBufferPass.cpp"
 	"Lib/Passes/SSAOPass.cpp"
+	"Lib/FrameBuffers/ColorBuffer.cpp"
 	"Lib/FrameBuffers/GBuffer.cpp"
 	"Lib/FrameBuffers/SSAOBuffer.cpp"
 	"Lib/Groups/FrameStaticGroup.cpp"

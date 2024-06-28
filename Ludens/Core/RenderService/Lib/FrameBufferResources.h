@@ -2,13 +2,16 @@
 
 #include <Core/DSA/Include/Vector.h>
 #include "Core/RenderService/Lib/RenderResources.h"
-#include "Core/RenderFX/Include/FrameBuffers/GBuffer.h"
-#include "Core/RenderFX/Include/FrameBuffers/SSAOBuffer.h"
 
 namespace LD
 {
 
 class RenderPassResources;
+class GBuffer;
+class SSAOBuffer;
+class SSAOPass;
+class ColorBuffer;
+class ColorPass;
 
 class FrameBufferResources : public RenderResources
 {
@@ -17,7 +20,8 @@ public:
     void Cleanup();
 
     void CreateGBuffer(GBuffer& gbuffer, int width, int height);
-    void CreateSSAOBuffer(SSAOBuffer& buffer, int width, int height, RPass pass);
+    void CreateSSAOBuffer(SSAOBuffer& buffer, int width, int height, SSAOPass* pass);
+    void CreateColorBuffer(ColorBuffer& buffer, int width, int height, ColorPass* pass);
 
 private:
     RenderPassResources* mPassRes;
