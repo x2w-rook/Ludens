@@ -50,6 +50,9 @@ public:
 
 private:
     void OnViewportResize(int width, int height);
+    void WorldRenderPasses();
+    void ScreenRenderPasses();
+    void SwapChainRenderPasses();
 
     struct RenderContext* mCtx;
 };
