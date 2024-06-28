@@ -76,6 +76,7 @@ embed_shader(GBuffer)
 embed_shader(DeferredBlinnPhong)
 embed_shader(DeferredSSAO)
 embed_shader(SSAOBlur)
+embed_shader(SwapChainTransfer)
 embed_shader(ToneMapping)
 
 add_custom_target(EmbedSPIRV
@@ -84,6 +85,7 @@ add_custom_target(EmbedSPIRV
 	DEPENDS EmbedDeferredBlinnPhong.cpp
 	DEPENDS EmbedDeferredSSAO.cpp
 	DEPENDS EmbedSSAOBlur.cpp
+	DEPENDS EmbedSwapChainTransfer.cpp
 	DEPENDS EmbedToneMapping.cpp
 )
 
@@ -93,6 +95,7 @@ add_library(EmbedSPIRVLib STATIC
 	EmbedDeferredBlinnPhong.cpp
 	EmbedDeferredSSAO.cpp
 	EmbedSSAOBlur.cpp
+	EmbedSwapChainTransfer.cpp
 	EmbedToneMapping.cpp
 )
 
