@@ -22,6 +22,9 @@ void PipelineResources::Cleanup()
     if (mGBuffer)
         mGBuffer.Cleanup();
 
+    if (mCubemap)
+        mCubemap.Cleanup();
+
     if (mDeferredBlinnPhong)
         mDeferredBlinnPhong.Cleanup();
 
@@ -59,6 +62,26 @@ GBufferPipeline& PipelineResources::GetGBufferPipeline()
 
     LD_DEBUG_ASSERT(mGBuffer);
     return mGBuffer;
+}
+
+CubemapPipeline& PipelineResources::GetCubemapPipeline()
+{
+    if (!mCubemap)
+    {
+        Array<RBindingGroupLayout, 3> groupLayout;
+        groupLayout[0] = mGroupRes->GetFrameStaticBGL();
+        groupLayout[1] = mGroupRes->GetViewportBGL();
+        groupLayout[2] = mGroupRes->GetCubemapBGL();
+
+        CubemapPipelineInfo pipelineI;
+        pipelineI.Device = mDevice;
+        pipelineI.RenderPass = (RPass)mPassRes->GetGBufferPass();
+        pipelineI.CubemapPipelineLayout.GroupLayouts = groupLayout.GetView();
+        mCubemap.Startup(pipelineI);
+    }
+
+    LD_DEBUG_ASSERT(mCubemap);
+    return mCubemap;
 }
 
 RectPipeline& PipelineResources::GetRectPipeline()

@@ -34,6 +34,11 @@ public:
         return mMaterialBGL;
     }
 
+    inline RBindingGroupLayout GetCubemapBGL()
+    {
+        return mCubemapBGL;
+    }
+
     inline RBindingGroupLayout GetRectBGL()
     {
         return mRectBGL;
@@ -50,6 +55,7 @@ private:
     RBindingGroupLayout mFrameStaticBGL;
     RBindingGroupLayout mViewportBGL;
     RBindingGroupLayout mMaterialBGL;
+    RBindingGroupLayout mCubemapBGL;
     RBindingGroupLayout mRectBGL;
     RBindingGroupLayout mSSAOBGL;
 };

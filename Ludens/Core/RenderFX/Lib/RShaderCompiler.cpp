@@ -15,6 +15,7 @@
 #include "Core/RenderBase/Include/RPipeline.h"
 #include "Core/RenderFX/Include/RShaderCompiler.h"
 #include "Core/RenderFX/Include/Groups/FrameStaticGroup.h"
+#include "Core/RenderFX/Include/Groups/CubemapGroup.h"
 #include "Core/RenderFX/Include/Groups/ViewportGroup.h"
 #include "Core/RenderFX/Include/Groups/MaterialGroup.h"
 #include "Core/RenderFX/Include/Groups/RectGroup.h"
@@ -442,6 +443,8 @@ int RShaderCompiler::ParseLudensMacroGroupPrefab(std::string str, RBindingGroupL
 
     if (str == "FrameStatic")
         layoutData = FrameStaticGroup{}.GetLayoutData();
+    else if (str == "Cubemap")
+        layoutData = CubemapGroup{}.GetLayoutData();
     else if (str == "Viewport")
         layoutData = ViewportGroup{}.GetLayoutData();
     else if (str == "Material")

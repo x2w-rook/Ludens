@@ -1,6 +1,7 @@
 #include "Core/RenderFX/Include/Groups/FrameStaticGroup.h"
 #include "Core/RenderFX/Include/Groups/ViewportGroup.h"
 #include "Core/RenderFX/Include/Groups/MaterialGroup.h"
+#include "Core/RenderFX/Include/Groups/CubemapGroup.h"
 #include "Core/RenderFX/Include/Groups/RectGroup.h"
 #include "Core/RenderFX/Include/Groups/SSAOGroup.h"
 #include "Core/RenderService/Lib/BindingGroupResources.h"
@@ -16,6 +17,7 @@ void BindingGroupResources::Startup(RDevice device)
     mFrameStaticBGL = FrameStaticGroup{}.CreateLayout(mDevice);
     mViewportBGL = ViewportGroup{}.CreateLayout(mDevice);
     mMaterialBGL = MaterialGroup{}.CreateLayout(mDevice);
+    mCubemapBGL = CubemapGroup{}.CreateLayout(mDevice);
     mRectBGL = RectGroup{}.CreateLayout(mDevice);
     mSSAOBGL = SSAOGroup{}.CreateLayout(mDevice);
 }
@@ -30,6 +32,7 @@ void BindingGroupResources::Cleanup()
 
     mDevice.DeleteBindingGroupLayout(mSSAOBGL);
     mDevice.DeleteBindingGroupLayout(mRectBGL);
+    mDevice.DeleteBindingGroupLayout(mCubemapBGL);
     mDevice.DeleteBindingGroupLayout(mMaterialBGL);
     mDevice.DeleteBindingGroupLayout(mViewportBGL);
     mDevice.DeleteBindingGroupLayout(mFrameStaticBGL);

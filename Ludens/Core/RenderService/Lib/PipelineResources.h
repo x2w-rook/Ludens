@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/RenderFX/Include/Pipelines/GBufferPipeline.h"
+#include "Core/RenderFX/Include/Pipelines/CubemapPipeline.h"
 #include "Core/RenderFX/Include/Pipelines/RectPipeline.h"
 #include "Core/RenderFX/Include/Pipelines/DeferredBlinnPhongPipeline.h"
 #include "Core/RenderFX/Include/Pipelines/DeferredSSAOPipeline.h"
@@ -23,6 +24,8 @@ public:
 
     GBufferPipeline& GetGBufferPipeline();
 
+    CubemapPipeline& GetCubemapPipeline();
+
     RectPipeline& GetRectPipeline();
 
     DeferredBlinnPhongPipeline& GetDeferredBlinnPhongPipeline();
@@ -39,6 +42,7 @@ private:
     RenderPassResources* mPassRes;
     BindingGroupResources* mGroupRes;
     GBufferPipeline mGBuffer;
+    CubemapPipeline mCubemap;
     RectPipeline mRect;
     DeferredBlinnPhongPipeline mDeferredBlinnPhong;
     DeferredSSAOPipeline mDeferredSSAO;
