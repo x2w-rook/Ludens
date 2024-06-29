@@ -73,6 +73,7 @@ endfunction()
 
 embed_shader(Rect)
 embed_shader(GBuffer)
+embed_shader(Cubemap)
 embed_shader(DeferredBlinnPhong)
 embed_shader(DeferredSSAO)
 embed_shader(SSAOBlur)
@@ -82,6 +83,7 @@ embed_shader(ToneMapping)
 add_custom_target(EmbedSPIRV
 	DEPENDS EmbedRect.cpp
 	DEPENDS EmbedGBuffer.cpp
+	DEPENDS EmbedCubemap.cpp
 	DEPENDS EmbedDeferredBlinnPhong.cpp
 	DEPENDS EmbedDeferredSSAO.cpp
 	DEPENDS EmbedSSAOBlur.cpp
@@ -92,6 +94,7 @@ add_custom_target(EmbedSPIRV
 add_library(EmbedSPIRVLib STATIC
 	EmbedRect.cpp
 	EmbedGBuffer.cpp
+	EmbedCubemap.cpp
 	EmbedDeferredBlinnPhong.cpp
 	EmbedDeferredSSAO.cpp
 	EmbedSSAOBlur.cpp
