@@ -40,6 +40,7 @@ struct RenderContext
     TextureResources Textures;
 
     RBuffer QuadVBO;
+    RBuffer CubeVBO;
     Ref<FontTTF> DefaultFontTTF;
     RFontAtlas DefaultFontAtlas;
     GBuffer DefaultGBuffer;

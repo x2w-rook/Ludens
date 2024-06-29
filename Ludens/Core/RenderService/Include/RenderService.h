@@ -29,11 +29,14 @@ public:
     void BeginFrame();
     void EndFrame();
 
-    void BeginWorldViewport(const Vec3& viewpos, const Mat4& view, const Mat4& projection);
+    void BeginWorldViewport(const Vec3& viewpos, const Mat4& view, const Mat4& projection, RRID cubemap = 0);
     void EndWorldViewport();
 
     void BeginScreenViewport();
     void EndScreenViewport();
+
+    void CreateCubemap(RRID& id, int resolution, const void* data);
+    void DeleteCubemap(RRID id);
 
     void CreateMesh(RRID& id, const Model* model);
     void DeleteMesh(RRID id);

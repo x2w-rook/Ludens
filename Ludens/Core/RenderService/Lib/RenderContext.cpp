@@ -21,6 +21,50 @@ static float sQuadVertices[]{
      1.0f,  1.0f,  1.0f, 1.0f,
     -1.0f,  1.0f,  0.0f, 1.0f,
 };
+
+static float sCubeVertices[]{
+    -1.0f,  1.0f, -1.0f,
+    -1.0f, -1.0f, -1.0f,
+     1.0f, -1.0f, -1.0f,
+     1.0f, -1.0f, -1.0f,
+     1.0f,  1.0f, -1.0f,
+    -1.0f,  1.0f, -1.0f,
+
+    -1.0f, -1.0f,  1.0f,
+    -1.0f, -1.0f, -1.0f,
+    -1.0f,  1.0f, -1.0f,
+    -1.0f,  1.0f, -1.0f,
+    -1.0f,  1.0f,  1.0f,
+    -1.0f, -1.0f,  1.0f,
+
+    1.0f, -1.0f, -1.0f,
+    1.0f, -1.0f,  1.0f,
+    1.0f,  1.0f,  1.0f,
+    1.0f,  1.0f,  1.0f,
+    1.0f,  1.0f, -1.0f,
+    1.0f, -1.0f, -1.0f,
+
+    -1.0f, -1.0f,  1.0f,
+    -1.0f,  1.0f,  1.0f,
+     1.0f,  1.0f,  1.0f,
+     1.0f,  1.0f,  1.0f,
+     1.0f, -1.0f,  1.0f,
+    -1.0f, -1.0f,  1.0f,
+
+    -1.0f,  1.0f, -1.0f,
+     1.0f,  1.0f, -1.0f,
+     1.0f,  1.0f,  1.0f,
+     1.0f,  1.0f,  1.0f,
+    -1.0f,  1.0f,  1.0f,
+    -1.0f,  1.0f, -1.0f,
+
+    -1.0f, -1.0f, -1.0f,
+    -1.0f, -1.0f,  1.0f,
+     1.0f, -1.0f, -1.0f,
+     1.0f, -1.0f, -1.0f,
+    -1.0f, -1.0f,  1.0f,
+     1.0f, -1.0f,  1.0f
+};
 // clang-format on
 
 void RenderContext::Startup(RDevice device, int viewportWidth, int viewportHeight)
@@ -64,6 +108,12 @@ void RenderContext::Startup(RDevice device, int viewportWidth, int viewportHeigh
         info.Data = sQuadVertices;
         info.Size = sizeof(sQuadVertices);
         Device.CreateBuffer(QuadVBO, info);
+
+        info.Type = RBufferType::VertexBuffer;
+        info.MemoryUsage = RMemoryUsage::Immutable;
+        info.Data = sCubeVertices;
+        info.Size = sizeof(sCubeVertices);
+        Device.CreateBuffer(CubeVBO, info);
 
         unsigned int ttfSize;
         const char* ttfData;
@@ -113,6 +163,7 @@ void RenderContext::Cleanup()
         DefaultFontAtlas.Cleanup();
         DefaultFontTTF = nullptr;
         Device.DeleteBuffer(QuadVBO);
+        Device.DeleteBuffer(CubeVBO);
         ScreenViewportGroup.Cleanup();
         WorldViewportGroup.Cleanup();
         DefaultGBuffer.Cleanup();

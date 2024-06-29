@@ -6,6 +6,7 @@
 #include "Core/RenderBase/Include/RPipeline.h"
 #include "Core/RenderBase/Include/RShader.h"
 #include "Core/RenderFX/Include/RMesh.h"
+#include "Core/RenderFX/Include/Groups/CubemapGroup.h"
 #include "Core/RenderFX/Include/Groups/ViewportGroup.h"
 #include "Core/RenderService/Lib/RenderPassResources.h"
 #include "Core/RenderService/Lib/FrameBufferResources.h"
@@ -25,6 +26,12 @@ struct MeshResource
     RBuffer InstanceTransforms;
 };
 
+struct CubemapResource
+{
+    RTexture Cubemap;
+    CubemapGroup CubemapBG;
+};
+
 /// maintain a draw list for each BeginViewport/EndViewport scope
 struct DrawList
 {
@@ -36,6 +43,7 @@ struct DrawList
 struct WorldDrawList : DrawList
 {
     Vector<std::pair<RRID, Mat4>> Meshes;
+    RRID Cubemap;
 };
 
 struct ScreenDrawList : DrawList
@@ -47,6 +55,7 @@ static RDevice sDevice;
 static RRID sDirectionalLight;
 static FrameStaticLightingUBO sLightingUBO;
 static std::unordered_map<RRID, MeshResource> sMeshes;
+static std::unordered_map<RRID, CubemapResource> sCubemaps;
 static Vector<WorldDrawList> sWorldDrawLists;
 static Vector<ScreenDrawList> sScreenDrawLists;
 
@@ -126,7 +135,7 @@ void RenderService::EndFrame()
     sDevice.EndFrame();
 }
 
-void RenderService::BeginWorldViewport(const Vec3& viewpos, const Mat4& view, const Mat4& projection)
+void RenderService::BeginWorldViewport(const Vec3& viewpos, const Mat4& view, const Mat4& projection, RRID cubemap)
 {
     LD_DEBUG_ASSERT(mCtx->HasBeginFrame);
     LD_DEBUG_ASSERT(!mCtx->HasBeginViewport);
@@ -136,6 +145,7 @@ void RenderService::BeginWorldViewport(const Vec3& viewpos, const Mat4& view, co
     list.ViewPos = viewpos;
     list.ViewMat = view;
     list.ProjMat = projection;
+    list.Cubemap = cubemap;
 
     mCtx->HasBeginViewport = true;
 }
@@ -163,6 +173,39 @@ void RenderService::BeginScreenViewport()
 void RenderService::EndScreenViewport()
 {
     mCtx->HasBeginViewport = false;
+}
+
+void RenderService::CreateCubemap(RRID& id, int resolution, const void* data)
+{
+    id = CUID<CubemapResource>::Get();
+    LD_DEBUG_ASSERT(sCubemaps.find(id) == sCubemaps.end());
+
+    CubemapResource& res = sCubemaps[id];
+
+    RTextureInfo cubemapI;
+    cubemapI.Type = RTextureType::TextureCube;
+    cubemapI.Format = RTextureFormat::RGBA8;
+    cubemapI.Width = resolution;
+    cubemapI.Height = resolution;
+    cubemapI.Size = resolution * resolution * 4 * 6;
+    cubemapI.Data = data;
+    sDevice.CreateTexture(res.Cubemap, cubemapI);
+
+    res.CubemapBG.Startup(sDevice, mCtx->BindingGroups.GetCubemapBGL(), res.Cubemap);
+}
+
+void RenderService::DeleteCubemap(RRID id)
+{
+    auto& iter = sCubemaps.find(id);
+
+    if (iter == sCubemaps.end())
+        return;
+
+    CubemapResource& res = sCubemaps[id];
+    res.CubemapBG.Cleanup();
+    sDevice.DeleteTexture(res.Cubemap);
+
+    sCubemaps.erase(iter);
 }
 
 void RenderService::CreateMesh(RRID& id, const Model* model)
@@ -310,6 +353,23 @@ void RenderService::WorldRenderPasses()
                         info.InstanceCount = 1;
                         sDevice.DrawIndexed(info);
                     });
+            }
+
+            // render skybox after meshes
+            auto iter = sCubemaps.find(list.Cubemap);
+            if (iter != sCubemaps.end())
+            {
+                CubemapResource& res = sCubemaps[list.Cubemap];
+                sDevice.SetPipeline((RPipeline)mCtx->Pipelines.GetCubemapPipeline());
+                sDevice.SetBindingGroup(0, (RBindingGroup)mCtx->BindingGroups.GetFrameStaticGroup());
+                sDevice.SetBindingGroup(1, (RBindingGroup)mCtx->WorldViewportGroup);
+                sDevice.SetBindingGroup(2, (RBindingGroup)res.CubemapBG);
+                sDevice.SetVertexBuffer(0, mCtx->CubeVBO);
+
+                RDrawVertexInfo info{};
+                info.VertexStart = 0;
+                info.VertexCount = 36;
+                sDevice.DrawVertex(info);
             }
         }
 
