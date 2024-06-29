@@ -77,6 +77,13 @@ void main()
 		color = vec3(occlusion);
 	else
 	{
+		// if there is no geometry, return flat albedo color
+		if (length(normal) < 1e-5)
+		{
+			fColor = vec4(albedo, 1.0);
+			return;
+		}
+
 		// single directional light
 		vec3 lightPos;
 		vec3 lightColor = uLightingUBO.DirLightColor.rgb;
@@ -86,9 +93,12 @@ void main()
 		vec3 halfwayDir = normalize(lightDir + viewDir);
 		
 		// diffuse
-		color = albedo * 0.2 * occlusion;
-		color += max(dot(normal, lightDir), 0.0) * albedo * lightColor;
-		color += pow(max(dot(normal, halfwayDir), 0.0), 16.0) * specular * lightColor;
+		vec3 ambientResult = albedo;
+		vec3 diffuseResult = vec3(0.0);
+		vec3 specularResult = vec3(0.0);
+		
+		diffuseResult += max(dot(normal, lightDir), 0.0) * albedo * lightColor;
+		specularResult += pow(max(dot(normal, halfwayDir), 0.0), 16.0) * specular * lightColor;
 
 		// point lights
 		for (int i = 0; i < uViewportUBO.PointLightCount; i++)
@@ -102,9 +112,13 @@ void main()
 			float distance = length(lightPos - position);
 			float attenuation = 1.0 / (1.0 + 0.09 * distance + 0.032 * (distance * distance)); 
 
-			color += max(dot(normal, lightDir), 0.0) * albedo * lightColor * attenuation * 0.6;
-			color += pow(max(dot(normal, halfwayDir), 0.0), 16.0) * specular * lightColor;
+			diffuseResult += max(dot(normal, lightDir), 0.0) * albedo * lightColor * attenuation;
+			specularResult += pow(max(dot(normal, halfwayDir), 0.0), 16.0) * specular * lightColor;
 		}
+
+		ambientResult *= occlusion;
+		diffuseResult *= occlusion;
+		color = ambientResult * 0.2 + diffuseResult * 0.5 + specularResult * 0.3;
 	}
 
 	fColor = vec4(color, 1.0);
