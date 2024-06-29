@@ -180,6 +180,12 @@ void GLContext::BindTexture2DArray(GLTexture2DArray& texture)
     mBoundTexture2DArray = (UID)texture;
 }
 
+void GLContext::BindTextureCube(GLTextureCube& textureCube)
+{
+    glBindTexture(GL_TEXTURE_CUBE_MAP, (GLuint)textureCube);
+    mBoundTextureCube = (UID)textureCube;
+}
+
 void GLContext::BindProgram(GLProgram& shader)
 {
     if (mBoundProgram == (UID)shader)

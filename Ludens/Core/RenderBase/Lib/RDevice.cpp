@@ -102,6 +102,8 @@ RResult RDevice::CreateTexture(RTexture& texture, const RTextureInfo& info)
     RResult result;
 
     size_t expectDataSize = GetTextureFormatPixelSize(info.Format) * info.Width * info.Height;
+    if (info.Type == RTextureType::TextureCube)
+        expectDataSize *= 6;
 
     if (texture)
         result.Type = RResultType::InvalidHandle;

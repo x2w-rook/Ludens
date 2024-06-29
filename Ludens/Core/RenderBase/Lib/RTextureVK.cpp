@@ -42,10 +42,6 @@ void RTextureVK::Startup(RTexture& textureH, const RTextureInfo& info, RDeviceVK
 
     // create 2D image from data
     {
-        LD_DEBUG_ASSERT(info.Type == RTextureType::Texture2D);
-
-        const void* layers[1] = { info.Data };
-
         VkImageUsageFlags imageUsage = VK_IMAGE_USAGE_SAMPLED_BIT;
 
         if (info.Size > 0 && info.Data)
@@ -59,16 +55,43 @@ void RTextureVK::Startup(RTexture& textureH, const RTextureInfo& info, RDeviceVK
                                                   : VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
         }
 
+        VkExtent2D imageExtent;
+        imageExtent.width = info.Width;
+        imageExtent.height = info.Height;
+
         VKImageInfo imageI{};
         imageI.MemoryProperties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-        imageI.CreateInfo =
-            VKInfo::Image2DCreate(imageFormat, { info.Width, info.Height }, imageUsage, VK_SHARING_MODE_EXCLUSIVE);
+
+        Vector<const void*> layers = { info.Data };
+        int layerSize = info.Size;
+
+        if (info.Type == RTextureType::Texture2D)
+        {
+            imageI.CreateInfo = VKInfo::Image2DCreate(imageFormat, imageExtent, imageUsage, VK_SHARING_MODE_EXCLUSIVE);
+        }
+        else if (info.Type == RTextureType::TextureCube)
+        {
+            imageI.CreateInfo =
+                VKInfo::Image2DCreateCubemap(imageFormat, imageExtent, imageUsage, VK_SHARING_MODE_EXCLUSIVE);
+            
+            LD_DEBUG_ASSERT(info.Size % 6 == 0);
+            layerSize = info.Size / 6;
+            layers.Resize(6);
+            
+            for (int i = 1; i < 6; i++)
+            {
+                layers[i] = (const void*)((u8*)info.Data + layerSize * i);
+            }
+        }
+        else
+            LD_DEBUG_UNREACHABLE;
 
         Image.Startup(vkDevice, imageI);
 
         if (imageUsage & VK_IMAGE_USAGE_TRANSFER_DST_BIT)
         {
-            Image.StageData(1, info.Size, layers, device.TransferCommandPool, vkDevice.GetTransferQueue());
+            Image.StageData(layers.Size(), layerSize, layers.Data(), device.TransferCommandPool,
+                            vkDevice.GetTransferQueue());
         }
     }
 
@@ -82,8 +105,17 @@ void RTextureVK::Startup(RTexture& textureH, const RTextureInfo& info, RDeviceVK
         if (aspectFlags == 0)
             aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
 
-        VkImageViewCreateInfo imageViewCI =
-            VKInfo::ImageViewCreate(VK_IMAGE_VIEW_TYPE_2D, Image.GetHandle(), imageFormat, aspectFlags);
+        VkImageViewCreateInfo imageViewCI;
+        if (info.Type == RTextureType::Texture2D)
+        {
+            imageViewCI = VKInfo::ImageViewCreate(VK_IMAGE_VIEW_TYPE_2D, Image.GetHandle(), imageFormat, aspectFlags);
+        }
+        else if (info.Type == RTextureType::TextureCube)
+        {
+            imageViewCI = VKInfo::ImageViewCreateCubemap(Image.GetHandle(), imageFormat);
+        }
+        else
+            LD_DEBUG_UNREACHABLE;
 
         ImageView = MakeRef<VKImageView>();
         ImageView->Startup(vkDevice, imageViewCI);

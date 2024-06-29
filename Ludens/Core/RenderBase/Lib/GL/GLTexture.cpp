@@ -96,4 +96,60 @@ void GLTexture2DArray::Bind(int unit)
     mContext->BindTexture2DArray(*this);
 }
 
+GLTextureCube::GLTextureCube() : mContext(nullptr), mTexture(0)
+{
+}
+
+GLTextureCube::~GLTextureCube()
+{
+    LD_DEBUG_ASSERT(mHandle == 0);
+}
+
+void GLTextureCube::Startup(GLContext& context, const GLTextureCubeInfo& info)
+{
+    mHandle = CUID<GLTextureCube>::Get();
+    mContext = &context;
+
+    LD_DEBUG_ASSERT(info.Data != nullptr);
+
+    glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &mTexture);
+    Bind(0);
+
+    glTexStorage2D(GL_TEXTURE_CUBE_MAP, 1, info.InternalFormat, info.Resolution, info.Resolution);
+
+    // TODO: pixel byte size from internal format, relax this constraint for cube maps
+    LD_DEBUG_ASSERT(info.InternalFormat == GL_RGBA8);
+    int faceSize = info.Resolution * info.Resolution * 4;
+
+    for (int i = 0; i < 6; i++)
+    {
+        const char* data = (const char*)info.Data + faceSize * i;
+        glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, 0, 0, info.Resolution, info.Resolution, info.DataFormat,
+                        info.DataType, data);
+    }
+
+    // hard coded sampler properties for cube maps, parameterize later if necessary.
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+}
+
+void GLTextureCube::Cleanup()
+{
+    glDeleteTextures(1, &mTexture);
+
+    mHandle.Reset();
+    mContext = nullptr;
+}
+
+void GLTextureCube::Bind(int unit)
+{
+    LD_DEBUG_ASSERT(mContext != nullptr);
+
+    mContext->BindTextureUnit(unit);
+    mContext->BindTextureCube(*this);
+}
+
 } // namespace LD

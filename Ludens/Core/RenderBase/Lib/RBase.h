@@ -287,6 +287,7 @@ struct RPipelineBase
 
     bool DepthTestEnabled;
     bool DepthWriteEnabled;
+    RCompareMode DepthCompareMode;
     RCullMode CullMode;
     RPolygonMode PolygonMode;
 };

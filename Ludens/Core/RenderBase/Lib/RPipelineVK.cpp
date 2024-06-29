@@ -75,7 +75,7 @@ void RPipelineVK::Startup(RPipeline& pipelineH, const RPipelineInfo& info, RDevi
     depthStencilStateCI.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
     depthStencilStateCI.depthTestEnable = DepthTestEnabled ? VK_TRUE : VK_FALSE;
     depthStencilStateCI.depthWriteEnable = DepthWriteEnabled ? VK_TRUE : VK_FALSE;
-    depthStencilStateCI.depthCompareOp = VK_COMPARE_OP_LESS;
+    depthStencilStateCI.depthCompareOp = DeriveVKCompareOp(DepthCompareMode);
     depthStencilStateCI.depthBoundsTestEnable = VK_FALSE;
     depthStencilStateCI.stencilTestEnable = VK_FALSE;
 

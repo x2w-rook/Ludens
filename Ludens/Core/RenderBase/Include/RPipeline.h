@@ -78,6 +78,12 @@ enum class RBlendMode
     Add,
 };
 
+enum class RCompareMode
+{
+    Less = 0,
+    LessEqual,
+};
+
 enum class RBlendFactor
 {
     Zero,
@@ -114,6 +120,7 @@ struct RPipelineInfo
     {
         bool DepthTestEnabled = true;
         bool DepthWriteEnabled = true;
+        RCompareMode DepthCompareMode = RCompareMode::Less;
     } DepthStencilState;
 
     struct

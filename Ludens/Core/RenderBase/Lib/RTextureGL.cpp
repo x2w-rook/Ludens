@@ -20,9 +20,7 @@ void RTextureGL::Startup(RTexture& textureH, const RTextureInfo& info, RDeviceGL
 {
     RTextureBase::Startup(textureH, info, &device);
 
-    LD_DEBUG_ASSERT(info.Type == RTextureType::Texture2D);
-
-    Target = GL_TEXTURE_2D;
+    Target = DeriveGLTextureTarget(info.Type);
 
     if (Target == GL_TEXTURE_2D)
     {
@@ -42,6 +40,14 @@ void RTextureGL::Startup(RTexture& textureH, const RTextureInfo& info, RDeviceGL
         DeriveGLTextureFormat(info.Format, &glInfo.InternalFormat, &glInfo.DataFormat, &glInfo.DataType);
         Texture2D.Startup(device.Context, glInfo);
     }
+    else if (Target == GL_TEXTURE_CUBE_MAP)
+    {
+        GLTextureCubeInfo glInfo{};
+        glInfo.Resolution = info.Width;
+        glInfo.Data = info.Data;
+        DeriveGLTextureFormat(info.Format, &glInfo.InternalFormat, &glInfo.DataFormat, &glInfo.DataType);
+        TextureCube.Startup(device.Context, glInfo);
+    }
     else
         LD_DEBUG_UNREACHABLE;
 }
@@ -50,13 +56,20 @@ void RTextureGL::Cleanup(RTexture& textureH)
 {
     RTextureBase::Cleanup(textureH);
 
-    Texture2D.Cleanup();
+    if (Target == GL_TEXTURE_2D)
+        Texture2D.Cleanup();
+    else if (Target == GL_TEXTURE_CUBE_MAP)
+        TextureCube.Cleanup();
+    else
+        LD_DEBUG_UNREACHABLE;
 }
 
 void RTextureGL::Bind(int unit)
 {
     if (Target == GL_TEXTURE_2D)
         Texture2D.Bind(unit);
+    else if (Target == GL_TEXTURE_CUBE_MAP)
+        TextureCube.Bind(unit);
     else
         LD_DEBUG_UNREACHABLE;
 }

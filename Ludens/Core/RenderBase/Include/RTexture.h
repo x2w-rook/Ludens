@@ -39,6 +39,7 @@ enum RTextureUsageFlags : u8
 enum class RTextureType
 {
     Texture2D = 0,
+    TextureCube,
 };
 
 enum class RSamplerFilter

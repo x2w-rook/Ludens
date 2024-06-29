@@ -14,6 +14,7 @@ class GLIndexBuffer;
 class GLUniformBuffer;
 class GLTexture2D;
 class GLTexture2DArray;
+class GLTextureCube;
 class GLFrameBuffer;
 class GLProgram;
 
@@ -53,6 +54,7 @@ public:
     void BindTextureUnit(int unit);
     void BindTexture2D(GLTexture2D& texture);
     void BindTexture2DArray(GLTexture2DArray& textureArray);
+    void BindTextureCube(GLTextureCube& textureCube);
     void BindProgram(GLProgram& program);
     void BindFrameBuffer(GLFrameBuffer& frameBuffer);
     void UnbindProgram();
@@ -104,6 +106,7 @@ private:
     UID mBoundProgram = 0;
     UID mBoundTexture2D = 0;
     UID mBoundTexture2DArray = 0;
+    UID mBoundTextureCube = 0;
     UID mBoundFrameBuffer = 0;
     int mBoundTextureUnit = 0;
     GLint mDefaultFrameBufferDepthBits;

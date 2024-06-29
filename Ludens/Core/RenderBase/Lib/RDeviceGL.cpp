@@ -403,7 +403,7 @@ RResult RDeviceGL::SetPipeline(RPipeline& pipelineH)
     if (pipeline.DepthTestEnabled)
     {
         glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_LESS);
+        glDepthFunc(DeriveGLDepthFunc(pipeline.DepthCompareMode));
     }
     else
     {

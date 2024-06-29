@@ -19,7 +19,7 @@ void RBufferGL::Startup(RBuffer& handle, const RBufferInfo& info, RDeviceGL& dev
 {
     RBufferBase::Startup(handle, info, &device);
 
-    Target = DeriveGLTarget(info.Type);
+    Target = DeriveGLBufferTarget(info.Type);
 
     switch (Target)
     {

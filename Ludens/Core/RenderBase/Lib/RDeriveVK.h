@@ -65,6 +65,21 @@ inline VkBlendOp DeriveVKBlendOp(RBlendMode mode)
     LD_DEBUG_UNREACHABLE;
 }
 
+inline VkCompareOp DeriveVKCompareOp(RCompareMode mode)
+{
+    switch (mode)
+    {
+    case RCompareMode::Less:
+        return VK_COMPARE_OP_LESS;
+    case RCompareMode::LessEqual:
+        return VK_COMPARE_OP_LESS_OR_EQUAL;
+    default:
+        break;
+    }
+
+    LD_DEBUG_UNREACHABLE;
+}
+
 inline VkBlendFactor DeriveVKBlendFactor(RBlendFactor factor)
 {
     switch (factor)

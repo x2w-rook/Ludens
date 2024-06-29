@@ -27,6 +27,7 @@ struct RTextureGL : RTextureBase
     union
     {
         GLTexture2D Texture2D;
+        GLTextureCube TextureCube;
     };
 };
 

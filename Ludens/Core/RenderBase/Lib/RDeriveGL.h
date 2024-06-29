@@ -28,7 +28,7 @@ inline GLenum DeriveGLIndexType(RIndexType type)
     return GL_INVALID_ENUM;
 }
 
-inline GLenum DeriveGLTarget(RBufferType type)
+inline GLenum DeriveGLBufferTarget(RBufferType type)
 {
     switch (type)
     {
@@ -38,6 +38,20 @@ inline GLenum DeriveGLTarget(RBufferType type)
         return GL_ELEMENT_ARRAY_BUFFER;
     case RBufferType::UniformBuffer:
         return GL_UNIFORM_BUFFER;
+    }
+
+    LD_DEBUG_UNREACHABLE;
+    return GL_INVALID_ENUM;
+}
+
+inline GLenum DeriveGLTextureTarget(RTextureType type)
+{
+    switch (type)
+    {
+    case RTextureType::Texture2D:
+        return GL_TEXTURE_2D;
+    case RTextureType::TextureCube:
+        return GL_TEXTURE_CUBE_MAP;
     }
 
     LD_DEBUG_UNREACHABLE;
@@ -92,6 +106,22 @@ inline GLenum DeriveGLBlendOp(RBlendMode mode)
     {
     case RBlendMode::Add:
         return GL_FUNC_ADD;
+    default:
+        break;
+    }
+
+    LD_DEBUG_UNREACHABLE;
+    return GL_INVALID_ENUM;
+}
+
+inline GLenum DeriveGLDepthFunc(RCompareMode mode)
+{
+    switch (mode)
+    {
+    case RCompareMode::Less:
+        return GL_LESS;
+    case RCompareMode::LessEqual:
+        return GL_LEQUAL;
     default:
         break;
     }

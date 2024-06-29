@@ -40,12 +40,12 @@ public:
     {
         return mInternalFormat;
     }
-    
+
     inline GLenum GetDataFormat() const
     {
         return mDataFormat;
     }
-    
+
     inline GLenum GetDataType() const
     {
         return mDataType;
@@ -55,7 +55,7 @@ public:
     {
         return (UID)mHandle;
     }
-    
+
     inline explicit operator UID() const
     {
         return (UID)mHandle;
@@ -119,6 +119,42 @@ private:
     u32 mWidth;
     u32 mHeight;
     u32 mLayers;
+};
+
+struct GLTextureCubeInfo
+{
+    const void* Data = nullptr;
+    GLenum DataFormat;
+    GLenum DataType;
+    GLenum InternalFormat;
+    u32 Resolution;
+};
+
+class GLTextureCube
+{
+public:
+    GLTextureCube();
+    GLTextureCube(const GLTextureCube&) = delete;
+    ~GLTextureCube();
+
+    void Startup(GLContext& context, const GLTextureCubeInfo& info);
+    void Cleanup();
+    void Bind(int unit);
+
+    inline explicit operator UID() const
+    {
+        return (UID)mHandle;
+    }
+
+    inline explicit operator GLuint() const
+    {
+        return mTexture;
+    }
+
+private:
+    CUID<GLTextureCube> mHandle;
+    GLContext* mContext = nullptr;
+    GLuint mTexture;
 };
 
 } // namespace LD

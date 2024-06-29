@@ -314,6 +314,7 @@ void RPipelineBase::Startup(RPipeline& pipelineH, const RPipelineInfo& info, RDe
     FragmentShaderH = info.FragmentShader;
     DepthTestEnabled = info.DepthStencilState.DepthTestEnabled;
     DepthWriteEnabled = info.DepthStencilState.DepthWriteEnabled;
+    DepthCompareMode = info.DepthStencilState.DepthCompareMode;
     CullMode = info.RasterizationState.CullMode;
     PolygonMode = info.RasterizationState.PolygonMode;
 
