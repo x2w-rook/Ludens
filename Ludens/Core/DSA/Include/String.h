@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <cstring>
 #include <cstddef>
 #include <utility>
@@ -26,9 +27,17 @@ public:
     {
     }
 
-    TString(size_t size) : mBase(mLocal), mSize(size)
+    TString(size_t size) : mBase(mLocal), mSize(size), mCapacity(0)
     {
         GrowCapacity(size);
+    }
+
+    TString(size_t size, TChar c) : mBase(mLocal), mSize(size), mCapacity(0)
+    {
+        GrowCapacity(size);
+
+        for (size_t i = 0; i < size; i++)
+            mBase[i] = c;
     }
 
     /// construct from null terminated c string
@@ -131,6 +140,17 @@ public:
     inline void Clear()
     {
         mSize = 0;
+    }
+
+    inline void PushBack(TChar c)
+    {
+        *this += c;
+    }
+
+    inline void PushBack(TChar c, int repeat)
+    {
+        for (int i = 0; i < repeat; i++)
+            *this += c;
     }
 
     /// get a string view that is valid until the next
@@ -262,13 +282,62 @@ public:
         return *this;
     }
 
+    TString& operator<<(int i)
+    {
+        return *this += FromNumber<int>(i);
+    }
+
+    TString& operator<<(size_t s)
+    {
+        return *this += FromNumber<size_t>(s);
+    }
+
+    TString& operator<<(float f)
+    {
+        return *this += FromNumber<float>(f);
+    }
+
+    TString& operator<<(double d)
+    {
+        return *this += FromNumber<double>(d);
+    }
+
+    TString& operator<<(TChar c)
+    {
+        return *this += c;
+    }
+
+    TString& operator<<(const TChar* other)
+    {
+        return *this += other;
+    }
+
+    TString& operator<<(const TString& other)
+    {
+        return *this += other;
+    }
+
+    // STL backwards compatibility
+    TString& operator<<(const std::string& other)
+    {
+        return *this += other.c_str();
+    }
+
+    template <typename TNumber>
+    static TString FromNumber(TNumber number)
+    {
+        return TString(std::to_string(number).c_str());
+    }
+
 private:
     void GrowCapacity(size_t capacity)
     {
-        mCapacity = NextPowerOf2(capacity);
+        size_t nextPower = NextPowerOf2(capacity);
 
-        if (mCapacity <= TLocalCapacity)
+        if (nextPower <= TLocalCapacity || nextPower <= mCapacity)
             return;
+
+        mCapacity = nextPower;
 
         TChar* newBase = new TChar[mCapacity];
         for (size_t i = 0; i < mSize; i++)

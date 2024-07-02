@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <doctest.h>
 #include "Core/DSA/Include/String.h"
 
@@ -111,4 +112,20 @@ TEST_CASE("String CStr")
     // do not access cstr anymore
     s1 += "!";
     CHECK(s1 == "cstr!");
+}
+
+// syntax sugar for String::PushBack or String::operator+=
+TEST_CASE("String operator<<")
+{
+    String s1;
+    s1 << 'h' << "ello";
+
+    CHECK(s1 == "hello");
+
+    s1 << std::string(", world");
+    CHECK(s1 == "hello, world");
+
+    s1.Clear();
+    s1 << 1337 << - 1234;
+    CHECK(s1 == "1337-1234");
 }
