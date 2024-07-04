@@ -38,6 +38,7 @@ add_subdirectory("Extra/stb")
 add_subdirectory("Extra/lua")
 add_subdirectory("Extra/md4c")
 add_subdirectory("Extra/tinyobj")
+add_subdirectory("Extra/tinygltf")
 add_subdirectory("Extra/yoga/yoga")
 add_subdirectory("Extra/jolt/Build")
 
