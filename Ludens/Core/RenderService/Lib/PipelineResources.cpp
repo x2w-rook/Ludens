@@ -28,6 +28,9 @@ void PipelineResources::Cleanup()
     if (mDeferredBlinnPhong)
         mDeferredBlinnPhong.Cleanup();
 
+    if (mDeferredBRDF)
+        mDeferredBRDF.Cleanup();
+
     if (mDeferredSSAO)
         mDeferredSSAO.Cleanup();
 
@@ -120,6 +123,25 @@ DeferredBlinnPhongPipeline& PipelineResources::GetDeferredBlinnPhongPipeline()
 
     LD_DEBUG_ASSERT(mDeferredBlinnPhong);
     return mDeferredBlinnPhong;
+}
+
+DeferredBRDFPipeline& PipelineResources::GetDeferredBRDFPipeline()
+{
+    if (!mDeferredBRDF)
+    {
+        Array<RBindingGroupLayout, 2> groupLayout;
+        groupLayout[0] = mGroupRes->GetFrameStaticBGL();
+        groupLayout[1] = mGroupRes->GetViewportBGL();
+
+        DeferredBRDFPipelineInfo pipelineI;
+        pipelineI.Device = mDevice;
+        pipelineI.RenderPass = (RPass)mPassRes->GetColorPassHDR();
+        pipelineI.PipelineLayout.GroupLayouts = groupLayout.GetView();
+        mDeferredBRDF.Startup(pipelineI);
+    }
+
+    LD_DEBUG_ASSERT(mDeferredBRDF);
+    return mDeferredBRDF;
 }
 
 DeferredSSAOPipeline& PipelineResources::GetDeferredSSAOPipeline()

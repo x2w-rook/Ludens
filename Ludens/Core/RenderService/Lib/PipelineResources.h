@@ -4,6 +4,7 @@
 #include "Core/RenderFX/Include/Pipelines/CubemapPipeline.h"
 #include "Core/RenderFX/Include/Pipelines/RectPipeline.h"
 #include "Core/RenderFX/Include/Pipelines/DeferredBlinnPhongPipeline.h"
+#include "Core/RenderFX/Include/Pipelines/DeferredBRDFPipeline.h"
 #include "Core/RenderFX/Include/Pipelines/DeferredSSAOPipeline.h"
 #include "Core/RenderFX/Include/Pipelines/SSAOBlurPipeline.h"
 #include "Core/RenderFX/Include/Pipelines/SwapChainTransferPipeline.h"
@@ -30,6 +31,8 @@ public:
 
     DeferredBlinnPhongPipeline& GetDeferredBlinnPhongPipeline();
 
+    DeferredBRDFPipeline& GetDeferredBRDFPipeline();
+
     DeferredSSAOPipeline& GetDeferredSSAOPipeline();
 
     SSAOBlurPipeline& GetSSAOBlurPipeline();
@@ -45,6 +48,7 @@ private:
     CubemapPipeline mCubemap;
     RectPipeline mRect;
     DeferredBlinnPhongPipeline mDeferredBlinnPhong;
+    DeferredBRDFPipeline mDeferredBRDF;
     DeferredSSAOPipeline mDeferredSSAO;
     SSAOBlurPipeline mSSAOBlur;
     SwapChainTransferPipeline mSwapChainTransfer;
