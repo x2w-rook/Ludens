@@ -38,29 +38,29 @@ void MaterialGroup::Startup(const MaterialGroupInfo& info)
     defaultI.Data = &defaultPixel;
     defaultI.Size = 4;
 
-    textureI = info.AmbientTextureInfo.ValueOr(defaultI);
-    mDevice.CreateTexture(mAmbientTexture, textureI);
-    mHandle.BindTexture(1, mAmbientTexture);
-
     textureI = info.AlbedoTextureInfo.ValueOr(defaultI);
     mDevice.CreateTexture(mAlbedoTexture, textureI);
-    mHandle.BindTexture(2, mAlbedoTexture);
-
-    textureI = info.SpecularTextureInfo.ValueOr(defaultI);
-    mDevice.CreateTexture(mSpecularTexture, textureI);
-    mHandle.BindTexture(3, mSpecularTexture);
+    mHandle.BindTexture(1, mAlbedoTexture);
 
     textureI = info.NormalTextureInfo.ValueOr(defaultI);
     mDevice.CreateTexture(mNormalTexture, textureI);
-    mHandle.BindTexture(4, mNormalTexture);
+    mHandle.BindTexture(2, mNormalTexture);
+
+    textureI = info.MetallicTextureInfo.ValueOr(defaultI);
+    mDevice.CreateTexture(mMetallicTexture, textureI);
+    mHandle.BindTexture(3, mMetallicTexture);
+
+    textureI = info.RoughnessTextureInfo.ValueOr(defaultI);
+    mDevice.CreateTexture(mRoughnessTexture, textureI);
+    mHandle.BindTexture(4, mRoughnessTexture);
 }
 
 void MaterialGroup::Cleanup()
 {
+    mDevice.DeleteTexture(mRoughnessTexture);
+    mDevice.DeleteTexture(mMetallicTexture);
     mDevice.DeleteTexture(mNormalTexture);
-    mDevice.DeleteTexture(mSpecularTexture);
     mDevice.DeleteTexture(mAlbedoTexture);
-    mDevice.DeleteTexture(mAmbientTexture);
     mDevice.DeleteBuffer(mUBO);
     mDevice.DeleteBindingGroup(mHandle);
     mDevice.ResetHandle();
@@ -91,10 +91,10 @@ RBindingGroupLayout MaterialGroup::CreateLayout(RDevice device)
 
     Array<RBindingInfo, 5> bindings{
         { RBindingType::UniformBuffer },
-        { RBindingType::Texture }, // ambient
         { RBindingType::Texture }, // albedo
-        { RBindingType::Texture }, // specular
-        { RBindingType::Texture }, // normals
+        { RBindingType::Texture }, // normal
+        { RBindingType::Texture }, // metallic
+        { RBindingType::Texture }, // roughness
     };
 
     RBindingGroupLayoutInfo materialBGLI;

@@ -9,6 +9,10 @@ set(MODULE_LIB
 	"Lib/Font.cpp"
 	"Lib/Image.cpp"
 	"Lib/Model.cpp"
+	"Lib/ModelOBJ.h"
+	"Lib/ModelOBJ.cpp"
+	"Lib/ModelGLTF.h"
+	"Lib/ModelGLTF.cpp"
 	"Lib/Mesh.cpp"
 )
 
@@ -28,5 +32,6 @@ target_include_directories(LDMedia PRIVATE
 
 target_link_libraries(LDMedia PRIVATE
 	tinyobj
+	tinygltf
 	stb
 )

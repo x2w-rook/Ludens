@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Core/Header/Include/Types.h"
 #include "Core/RenderBase/Include/RBinding.h"
 #include "Core/RenderBase/Include/RTexture.h"
 #include "Core/RenderBase/Include/RBuffer.h"
@@ -11,13 +12,11 @@ namespace LD {
 /// binding 0, material flat values
 struct MaterialUBO
 {
-    alignas(16) Vec3 Ambient;
-    float UseAmbientTexture;
-    alignas(16) Vec3 Albedo;
-    float UseAlbedoTexture;
-    alignas(16) Vec3 Specular;
-    float UseSpecularTexture;
-    alignas(16) Vec4 UseNormalTexture;
+    i32 UseAlbedoTexture;
+    i32 UseNormalTexture;
+    f32 Roughness;
+    f32 Metallic;
+    alignas(16) Vec4 Albedo;
 };
 
 LD_STATIC_ASSERT(sizeof(MaterialUBO) % 16 == 0);
@@ -33,17 +32,17 @@ struct MaterialGroupInfo
     /// describe flat colors or specify textures for the material
     MaterialUBO UBO;
 
-    /// info to construct an ambient texture
-    Optional<RTextureInfo> AmbientTextureInfo;
-
-    /// info to construct an albedo texture
+    /// info to construct albedo texture
     Optional<RTextureInfo> AlbedoTextureInfo;
-
-    /// info to construct specular texture
-    Optional<RTextureInfo> SpecularTextureInfo;
 
     /// info to construct normal texture
     Optional<RTextureInfo> NormalTextureInfo;
+
+    /// info to construct metallic texture
+    Optional<RTextureInfo> MetallicTextureInfo;
+
+    /// info to construct roughness texture
+    Optional<RTextureInfo> RoughnessTextureInfo;
 };
 
 /// non-programmable, plain-old-data material
@@ -66,33 +65,33 @@ public:
 
     virtual RBindingGroupLayout CreateLayout(RDevice device) override;
 
-    inline RTexture GetAmbientTexture() const
-    {
-        return mAmbientTexture;
-    }
-
     inline RTexture GetAlbedoTexture() const
     {
         return mAlbedoTexture;
     }
 
-    inline RTexture GetSpecularTexture() const
+    inline RTexture GetNormalTexture() const
     {
-        return mSpecularTexture;
+        return mNormalTexture;
     }
     
-    inline RTexture GetNormalTexture() const
+    inline RTexture GetMetallicTexture() const
+    {
+        return mAlbedoTexture;
+    }
+
+    inline RTexture GetRoughnessTexture() const
     {
         return mNormalTexture;
     }
 
 private:
     RDevice mDevice;
-    RBuffer mUBO;              // binding 0
-    RTexture mAmbientTexture;  // binding 1
-    RTexture mAlbedoTexture;   // binding 2
-    RTexture mSpecularTexture; // binding 3
-    RTexture mNormalTexture;   // binding 4
+    RBuffer mUBO;               // binding 0
+    RTexture mAlbedoTexture;    // binding 1
+    RTexture mNormalTexture;    // binding 2
+    RTexture mMetallicTexture;  // binding 3
+    RTexture mRoughnessTexture; // binding 4
 };
 
 } // namespace LD

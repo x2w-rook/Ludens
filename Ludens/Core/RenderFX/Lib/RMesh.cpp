@@ -34,49 +34,21 @@ void RMesh::Startup(const RMeshInfo& info)
         MaterialGroupInfo matBGI;
         matBGI.Device = mDevice;
         matBGI.MaterialBGL = info.MaterialBGL;
-        matBGI.UBO.Ambient = mat.Ambient;
         matBGI.UBO.Albedo = mat.Albedo;
-        matBGI.UBO.Specular = mat.Specular;
-        matBGI.UBO.UseAmbientTexture = 0;
         matBGI.UBO.UseAlbedoTexture = 0;
-        matBGI.UBO.UseSpecularTexture = 0;
-        matBGI.UBO.UseNormalTexture = Vec4::Zero;
+        matBGI.UBO.UseNormalTexture = 0;
+        matBGI.UBO.Roughness = mat.Roughness;
+        matBGI.UBO.Metallic = mat.Metallic;
 
-        u8* albedoData = nullptr;
-        u8* ambientData = nullptr;
-        u8* specularData = nullptr;
-        u8* normalData = nullptr;
-
-        if (mat.AmbientTexture.HasValue())
+        if (mat.AlbedoTexture)
         {
-            int width, height, channels;
-            LoadImage(&ambientData, mat.AmbientTexture.Value().ToString().c_str(), &width, &height, &channels);
             RTextureInfo info{};
             info.Type = RTextureType::Texture2D;
             info.Format = RTextureFormat::RGBA8;
-            info.Width = (u32)width;
-            info.Height = (u32)height;
-            info.Data = ambientData;
-            info.Size = width * height * 4;
-            info.Sampler.MagFilter = RSamplerFilter::Linear;
-            info.Sampler.MinFilter = RSamplerFilter::Linear;
-            info.Sampler.AddressMode = RSamplerAddressMode::Repeat;
-
-            matBGI.AmbientTextureInfo = info;
-            matBGI.UBO.UseAmbientTexture = 1.0f;
-        }
-
-        if (mat.AlbedoTexture.HasValue())
-        {
-            int width, height, channels;
-            LoadImage(&albedoData, mat.AlbedoTexture.Value().ToString().c_str(), &width, &height, &channels);
-            RTextureInfo info{};
-            info.Type = RTextureType::Texture2D;
-            info.Format = RTextureFormat::RGBA8;
-            info.Width = (u32)width;
-            info.Height = (u32)height;
-            info.Data = albedoData;
-            info.Size = width * height * 4;
+            info.Width = (u32)mat.AlbedoTexture->GetWidth();
+            info.Height = (u32)mat.AlbedoTexture->GetHeight();
+            info.Data = (const void*)mat.AlbedoTexture->Pixels();
+            info.Size = mat.AlbedoTexture->ByteSize();
             info.Sampler.MagFilter = RSamplerFilter::Linear;
             info.Sampler.MinFilter = RSamplerFilter::Linear;
             info.Sampler.AddressMode = RSamplerAddressMode::Repeat;
@@ -85,54 +57,28 @@ void RMesh::Startup(const RMeshInfo& info)
             matBGI.UBO.UseAlbedoTexture = 1.0f;
         }
 
-        if (mat.SpecularTexture.HasValue())
+        if (mat.NormalTexture)
         {
-            int width, height, channels;
-            LoadImage(&specularData, mat.SpecularTexture.Value().ToString().c_str(), &width, &height, &channels);
             RTextureInfo info{};
             info.Type = RTextureType::Texture2D;
             info.Format = RTextureFormat::RGBA8;
-            info.Width = (u32)width;
-            info.Height = (u32)height;
-            info.Data = specularData;
-            info.Size = width * height * 4;
-            info.Sampler.MagFilter = RSamplerFilter::Linear;
-            info.Sampler.MinFilter = RSamplerFilter::Linear;
-            info.Sampler.AddressMode = RSamplerAddressMode::Repeat;
-
-            matBGI.SpecularTextureInfo = info;
-            matBGI.UBO.UseSpecularTexture = 1.0f;
-        }
-
-        if (mat.NormalTexture.HasValue())
-        {
-            int width, height, channels;
-            LoadImage(&normalData, mat.NormalTexture.Value().ToString().c_str(), &width, &height, &channels);
-            RTextureInfo info{};
-            info.Type = RTextureType::Texture2D;
-            info.Format = RTextureFormat::RGBA8;
-            info.Width = (u32)width;
-            info.Height = (u32)height;
-            info.Data = normalData;
-            info.Size = width * height * 4;
+            info.Width = (u32)mat.NormalTexture->GetWidth();
+            info.Height = (u32)mat.NormalTexture->GetHeight();
+            info.Data = mat.NormalTexture->Pixels();
+            info.Size = mat.NormalTexture->ByteSize();
             info.Sampler.MagFilter = RSamplerFilter::Linear;
             info.Sampler.MinFilter = RSamplerFilter::Linear;
             info.Sampler.AddressMode = RSamplerAddressMode::Repeat;
 
             matBGI.NormalTextureInfo = info;
-            matBGI.UBO.UseNormalTexture = { 1.0f, 1.0f, 1.0f, 1.0f };
+            matBGI.UBO.UseNormalTexture = 1;
         }
 
-        matBG.Startup(matBGI);
+        // TODO: PBR metallic / roughness texture
+        if (mat.MetallicRoughnessTexture)
+            ;
 
-        if (ambientData)
-            FreeImage(ambientData);
-        if (albedoData)
-            FreeImage(albedoData);
-        if (specularData)
-            FreeImage(specularData);
-        if (normalData)
-            FreeImage(normalData);
+        matBG.Startup(matBGI);
 
         // batch all geometry that uses the current material
         Vector<MeshVertex> batchVertices;

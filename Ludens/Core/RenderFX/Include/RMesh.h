@@ -12,7 +12,7 @@ struct RMeshInfo
 {
     RDevice Device; // owner of this static mesh
     RBindingGroupLayout MaterialBGL;
-    const Model* Data = nullptr;
+    Ref<Model> Data = nullptr;
 };
 
 class RMesh

@@ -56,9 +56,9 @@ layout (location = 1) in vec3 vNormal;
 layout (location = 2) in vec2 vTexUV;
 layout (location = 3) in mat3 vTBN;
 
-layout (location = 0) out vec4 fPos;
-layout (location = 1) out vec4 fNormal;
-layout (location = 2) out vec4 fAlbedoSpec;
+layout (location = 0) out vec4 fPosRoughness;
+layout (location = 1) out vec4 fNormalMetallic;
+layout (location = 2) out vec4 fAlbedo;
 
 layout (group = 0, binding = 0, std140) uniform Viewport
 {
@@ -70,50 +70,37 @@ layout (group = 0, binding = 0, std140) uniform Viewport
 
 layout (group = 1, binding = 0, std140) uniform Material
 {
-	vec3 Ambient;
-	float UseAmbientTexture;
-	vec3 Albedo;
-	float UseAlbedoTexture;
-	vec3 Specular;
-	float UseSpecularTexture;
-	vec4 UseNormalTexture;
+	int UseAlbedoTexture;
+	int UseNormalTexture;
+	float Roughness;
+	float Metallic;
+	vec4 Albedo;
 } uMaterial;
 
-layout (group = 1, binding = 1) uniform sampler2D uAmbient;
-layout (group = 1, binding = 2) uniform sampler2D uAlbedo;
-layout (group = 1, binding = 3) uniform sampler2D uSpecular;
-layout (group = 1, binding = 4) uniform sampler2D uNormals;
-
-float avg(vec3 v)
-{
-	return (v.r + v.g + v.b) / 3.0f;
-}
+layout (group = 1, binding = 1) uniform sampler2D uAlbedo;
+layout (group = 1, binding = 2) uniform sampler2D uNormal;
+layout (group = 1, binding = 3) uniform sampler2D uMetallic;
+layout (group = 1, binding = 4) uniform sampler2D uRoughness;
 
 void main()
 {
-	float specular = avg(uMaterial.Specular);
-	vec4 albedoSpec = vec4(uMaterial.Albedo, specular);
+	vec4 albedo = uMaterial.Albedo;
 	vec3 normal = normalize(vNormal);
 
-	if (uMaterial.UseAlbedoTexture > 0.0)
+	if (uMaterial.UseAlbedoTexture > 0)
 	{
-		albedoSpec.rgb = texture(uAlbedo, vTexUV).rgb;
+		albedo = texture(uAlbedo, vTexUV);
 	}
 
-	if (uMaterial.UseSpecularTexture > 0.0)
-	{
-		albedoSpec.a = avg(texture(uSpecular, vTexUV).rgb);
-	}
-
-	if (uMaterial.UseNormalTexture.x > 0.0)
+	if (uMaterial.UseNormalTexture > 0)
 	{
 		// normal mapping from tangent space to view space
-		normal = texture(uNormals, vTexUV).rgb;
+		normal = texture(uNormal, vTexUV).rgb;
 		normal = normalize(normal * 2.0 - 1.0);   
 		normal = normalize(vTBN * normal);
 	}
 
-	fPos = vec4(vPos, 1.0);
-	fNormal = vec4(normal, 1.0);
-	fAlbedoSpec = albedoSpec;
+	fPosRoughness = vec4(vPos, uMaterial.Roughness);
+	fNormalMetallic = vec4(normal, uMaterial.Metallic);
+	fAlbedo = albedo;
 }

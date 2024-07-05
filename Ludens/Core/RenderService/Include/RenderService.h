@@ -38,7 +38,7 @@ public:
     void CreateCubemap(RRID& id, int resolution, const void* data);
     void DeleteCubemap(RRID id);
 
-    void CreateMesh(RRID& id, const Model* model);
+    void CreateMesh(RRID& id, Ref<Model> model);
     void DeleteMesh(RRID id);
 
     void CreateDirectionalLight(RRID& id, const Vec3& direction, const Vec3& color);

@@ -208,7 +208,7 @@ void RenderService::DeleteCubemap(RRID id)
     sCubemaps.erase(iter);
 }
 
-void RenderService::CreateMesh(RRID& id, const Model* model)
+void RenderService::CreateMesh(RRID& id, Ref<Model> model)
 {
     id = CUID<MeshResource>::Get();
     LD_DEBUG_ASSERT(sMeshes.find(id) == sMeshes.end());
