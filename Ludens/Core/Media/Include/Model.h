@@ -8,8 +8,10 @@
 #include "Core/DSA/Include/Vector.h"
 #include "Core/DSA/Include/Optional.h"
 #include "Core/OS/Include/JobSystem.h"
+#include "Core/OS/Include/Memory.h"
 #include "Core/IO/Include/FileSystem.h"
 #include "Core/Media/Include/Mesh.h"
+#include "Core/Media/Include/Image.h"
 
 namespace LD
 {
@@ -17,26 +19,28 @@ namespace LD
 /// Material plain-old-data, non-programmable
 struct Material
 {
-    Vec3 Ambient;
-    Vec3 Albedo;
-    Vec3 Specular;
-    Optional<Path> AmbientTexture;
-    Optional<Path> AlbedoTexture;
-    Optional<Path> SpecularTexture;
-    Optional<Path> NormalTexture;
+    Vec4 Albedo;
+    float Roughness;
+    float Metallic;
+    Ref<Image> AlbedoTexture;
+    Ref<Image> NormalTexture;
+    Ref<Image> RoughnessTexture;
+    Ref<Image> MetallicTexture;
+    Ref<Image> MetallicRoughnessTexture;
 
     static Material GetDefault()
     {
-        Vec3 pearlWhite = Hex(0xF8F6F0FF).RGB();
+        Vec4 pearlWhite = Hex(0xF8F6F0FF);
 
         Material mtl;
         mtl.Albedo = pearlWhite;
-        mtl.Ambient = pearlWhite;
-        mtl.Specular = { 0.5f, 0.5f, 0.5f };
-        mtl.AlbedoTexture.Reset();
-        mtl.AmbientTexture.Reset();
-        mtl.SpecularTexture.Reset();
-        mtl.NormalTexture.Reset();
+        mtl.Roughness = 0.1f;
+        mtl.Metallic = 0.0f;
+        mtl.AlbedoTexture = nullptr;
+        mtl.NormalTexture = nullptr;
+        mtl.RoughnessTexture = nullptr;
+        mtl.MetallicTexture = nullptr;
+        mtl.MetallicRoughnessTexture = nullptr;
 
         return mtl;
     }
@@ -64,7 +68,7 @@ public:
 
     ModelLoader& operator=(const ModelLoader&) = delete;
 
-    void LoadModel(const Path& path, Model& model);
+    Ref<Model> LoadModel(const Path& path);
 
 private:
 };
@@ -74,7 +78,7 @@ class LoadModelJob
 public:
     LoadModelJob() = delete;
     LoadModelJob(const LoadModelJob&) = delete;
-    LoadModelJob(const Path& path, Model* model);
+    LoadModelJob(const Path& path, Ref<Model>* model);
     ~LoadModelJob() = default;
 
     LoadModelJob& operator=(const LoadModelJob&) = delete;
@@ -92,7 +96,7 @@ private:
     bool mHasCompleted = false;
     double mLoadTimeMS;
     Path mPath;
-    Model* mModel;
+    Ref<Model>* mModel;
     ModelLoader mLoader;
 };
 

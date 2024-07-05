@@ -21,6 +21,11 @@ public:
         return mPath.string();
     }
 
+    inline Path Extension() const
+    {
+        return { mPath.extension() };
+    }
+
     inline Path Stem() const
     {
         return { mPath.stem() };
