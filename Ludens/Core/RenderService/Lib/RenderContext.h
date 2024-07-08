@@ -8,6 +8,7 @@
 #include "Core/RenderFX/Include/FrameBuffers/GBuffer.h"
 #include "Core/RenderFX/Include/FrameBuffers/SSAOBuffer.h"
 #include "Core/RenderFX/Include/FrameBuffers/ColorBuffer.h"
+#include "Core/RenderService/Include/RenderService.h"
 #include "Core/RenderService/Lib/RenderPassResources.h"
 #include "Core/RenderService/Lib/FrameBufferResources.h"
 #include "Core/RenderService/Lib/BindingGroupResources.h"
@@ -38,6 +39,7 @@ struct RenderContext
     BindingGroupResources BindingGroups;
     PipelineResources Pipelines;
     TextureResources Textures;
+    RenderPipeline DefaultRenderPipeline;
 
     RBuffer QuadVBO;
     RBuffer CubeVBO;

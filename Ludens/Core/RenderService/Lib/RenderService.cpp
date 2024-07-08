@@ -93,6 +93,11 @@ void RenderService::GetDefaultFont(Ref<FontTTF>& ttf, Ref<FontGlyphTable>& table
     table = mCtx->DefaultFontAtlas.GetGlyphTable();
 }
 
+void RenderService::SetDefaultRenderPipeline(RenderPipeline pipeline)
+{
+    mCtx->DefaultRenderPipeline = pipeline;
+}
+
 void RenderService::BeginFrame()
 {
     // adapt to application framebuffer size
@@ -421,7 +426,11 @@ void RenderService::WorldRenderPasses()
         passBI.FrameBuffer = (RFrameBuffer)mCtx->ColorBufferHDR;
         sDevice.BeginRenderPass(passBI);
 
-        sDevice.SetPipeline((RPipeline)mCtx->Pipelines.GetDeferredBlinnPhongPipeline());
+        if (mCtx->DefaultRenderPipeline == RenderPipeline::BRDF)
+            sDevice.SetPipeline((RPipeline)mCtx->Pipelines.GetDeferredBRDFPipeline());
+        else    
+            sDevice.SetPipeline((RPipeline)mCtx->Pipelines.GetDeferredBlinnPhongPipeline());
+
         sDevice.SetBindingGroup(0, (RBindingGroup)mCtx->BindingGroups.GetFrameStaticGroup());
         sDevice.SetBindingGroup(1, (RBindingGroup)mCtx->WorldViewportGroup);
         sDevice.SetVertexBuffer(0, mCtx->QuadVBO);

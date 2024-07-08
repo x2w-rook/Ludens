@@ -16,6 +16,12 @@ class Model;
 /// renderer resource id
 using RRID = UID;
 
+enum class RenderPipeline
+{
+    BRDF = 0,
+    BlinnPhong = 1,
+};
+
 class RenderService : public Singleton<RenderService>
 {
     friend class Singleton<RenderService>;
@@ -25,6 +31,8 @@ public:
     void Cleanup();
 
     void GetDefaultFont(Ref<FontTTF>& ttf, Ref<FontGlyphTable>& table);
+
+    void SetDefaultRenderPipeline(RenderPipeline pipeline);
 
     void BeginFrame();
     void EndFrame();
