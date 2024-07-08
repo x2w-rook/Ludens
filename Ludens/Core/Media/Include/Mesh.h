@@ -39,6 +39,7 @@ struct Mesh
 };
 
 void GenerateBoxMesh(Mesh& mesh, const Vec3& halfExtent);
+void GenerateSphereMesh(Mesh& mesh, float radius, int stackCount, int sectorCount);
 
 } // namespace LD
 
