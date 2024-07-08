@@ -186,9 +186,11 @@ ToneMappingPipeline& PipelineResources::GetToneMappingPipeline()
 {
     if (!mToneMapping)
     {
-        Array<RBindingGroupLayout, 2> groupLayout;
+        Array<RBindingGroupLayout, 4> groupLayout;
         groupLayout[0] = mGroupRes->GetFrameStaticBGL();
         groupLayout[1] = mGroupRes->GetViewportBGL();
+        groupLayout[2] = mGroupRes->GetViewportBGL();
+        groupLayout[3] = mGroupRes->GetToneMappingBGL();
 
         ToneMappingPipelineInfo pipelineI;
         pipelineI.Device = mDevice;

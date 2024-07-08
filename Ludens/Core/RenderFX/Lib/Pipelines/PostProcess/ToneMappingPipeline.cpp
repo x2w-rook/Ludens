@@ -2,6 +2,8 @@
 #include "Core/RenderFX/Include/Pipelines/PostProcess/ToneMappingPipeline.h"
 #include "Core/RenderFX/Include/Groups/FrameStaticGroup.h"
 #include "Core/RenderFX/Include/Groups/ViewportGroup.h"
+#include "Core/RenderFX/Include/Groups/ToneMappingGroup.h"
+
 namespace LD
 {
 
@@ -79,10 +81,13 @@ void ToneMappingPipeline::Cleanup()
 
 RPipelineLayoutData ToneMappingPipeline::GetLayoutData() const
 {
-    RBindingGroupLayoutData group0 = FrameStaticGroup{}.GetLayoutData();
-    RBindingGroupLayoutData group1 = ViewportGroup{}.GetLayoutData();
+    RBindingGroupLayoutData fs = FrameStaticGroup{}.GetLayoutData();
+    RBindingGroupLayoutData viewport = ViewportGroup{}.GetLayoutData();
+    RBindingGroupLayoutData tone = ToneMappingGroup{}.GetLayoutData();
+
+    // frame static, world viewport, screen viewport, tone mapping
     RPipelineLayoutData data{};
-    data.GroupLayouts = { group0, group1 };
+    data.GroupLayouts = { fs, viewport, viewport, tone };
 
     return data;
 }

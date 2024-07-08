@@ -3,6 +3,7 @@
 #include "Core/RenderBase/Include/RBinding.h"
 #include "Core/RenderFX/Include/Groups/FrameStaticGroup.h"
 #include "Core/RenderFX/Include/Groups/SSAOGroup.h"
+#include "Core/RenderFX/Include/Groups/ToneMappingGroup.h"
 #include "Core/RenderService/Lib/RenderResources.h"
 
 namespace LD
@@ -11,17 +12,23 @@ namespace LD
 class BindingGroupResources : public RenderResources
 {
 public:
-
     void Startup(RDevice device);
     void Cleanup();
 
     FrameStaticGroup& GetFrameStaticGroup();
+
+    ToneMappingGroup& GetToneMappingGroup();
 
     SSAOGroup& GetSSAOGroup();
 
     inline RBindingGroupLayout GetFrameStaticBGL()
     {
         return mFrameStaticBGL;
+    }
+
+    inline RBindingGroupLayout GetToneMappingBGL()
+    {
+        return mToneMappingBGL;
     }
 
     inline RBindingGroupLayout GetViewportBGL()
@@ -51,8 +58,10 @@ public:
 
 private:
     FrameStaticGroup mFrameStaticGroup;
+    ToneMappingGroup mToneMappingGroup;
     SSAOGroup mSSAOGroup;
     RBindingGroupLayout mFrameStaticBGL;
+    RBindingGroupLayout mToneMappingBGL;
     RBindingGroupLayout mViewportBGL;
     RBindingGroupLayout mMaterialBGL;
     RBindingGroupLayout mCubemapBGL;

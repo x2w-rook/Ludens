@@ -22,6 +22,24 @@ enum class RenderPipeline
     BlinnPhong = 1,
 };
 
+enum class LDRResult
+{
+    /// apply Reinhard tone mapping on HDR texture
+    ToneMappedReinhard = 0,
+
+    /// output view space normals as LDR result
+    Normals = 2,
+
+    /// output albedo as LDR result
+    Albedo = 3,
+
+    /// output metallic as LDR result
+    Metallic = 4,
+
+    /// output roughness as LDR result
+    Roughness = 5,
+};
+
 class RenderService : public Singleton<RenderService>
 {
     friend class Singleton<RenderService>;
@@ -33,6 +51,7 @@ public:
     void GetDefaultFont(Ref<FontTTF>& ttf, Ref<FontGlyphTable>& table);
 
     void SetDefaultRenderPipeline(RenderPipeline pipeline);
+    void SetLDRResult(LDRResult result);
 
     void BeginFrame();
     void EndFrame();
@@ -55,9 +74,6 @@ public:
     void DrawMesh(RRID mesh, const Mat4& transform);
 
     void DrawScreenUI(UIContext* ui);
-
-    // TODO: remove
-    void SetDebugValue(float value);
 
 private:
     void OnViewportResize(int width, int height);

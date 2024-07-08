@@ -15,6 +15,7 @@
 #include "Core/RenderBase/Include/RPipeline.h"
 #include "Core/RenderFX/Include/RShaderCompiler.h"
 #include "Core/RenderFX/Include/Groups/FrameStaticGroup.h"
+#include "Core/RenderFX/Include/Groups/ToneMappingGroup.h"
 #include "Core/RenderFX/Include/Groups/CubemapGroup.h"
 #include "Core/RenderFX/Include/Groups/ViewportGroup.h"
 #include "Core/RenderFX/Include/Groups/MaterialGroup.h"
@@ -308,7 +309,8 @@ void RShaderCompiler::PatchOpenGL(const RPipelineLayoutData& layout, RShaderType
     std::string patchError;
 
     Vector<u32> spirv;
-    GlslangCompile(RBackend::Vulkan, type, glsl, preamble, spirv, patchError);
+    bool ok = GlslangCompile(RBackend::Vulkan, type, glsl, preamble, spirv, patchError);
+    LD_DEBUG_ASSERT(ok && "PatchOpenGL failed to compile Ludens GLSL to SPIRV");
 
     // TODO: validate shader reflection result with the pipeline layout, find any conflicts
     try
@@ -443,6 +445,8 @@ int RShaderCompiler::ParseLudensMacroGroupPrefab(std::string str, RBindingGroupL
 
     if (str == "FrameStatic")
         layoutData = FrameStaticGroup{}.GetLayoutData();
+    else if (str == "ToneMapping")
+        layoutData = ToneMappingGroup{}.GetLayoutData();
     else if (str == "Cubemap")
         layoutData = CubemapGroup{}.GetLayoutData();
     else if (str == "Viewport")

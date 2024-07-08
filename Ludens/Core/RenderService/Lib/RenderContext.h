@@ -40,6 +40,7 @@ struct RenderContext
     PipelineResources Pipelines;
     TextureResources Textures;
     RenderPipeline DefaultRenderPipeline;
+    LDRResult DefaultLDRResult;
 
     RBuffer QuadVBO;
     RBuffer CubeVBO;

@@ -98,6 +98,11 @@ void RenderService::SetDefaultRenderPipeline(RenderPipeline pipeline)
     mCtx->DefaultRenderPipeline = pipeline;
 }
 
+void RenderService::SetLDRResult(LDRResult result)
+{
+    mCtx->DefaultLDRResult = result;
+}
+
 void RenderService::BeginFrame()
 {
     // adapt to application framebuffer size
@@ -278,11 +283,6 @@ void RenderService::DrawScreenUI(UIContext* ui)
     sScreenDrawLists.Back().UI = ui;
 }
 
-void RenderService::SetDebugValue(float value)
-{
-    sLightingUBO.DirectionalLight.Dir.w = value;
-}
-
 void RenderService::OnViewportResize(int width, int height)
 {
     printf("RenderService::OnViewportResize(%d,%d)\n", width, height);
@@ -450,10 +450,19 @@ void RenderService::ScreenRenderPasses()
     passBI.FrameBuffer = (RFrameBuffer)mCtx->ColorBufferLDR;
     sDevice.BeginRenderPass(passBI);
 
+    ToneMappingGroup& toneGroup = mCtx->BindingGroups.GetToneMappingGroup();
+    RBuffer toneUBO = toneGroup.GetUBO();
+
+    ToneMappingUBO toneUBOData;
+    toneUBOData.LDRResult = (int)mCtx->DefaultLDRResult;
+    toneUBO.SetData(0, sizeof(ToneMappingUBO), &toneUBOData);
+
     // tone mapping, the HDR texture should already be bound in the ScreenViewportGroup
     sDevice.SetPipeline((RPipeline)mCtx->Pipelines.GetToneMappingPipeline());
     sDevice.SetBindingGroup(0, (RBindingGroup)mCtx->BindingGroups.GetFrameStaticGroup());
-    sDevice.SetBindingGroup(1, (RBindingGroup)mCtx->ScreenViewportGroup);
+    sDevice.SetBindingGroup(1, (RBindingGroup)mCtx->WorldViewportGroup);
+    sDevice.SetBindingGroup(2, (RBindingGroup)mCtx->ScreenViewportGroup);
+    sDevice.SetBindingGroup(3, (RBindingGroup)mCtx->BindingGroups.GetToneMappingGroup());
     sDevice.SetVertexBuffer(0, mCtx->QuadVBO);
 
     RDrawVertexInfo drawInfo{};
