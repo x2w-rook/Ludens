@@ -18,6 +18,51 @@ struct TQuat : public TVec4<T>
     {
     }
 
+    TQuat(const TVec3<T>& v, T w) : TVec4(v.x, v.y, v.z, w)
+    {
+    }
+
+    TQuat<T> Conjugated() const
+    {
+        return { -x, -y, -z, w };
+    }
+
+    TQuat<T> Normalized() const
+    {
+        TVec4<T> v = TVec4<T>::Normalized();
+        return { v.x, v.y, v.z, v.w };
+    }
+
+    TQuat<T> operator*(const TQuat<T>& other) const
+    {
+        float lx = x;
+        float ly = y;
+        float lz = z;
+        float lw = w;
+
+        float rx = other.x;
+        float ry = other.y;
+        float rz = other.z;
+        float rw = other.w;
+
+        float x = lw * rx + lx * rw + ly * rz - lz * ry;
+        float y = lw * ry - lx * rz + ly * rw + lz * rx;
+        float z = lw * rz + lx * ry - ly * rx + lz * rw;
+        float w = lw * rw - lx * rx - ly * ry - lz * rz;
+
+        return { x, y, z, w };
+    }
+
+    /// @brief rotate a vector
+    /// @warn quaternion must first be normalized
+    TVec3<T> operator*(const TVec3<T>& vec) const
+    {
+        LD_DEBUG_ASSERT(IsNormalized());
+
+        TQuat<T> p = *this * TQuat(vec, 0) * Conjugated();
+        return { p.x, p.y, p.z };
+    }
+
     void GetAxisRadians(TVec3<T>& axis, TRadians<T>& rad) const
     {
         LD_DEBUG_ASSERT(IsNormalized());
@@ -44,7 +89,7 @@ struct TQuat : public TVec4<T>
         TVec3<T> axis;
         TRadians<T> rad;
         GetAxisRadians(axis, rad);
-        
+
         mat = TMat4<T>::Rotate(axis, rad.ToDegrees());
     }
 

@@ -61,6 +61,14 @@ public:
         mData[mSize - 1] = std::move(item);
     }
 
+    inline T& PushBack()
+    {
+        Resize(mSize + 1);
+        mData[mSize - 1] = {};
+
+        return mData[mSize - 1];
+    }
+
     inline void PopBack()
     {
         if (mSize == 0)
