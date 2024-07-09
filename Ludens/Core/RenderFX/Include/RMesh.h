@@ -42,6 +42,8 @@ public:
     void Draw(BatchFn fn);
 
 private:
+    void PrepareMetallicRoughnessInfo(MaterialGroupInfo& matBGI, const Material& mat);
+
     RDevice mDevice;
     Vector<Batch> mBatches;
 };

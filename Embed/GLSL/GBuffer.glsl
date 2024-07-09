@@ -75,6 +75,7 @@ layout (group = 1, binding = 0, std140) uniform Material
 	float Roughness;
 	float Metallic;
 	vec4 Albedo;
+	int MetallicRoughnessLayout;
 } uMaterial;
 
 layout (group = 1, binding = 1) uniform sampler2D uAlbedo;
@@ -100,7 +101,30 @@ void main()
 		normal = normalize(vTBN * normal);
 	}
 
-	fPosRoughness = vec4(vPos, uMaterial.Roughness);
-	fNormalMetallic = vec4(normal, uMaterial.Metallic);
+	float metallic = uMaterial.Metallic;
+	float roughness = uMaterial.Roughness;
+
+	switch (uMaterial.MetallicRoughnessLayout)
+	{
+	case 1: // separate textures
+		metallic = texture(uMetallic, vTexUV).r;
+		roughness = texture(uRoughness, vTexUV).r;
+		break;
+	case 2: // single texture
+		metallic = texture(uMetallic, vTexUV).b;
+		roughness = texture(uMetallic, vTexUV).g;
+		break;
+	case 3: // metallic only
+		metallic = texture(uMetallic, vTexUV).r;
+		break;
+	case 4: // roughness only
+		roughness = texture(uRoughness, vTexUV).r;
+		break;
+	default: // no textures
+		break;
+	}
+
+	fPosRoughness = vec4(vPos, roughness);
+	fNormalMetallic = vec4(normal, metallic);
 	fAlbedo = albedo;
 }

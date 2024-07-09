@@ -12,6 +12,7 @@ void MaterialGroup::Startup(const MaterialGroupInfo& info)
 {
     LD_DEBUG_ASSERT(info.Device);
     mDevice = info.Device;
+    mMetallicRoughnessLayout = info.MetallicRoughnessLayout;
 
     RBindingGroupInfo groupI;
     groupI.Layout = info.MaterialBGL;

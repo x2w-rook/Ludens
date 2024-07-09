@@ -74,9 +74,8 @@ void RMesh::Startup(const RMeshInfo& info)
             matBGI.UBO.UseNormalTexture = 1;
         }
 
-        // TODO: PBR metallic / roughness texture
-        if (mat.MetallicRoughnessTexture)
-            ;
+        // PBR metallic roughness information can be stored in many different ways
+        PrepareMetallicRoughnessInfo(matBGI, mat);
 
         matBG.Startup(matBGI);
 
@@ -148,6 +147,71 @@ void RMesh::Draw(BatchFn fn)
     {
         fn(batch);
     }
+}
+
+void RMesh::PrepareMetallicRoughnessInfo(MaterialGroupInfo& matBGI, const Material& mat)
+{
+    RTextureInfo metallicI{};
+    metallicI.Format = RTextureFormat::RGBA8;
+    metallicI.Sampler.MagFilter = RSamplerFilter::Linear;
+    metallicI.Sampler.MinFilter = RSamplerFilter::Linear;
+    metallicI.Sampler.AddressMode = RSamplerAddressMode::Repeat;
+
+    RTextureInfo roughnessI{};
+    roughnessI.Format = RTextureFormat::RGBA8;
+    roughnessI.Sampler.MagFilter = RSamplerFilter::Linear;
+    roughnessI.Sampler.MinFilter = RSamplerFilter::Linear;
+    roughnessI.Sampler.AddressMode = RSamplerAddressMode::Repeat;
+
+    if (mat.MetallicRoughnessTexture)
+    {
+        metallicI.Width = (u32)mat.MetallicRoughnessTexture->GetWidth();
+        metallicI.Height = (u32)mat.MetallicRoughnessTexture->GetHeight();
+        metallicI.Data = mat.MetallicRoughnessTexture->Pixels();
+        metallicI.Size = mat.MetallicRoughnessTexture->ByteSize();
+        matBGI.MetallicTextureInfo = metallicI;
+        matBGI.RoughnessTextureInfo.Reset();
+        matBGI.MetallicRoughnessLayout = MetallicRoughnessInfo::SingleTexture;
+    }
+    else if (mat.MetallicTexture && mat.RoughnessTexture)
+    {
+        metallicI.Width = (u32)mat.MetallicTexture->GetWidth();
+        metallicI.Height = (u32)mat.MetallicTexture->GetHeight();
+        metallicI.Data = mat.MetallicTexture->Pixels();
+        metallicI.Size = mat.MetallicTexture->ByteSize();
+        roughnessI.Width = (u32)mat.RoughnessTexture->GetWidth();
+        roughnessI.Height = (u32)mat.RoughnessTexture->GetHeight();
+        roughnessI.Data = mat.RoughnessTexture->Pixels();
+        roughnessI.Size = mat.RoughnessTexture->ByteSize();
+        matBGI.MetallicTextureInfo = metallicI;
+        matBGI.RoughnessTextureInfo = roughnessI;
+        matBGI.MetallicRoughnessLayout = MetallicRoughnessInfo::SeparateTextures;
+    }
+    else if (mat.MetallicTexture && !mat.RoughnessTexture)
+    {
+        metallicI.Width = (u32)mat.MetallicTexture->GetWidth();
+        metallicI.Height = (u32)mat.MetallicTexture->GetHeight();
+        metallicI.Data = mat.MetallicTexture->Pixels();
+        metallicI.Size = mat.MetallicTexture->ByteSize();
+        matBGI.MetallicTextureInfo = metallicI;
+        matBGI.RoughnessTextureInfo.Reset();
+        matBGI.MetallicRoughnessLayout = MetallicRoughnessInfo::MetallicTextureOnly;
+    }
+    else if (!mat.MetallicTexture && mat.RoughnessTexture)
+    {
+        roughnessI.Width = (u32)mat.RoughnessTexture->GetWidth();
+        roughnessI.Height = (u32)mat.RoughnessTexture->GetHeight();
+        roughnessI.Data = mat.RoughnessTexture->Pixels();
+        roughnessI.Size = mat.RoughnessTexture->ByteSize();
+        matBGI.MetallicTextureInfo.Reset();
+        matBGI.RoughnessTextureInfo = roughnessI;
+        matBGI.MetallicRoughnessLayout = MetallicRoughnessInfo::RoughnessTextureOnly;
+    }
+    else
+        matBGI.MetallicRoughnessLayout = MetallicRoughnessInfo::None;
+
+    // don't forget to make this flag visible from the shader in the UBO
+    matBGI.UBO.MetallicRoughnessLayout = (i32)matBGI.MetallicRoughnessLayout;
 }
 
 } // namespace LD
